@@ -515,6 +515,58 @@ def main() -> None:
         )
         _render_result_column()
 
+    # Rodapé
+    _render_footer()
+
+
+# ---------------------------------------------------------------------------
+# Rodapé
+# ---------------------------------------------------------------------------
+_APP_VERSION = "1.0"
+
+# Estimativa de tempo manual por item de checklist (em minutos).
+# Considera: leitura do dispositivo, identificação do requisito,
+# análise de risco, definição de responsável, sugestão de evidência
+# e mitigação, e preenchimento da planilha.
+_MINUTES_PER_ITEM = 8
+
+
+def _render_footer() -> None:
+    """Renderiza o rodapé com versão, autor e estimativa de tempo economizado."""
+    items = st.session_state.get("checklist_items")
+    num_items = len(items) if items else 0
+
+    if num_items > 0:
+        total_min = num_items * _MINUTES_PER_ITEM
+        if total_min >= 60:
+            hours = total_min // 60
+            mins = total_min % 60
+            time_str = f"{hours}h{mins:02d}min" if mins else f"{hours}h"
+        else:
+            time_str = f"{total_min} min"
+
+        savings_html = (
+            f'<div style="text-align:center; margin-bottom:6px; '
+            f'color:#1F4E79; font-size:0.95rem;">'
+            f'<b>{num_items} itens</b> gerados &mdash; '
+            f'tempo manual estimado: <b>{time_str}</b> de trabalho economizado'
+            f'</div>'
+        )
+    else:
+        savings_html = ""
+
+    st.markdown("---")
+    st.markdown(
+        f'{savings_html}'
+        f'<div style="text-align:center; color:#888; font-size:0.82rem; '
+        f'line-height:1.6;">'
+        f'Checklist de Conformidade Normativa &mdash; v{_APP_VERSION}<br>'
+        f'Feito por <b>Rodrigo Pinto</b> &mdash; '
+        f'NUATI / SECIN / C&acirc;mara dos Deputados'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
 
 if __name__ == "__main__":
     main()
