@@ -522,13 +522,29 @@ def main() -> None:
 # ---------------------------------------------------------------------------
 # Rodapé
 # ---------------------------------------------------------------------------
-_APP_VERSION = "1.0"
+_APP_VERSION = "1.1"
 
-# Estimativa de tempo manual por item de checklist (em minutos).
-# Considera: leitura do dispositivo, identificação do requisito,
-# análise de risco, definição de responsável, sugestão de evidência
-# e mitigação, e preenchimento da planilha.
-_MINUTES_PER_ITEM = 8
+# Parâmetros da estimativa de tempo manual (minutos por etapa, por item)
+_TIME_BREAKDOWN = {
+    "Leitura e interpretação do dispositivo legal": 2.0,
+    "Identificação do requisito de conformidade": 1.0,
+    "Análise de risco e classificação de criticidade": 1.5,
+    "Definição do responsável pelo atendimento": 0.5,
+    "Elaboração de sugestão de mitigação": 1.5,
+    "Identificação de evidência comprobatória": 1.0,
+    "Preenchimento e formatação na planilha": 0.5,
+}
+_MINUTES_PER_ITEM = sum(_TIME_BREAKDOWN.values())  # 8.0
+
+
+def _format_time(total_min: float) -> str:
+    """Formata minutos em string legível (ex: '1h52min', '45 min')."""
+    total_min = int(total_min)
+    if total_min >= 60:
+        hours = total_min // 60
+        mins = total_min % 60
+        return f"{hours}h{mins:02d}min" if mins else f"{hours}h"
+    return f"{total_min} min"
 
 
 def _render_footer() -> None:
@@ -536,28 +552,52 @@ def _render_footer() -> None:
     items = st.session_state.get("checklist_items")
     num_items = len(items) if items else 0
 
+    st.markdown("---")
+
     if num_items > 0:
         total_min = num_items * _MINUTES_PER_ITEM
-        if total_min >= 60:
-            hours = total_min // 60
-            mins = total_min % 60
-            time_str = f"{hours}h{mins:02d}min" if mins else f"{hours}h"
-        else:
-            time_str = f"{total_min} min"
+        time_str = _format_time(total_min)
 
-        savings_html = (
-            f'<div style="text-align:center; margin-bottom:6px; '
+        st.markdown(
+            f'<div style="text-align:center; margin-bottom:8px; '
             f'color:#1F4E79; font-size:0.95rem;">'
             f'<b>{num_items} itens</b> gerados &mdash; '
             f'tempo manual estimado: <b>{time_str}</b> de trabalho economizado'
-            f'</div>'
+            f'</div>',
+            unsafe_allow_html=True,
         )
-    else:
-        savings_html = ""
 
-    st.markdown("---")
+        with st.expander("Como calculamos essa estimativa?"):
+            st.markdown(
+                "A estimativa considera o tempo que um profissional levaria "
+                "para executar **manualmente** cada etapa da análise, "
+                "**para cada item** do checklist:"
+            )
+
+            # Tabela com a memória de cálculo
+            breakdown_rows = ""
+            for etapa, minutos in _TIME_BREAKDOWN.items():
+                total_etapa = minutos * num_items
+                breakdown_rows += (
+                    f"| {etapa} | {minutos:.1f} min | "
+                    f"{_format_time(total_etapa)} |\n"
+                )
+
+            st.markdown(
+                f"| Etapa | Por item | Total ({num_items} itens) |\n"
+                f"|:------|:--------:|:--------:|\n"
+                f"{breakdown_rows}"
+                f"| **Total** | **{_MINUTES_PER_ITEM:.1f} min** | "
+                f"**{time_str}** |"
+            )
+
+            st.caption(
+                "Estimativa baseada em experiência de trabalhos de auditoria "
+                "de conformidade normativa. O tempo real pode variar conforme "
+                "a complexidade do normativo e a experiência do profissional."
+            )
+
     st.markdown(
-        f'{savings_html}'
         f'<div style="text-align:center; color:#888; font-size:0.82rem; '
         f'line-height:1.6;">'
         f'Checklist de Conformidade Normativa &mdash; v{_APP_VERSION}<br>'
