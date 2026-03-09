@@ -170,7 +170,22 @@ def validate_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
         clean = _ensure_required_fields(item)
         clean = _sanitize_string_fields(clean)
+
+        # Normalizar probabilidade e impacto (1-5)
+        clean["probabilidade"] = _normalize_score(clean.get("probabilidade"), "probabilidade")
+        clean["impacto"] = _normalize_score(clean.get("impacto"), "impacto")
+
+        # Normalizar nivel; se inconsistente com scores, recalcular
         clean["nivel"] = _normalize_level(clean.get("nivel"))
+        computed = _compute_nivel_from_scores(clean["probabilidade"], clean["impacto"])
+        if computed and clean["nivel"] != computed:
+            logger.info(
+                "Item %d: nivel '%s' inconsistente com P(%s)xI(%s)=%s. Corrigido para '%s'.",
+                idx, clean["nivel"], clean["probabilidade"], clean["impacto"],
+                (clean["probabilidade"] or 0) * (clean["impacto"] or 0), computed,
+            )
+            clean["nivel"] = computed
+
         seq += 1
         clean["id"] = seq
         validated.append(clean)
@@ -203,19 +218,22 @@ def _ensure_required_fields(item: dict[str, Any]) -> dict[str, Any]:
 
 
 def _normalize_level(raw_level: Any) -> str | None:
-    """Normaliza o campo 'nivel' para um dos valores validos."""
+    """Normaliza o campo 'nivel' para um dos valores validos (MCGR Camara)."""
     if raw_level is None:
         return None
 
     text = str(raw_level).strip()
 
     level_map: dict[str, str] = {
-        "critico": "Critico",
-        "crítico": "Critico",
+        "muito alto": "Muito Alto",
         "alto": "Alto",
-        "medio": "Medio",
-        "médio": "Medio",
+        "moderado": "Moderado",
+        "medio": "Moderado",
+        "médio": "Moderado",
         "baixo": "Baixo",
+        # Compatibilidade com termos antigos
+        "critico": "Muito Alto",
+        "crítico": "Muito Alto",
     }
 
     normalized = level_map.get(text.lower())
@@ -224,6 +242,32 @@ def _normalize_level(raw_level: Any) -> str | None:
 
     logger.warning("Nivel de risco invalido: '%s'. Valores aceitos: %s", text, VALID_LEVELS)
     return None
+
+
+def _normalize_score(value: Any, field_name: str) -> int | None:
+    """Normaliza probabilidade ou impacto para inteiro de 1 a 5."""
+    if value is None:
+        return None
+    try:
+        score = int(value)
+    except (ValueError, TypeError):
+        logger.warning("Valor invalido para %s: '%s'. Esperado inteiro 1-5.", field_name, value)
+        return None
+    return max(1, min(5, score))
+
+
+def _compute_nivel_from_scores(prob: int | None, imp: int | None) -> str | None:
+    """Calcula o nivel de risco (MCGR) a partir de probabilidade x impacto."""
+    if prob is None or imp is None:
+        return None
+    criticidade = prob * imp
+    if criticidade >= 20:
+        return "Muito Alto"
+    if criticidade >= 10:
+        return "Alto"
+    if criticidade >= 4:
+        return "Moderado"
+    return "Baixo"
 
 
 def _parse_json_response(raw_text: str) -> list[dict[str, Any]]:

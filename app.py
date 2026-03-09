@@ -312,7 +312,7 @@ def _render_result_column() -> None:
     )
 
     # Preview em tabela -- selecionar colunas mais relevantes para leitura rápida
-    preview_keys = ["artigo", "requisito", "nivel", "responsavel"]
+    preview_keys = ["artigo", "requisito", "probabilidade", "impacto", "nivel", "responsavel"]
     preview_data = [
         {k: item.get(k, "") for k in preview_keys}
         for item in items
@@ -325,7 +325,9 @@ def _render_result_column() -> None:
         column_config={
             "artigo": st.column_config.TextColumn("Artigo/Dispositivo", width="small"),
             "requisito": st.column_config.TextColumn("O que deve ser verificado", width="large"),
-            "nivel": st.column_config.TextColumn("Prioridade", width="small"),
+            "probabilidade": st.column_config.NumberColumn("P", width="small"),
+            "impacto": st.column_config.NumberColumn("I", width="small"),
+            "nivel": st.column_config.TextColumn("Nível", width="small"),
             "responsavel": st.column_config.TextColumn("Responsável", width="medium"),
         },
         use_container_width=True,
@@ -528,7 +530,8 @@ _APP_VERSION = "1.1"
 _TIME_BREAKDOWN = {
     "Leitura e interpretação do dispositivo legal": 2.0,
     "Identificação do requisito de conformidade": 1.0,
-    "Análise de risco e classificação de criticidade": 1.5,
+    "Avaliação de probabilidade e impacto (MCGR)": 1.5,
+    "Cálculo de criticidade e classificação de nível": 1.0,
     "Definição do responsável pelo atendimento": 0.5,
     "Elaboração de sugestão de mitigação": 1.5,
     "Identificação de evidência comprobatória": 1.0,

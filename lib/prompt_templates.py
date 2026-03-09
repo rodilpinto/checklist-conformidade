@@ -19,14 +19,16 @@ REQUIRED_FIELDS: list[str] = [
     "texto_literal",
     "requisito",
     "risco",
+    "probabilidade",
+    "impacto",
     "nivel",
     "mitigacao",
     "responsavel",
     "evidencia",
 ]
 
-# Niveis de risco aceitos na classificacao
-VALID_LEVELS: list[str] = ["Critico", "Alto", "Medio", "Baixo"]
+# Niveis de risco aceitos na classificacao (MCGR - Camara dos Deputados)
+VALID_LEVELS: list[str] = ["Muito Alto", "Alto", "Moderado", "Baixo"]
 
 # ---------------------------------------------------------------------------
 # Prompt de sistema -- instrui o LLM a gerar o checklist
@@ -65,15 +67,43 @@ um checklist de conformidade estruturado em JSON.
    - "risco": consequencia ou impacto caso a organizacao nao cumpra este
      dispositivo (ex: sancao administrativa, nulidade de ato, responsabilizacao).
 
-   - "nivel": classificacao de risco do descumprimento. Use SOMENTE um dos
-     seguintes valores: "Critico", "Alto", "Medio" ou "Baixo".
-     - Critico: vedacoes expressas, sancoes graves, direitos fundamentais.
-     - Alto: prazos cogentes, obrigacoes com consequencias diretas.
-     - Medio: obrigacoes procedimentais, requisitos organizacionais.
-     - Baixo: recomendacoes, diretrizes sem sancao especifica.
+   - "probabilidade": valor INTEIRO de 1 a 5 que representa a probabilidade
+     de descumprimento do dispositivo, conforme a escala do Modelo Corporativo
+     de Gestao de Riscos (MCGR) da Camara dos Deputados:
+       5 - Praticamente certo: ocorrencia quase garantida.
+       4 - Muito provavel: repete-se com elevada frequencia ou ha muitos
+           indicios de que ocorrera.
+       3 - Provavel: repete-se com frequencia razoavel ou ha indicios de
+           que possa ocorrer.
+       2 - Pouco provavel: historico aponta para baixa frequencia de
+           ocorrencia.
+       1 - Raro: acontece apenas em situacoes excepcionais; sem historico
+           conhecido.
+
+   - "impacto": valor INTEIRO de 1 a 5 que representa o impacto do
+     descumprimento sobre os objetivos da organizacao, conforme a escala
+     do MCGR da Camara dos Deputados:
+       5 - Muito alto: compromete totalmente ou quase totalmente o
+           atingimento do objetivo.
+       4 - Alto: compromete a maior parte do atingimento do objetivo.
+       3 - Medio: compromete razoavelmente o atingimento do objetivo.
+       2 - Baixo: compromete em alguma medida o alcance do objetivo.
+       1 - Muito baixo: compromete minimamente ou nao altera o atingimento
+           do objetivo.
+
+   - "nivel": classificacao de risco calculada como criticidade
+     (probabilidade x impacto), conforme faixas do MCGR da Camara dos
+     Deputados. Use SOMENTE um dos seguintes valores:
+     - "Muito Alto": criticidade de 20 a 25 (vermelho).
+     - "Alto": criticidade de 10 a 16 (laranja).
+     - "Moderado": criticidade de 4 a 9 (amarelo).
+     - "Baixo": criticidade de 1 a 3 (verde).
+     O valor do nivel DEVE ser consistente com o produto de
+     probabilidade x impacto.
 
    - "mitigacao": acao concreta recomendada para mitigar o risco e garantir
-     conformidade.
+     conformidade. Considere as estrategias de tratamento do MCGR: evitar,
+     transferir, mitigar ou aceitar.
 
    - "responsavel": area, cargo ou papel organizacional responsavel pelo
      cumprimento do dispositivo.
@@ -90,7 +120,10 @@ um checklist de conformidade estruturado em JSON.
   gerar um item SEPARADO no checklist.
 - Dispositivos puramente declaratorios (ementas, titulos, preambulos) sem
   conteudo obrigacional podem ser omitidos.
-- O campo "nivel" so aceita os valores: "Critico", "Alto", "Medio", "Baixo".
+- O campo "nivel" so aceita os valores: "Muito Alto", "Alto", "Moderado", "Baixo".
+- Os campos "probabilidade" e "impacto" devem ser numeros inteiros de 1 a 5.
+- O "nivel" deve ser consistente com o produto probabilidade x impacto:
+  Muito Alto (20-25), Alto (10-16), Moderado (4-9), Baixo (1-3).
 - Mantenha a ORDEM dos itens conforme aparecem no normativo (Art. 1 antes
   de Art. 2, etc.).
 - Seja EXAUSTIVO: analise o normativo INTEIRO, do primeiro ao ultimo artigo.
@@ -108,6 +141,8 @@ Retorne SOMENTE um array JSON de objetos. Exemplo:
     "texto_literal": "Esta portaria estabelece...",
     "requisito": "Todos os usos de IA devem observar esta Portaria",
     "risco": "Iniciativa de IA implementada sem observancia das diretrizes",
+    "probabilidade": 3,
+    "impacto": 4,
     "nivel": "Alto",
     "mitigacao": "Incluir conformidade com a Portaria como requisito obrigatorio",
     "responsavel": "Ditec / CGE",

@@ -60,20 +60,20 @@ SECTION_FILL = PatternFill("solid", fgColor="D6E4F0")
 ALT_ROW_FILL = PatternFill("solid", fgColor="F2F7FB")
 WHITE_FILL = PatternFill("solid", fgColor="FFFFFF")
 
-# -- Cores por nível de risco ------------------------------------------------
+# -- Cores por nível de risco (MCGR - Câmara dos Deputados) -----------------
 RISK_FILLS: dict[str, PatternFill] = {
-    "Critico": PatternFill("solid", fgColor="FF4444"),
-    "Alto": PatternFill("solid", fgColor="FFA500"),
-    "Medio": PatternFill("solid", fgColor="FFD700"),
-    "Baixo": PatternFill("solid", fgColor="92D050"),
+    "Muito Alto": PatternFill("solid", fgColor="FF4444"),   # vermelho
+    "Alto": PatternFill("solid", fgColor="FFA500"),          # laranja
+    "Moderado": PatternFill("solid", fgColor="FFD700"),      # amarelo
+    "Baixo": PatternFill("solid", fgColor="92D050"),         # verde
 }
 
-# Niveis "Critico" e "Alto" usam fonte branca para contraste sobre fundo
-# escuro (vermelho/laranja); "Medio" e "Baixo" usam fonte escura.
+# "Muito Alto" e "Alto" usam fonte branca para contraste sobre fundo
+# escuro (vermelho/laranja); "Moderado" e "Baixo" usam fonte escura.
 RISK_FONTS: dict[str, Font] = {
-    "Critico": RISK_FONT_WHITE,
+    "Muito Alto": RISK_FONT_WHITE,
     "Alto": RISK_FONT_WHITE,
-    "Medio": RISK_FONT_DARK,
+    "Moderado": RISK_FONT_DARK,
     "Baixo": RISK_FONT_DARK,
 }
 
@@ -93,23 +93,25 @@ ALIGN_CENTER = Alignment(horizontal="center", vertical="center", wrap_text=True)
 # -- Layout de colunas -------------------------------------------------------
 # (chave do dict, título do header, largura em caracteres)
 COLUMNS: list[tuple[str, str, int]] = [
-    ("id",             "Nº",             5),
-    ("capitulo",       "Capítulo",       14),
-    ("artigo",         "Artigo",         12),
-    ("texto_literal",  "Texto Literal",  55),
-    ("requisito",      "Requisito",      40),
-    ("risco",          "Risco",          40),
-    ("nivel",          "Nível",          10),
-    ("mitigacao",      "Mitigação",      40),
-    ("responsavel",    "Responsável",    22),
-    ("evidencia",      "Evidência",      30),
-    ("status",         "Status",         16),
-    ("observacoes",    "Observações",    30),
+    ("id",              "Nº",              5),
+    ("capitulo",        "Capítulo",       14),
+    ("artigo",          "Artigo",         12),
+    ("texto_literal",   "Texto Literal",  55),
+    ("requisito",       "Requisito",      40),
+    ("risco",           "Risco",          40),
+    ("probabilidade",   "Prob.",           7),
+    ("impacto",         "Impacto",         8),
+    ("nivel",           "Nível",          12),
+    ("mitigacao",       "Mitigação",      40),
+    ("responsavel",     "Responsável",    22),
+    ("evidencia",       "Evidência",      30),
+    ("status",          "Status",         16),
+    ("observacoes",     "Observações",    30),
 ]
 
 # Valores permitidos para validação de dados
 STATUS_OPTIONS = "Não Iniciado,Em Andamento,Concluído,Não Aplicável"
-NIVEL_OPTIONS = "Critico,Alto,Medio,Baixo"
+NIVEL_OPTIONS = "Muito Alto,Alto,Moderado,Baixo"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # HELPERS INTERNOS
@@ -201,39 +203,103 @@ def _build_legend_sheet(wb: Workbook) -> None:
     ws.row_dimensions[row].height = 36
     row += 2
 
-    # Seção: Níveis de Risco
-    cell = ws.cell(row=row, column=1, value="Níveis de Risco")
+    # Seção: Metodologia de Gestão de Riscos
+    cell = ws.cell(row=row, column=1, value="Metodologia de Gestão de Riscos")
     cell.font = Font(name="Arial", size=12, bold=True, color="1F4E79")
     row += 1
 
+    cell = ws.cell(row=row, column=1, value=(
+        "Baseada no Modelo Corporativo de Gestão de Riscos (MCGR) da Câmara dos "
+        "Deputados (Ato da Mesa nº 233/2018), que adota referências da ABNT NBR "
+        "ISO 31000, COSO-ERM e PMI."
+    ))
+    cell.font = Font(name="Arial", size=10, italic=True)
+    cell.alignment = ALIGN_WRAP
+    cell.border = THIN_BORDER
+    ws.row_dimensions[row].height = 30
+    row += 2
+
+    # Subseção: Escala de Probabilidade
+    cell = ws.cell(row=row, column=1, value="Escala de Probabilidade")
+    cell.font = Font(name="Arial", size=11, bold=True, color="1F4E79")
+    row += 1
+
+    prob_scale = [
+        ("5 — Praticamente certo", "Ocorrência quase garantida no prazo associado ao escopo."),
+        ("4 — Muito provável", "Repete-se com elevada frequência ou há muitos indícios de que ocorrerá."),
+        ("3 — Provável", "Repete-se com frequência razoável ou há indícios de que possa ocorrer."),
+        ("2 — Pouco provável", "Histórico aponta para baixa frequência de ocorrência."),
+        ("1 — Raro", "Acontece apenas em situações excepcionais; sem histórico conhecido."),
+    ]
+
+    for label, desc in prob_scale:
+        cell_a = ws.cell(row=row, column=1, value=label)
+        cell_a.font = Font(name="Arial", size=10, bold=True)
+        cell_a.border = THIN_BORDER
+        cell_a.alignment = Alignment(vertical="center")
+        cell_b = ws.cell(row=row, column=2, value=desc)
+        cell_b.font = Font(name="Arial", size=10)
+        cell_b.alignment = ALIGN_WRAP
+        cell_b.border = THIN_BORDER
+        ws.row_dimensions[row].height = 22
+        row += 1
+
+    row += 1
+
+    # Subseção: Escala de Impacto
+    cell = ws.cell(row=row, column=1, value="Escala de Impacto")
+    cell.font = Font(name="Arial", size=11, bold=True, color="1F4E79")
+    row += 1
+
+    impact_scale = [
+        ("5 — Muito alto", "Compromete totalmente ou quase totalmente o atingimento do objetivo."),
+        ("4 — Alto", "Compromete a maior parte do atingimento do objetivo."),
+        ("3 — Médio", "Compromete razoavelmente o atingimento do objetivo."),
+        ("2 — Baixo", "Compromete em alguma medida o alcance do objetivo."),
+        ("1 — Muito baixo", "Compromete minimamente ou não altera o atingimento do objetivo."),
+    ]
+
+    for label, desc in impact_scale:
+        cell_a = ws.cell(row=row, column=1, value=label)
+        cell_a.font = Font(name="Arial", size=10, bold=True)
+        cell_a.border = THIN_BORDER
+        cell_a.alignment = Alignment(vertical="center")
+        cell_b = ws.cell(row=row, column=2, value=desc)
+        cell_b.font = Font(name="Arial", size=10)
+        cell_b.alignment = ALIGN_WRAP
+        cell_b.border = THIN_BORDER
+        ws.row_dimensions[row].height = 22
+        row += 1
+
+    row += 1
+
+    # Subseção: Níveis de Risco (Criticidade = Probabilidade × Impacto)
+    cell = ws.cell(row=row, column=1, value="Níveis de Risco (Criticidade = P × I)")
+    cell.font = Font(name="Arial", size=11, bold=True, color="1F4E79")
+    row += 1
+
     risk_levels = [
-        ("Critico", "FF4444", "FFFFFF",
-         "Requisito cuja inobservância pode gerar dano grave, irreversível "
-         "ou de difícil reparação — ex.: violação de direitos fundamentais, "
-         "ilegalidade flagrante, risco à segurança da informação."),
+        ("Muito Alto", "FF4444", "FFFFFF",
+         "Criticidade 20 a 25 — Risco inaceitável que exige tratamento "
+         "imediato. Pode comprometer totalmente o atingimento dos objetivos."),
         ("Alto", "FFA500", "FFFFFF",
-         "Requisito cuja inobservância pode causar prejuízo significativo "
-         "à organização — ex.: descumprimento de obrigação legal com "
-         "sanções previstas, falha em controles essenciais."),
-        ("Medio", "FFD700", "000000",
-         "Requisito cuja inobservância pode gerar impacto moderado — "
-         "ex.: descumprimento de boas práticas recomendadas, ausência "
-         "de documentação formal exigida."),
+         "Criticidade 10 a 16 — Risco significativo que demanda ações "
+         "prioritárias de tratamento para reduzir a exposição."),
+        ("Moderado", "FFD700", "000000",
+         "Criticidade 4 a 9 — Risco tolerável sob monitoramento. Pode "
+         "exigir ações de mitigação conforme o apetite a riscos definido."),
         ("Baixo", "92D050", "000000",
-         "Requisito cuja inobservância gera impacto limitado — ex.: "
-         "ajuste operacional, melhoria de processo, recomendação de "
-         "aprimoramento sem consequência imediata."),
+         "Criticidade 1 a 3 — Risco aceitável. Geralmente aceito sem "
+         "necessidade de tratamento adicional."),
     ]
 
     for nivel, bg_color, fg_color, descricao in risk_levels:
-        # Coluna A: nível com cor
         cell_nivel = ws.cell(row=row, column=1, value=nivel)
         cell_nivel.font = Font(name="Arial", size=11, bold=True, color=fg_color)
         cell_nivel.fill = PatternFill("solid", fgColor=bg_color)
         cell_nivel.alignment = Alignment(horizontal="center", vertical="center")
         cell_nivel.border = THIN_BORDER
 
-        # Coluna B: descrição
         cell_desc = ws.cell(row=row, column=2, value=descricao)
         cell_desc.font = Font(name="Arial", size=10)
         cell_desc.alignment = ALIGN_WRAP
@@ -251,10 +317,12 @@ def _build_legend_sheet(wb: Workbook) -> None:
     aviso = (
         "Esta planilha foi gerada automaticamente por inteligência artificial "
         "(Google Gemini) a partir do texto do normativo informado.\n\n"
-        "A classificação de risco (Crítico, Alto, Médio, Baixo) é uma "
-        "SUGESTÃO INICIAL produzida pela IA com base no teor do dispositivo "
-        "legal. Ela NÃO substitui o julgamento profissional do auditor, "
-        "gestor ou responsável pela conformidade.\n\n"
+        "A classificação de risco (Muito Alto, Alto, Moderado, Baixo), bem "
+        "como os valores de probabilidade e impacto, são uma SUGESTÃO INICIAL "
+        "produzida pela IA com base no teor do dispositivo legal e na "
+        "metodologia MCGR da Câmara dos Deputados. Ela NÃO substitui o "
+        "julgamento profissional do auditor, gestor ou responsável pela "
+        "conformidade.\n\n"
         "É responsabilidade do usuário que gera e utiliza esta planilha:\n"
         "  • Revisar todos os itens e suas classificações;\n"
         "  • Ajustar os níveis de risco conforme o contexto organizacional;\n"
@@ -283,8 +351,10 @@ def _build_legend_sheet(wb: Workbook) -> None:
         ("Texto Literal", "Transcrição literal do dispositivo legal (sem paráfrase)."),
         ("Requisito", "O que deve ser verificado ou atendido."),
         ("Risco", "Consequência do não atendimento ao requisito."),
-        ("Nível", "Classificação de risco: Critico, Alto, Medio ou Baixo."),
-        ("Mitigação", "Ação sugerida para atender ao requisito."),
+        ("Prob.", "Probabilidade de ocorrência (1-5, conforme escala MCGR)."),
+        ("Impacto", "Impacto sobre os objetivos (1-5, conforme escala MCGR)."),
+        ("Nível", "Criticidade (P×I): Muito Alto (20-25), Alto (10-16), Moderado (4-9), Baixo (1-3)."),
+        ("Mitigação", "Ação sugerida para atender ao requisito (evitar, transferir, mitigar ou aceitar)."),
         ("Responsável", "Ator ou área responsável pelo atendimento."),
         ("Evidência", "Documento ou artefato que comprova o atendimento."),
         ("Status", "Andamento: Não Iniciado, Em Andamento, Concluído, Não Aplicável."),
@@ -429,7 +499,7 @@ def build_excel(
 
             # Colunas curtas (Nº, Nível, Status) ficam centralizadas;
             # demais com wrap_text alinhado ao topo.
-            if key in ("id", "nivel", "status"):
+            if key in ("id", "probabilidade", "impacto", "nivel", "status"):
                 cell.alignment = ALIGN_CENTER
             else:
                 cell.alignment = ALIGN_WRAP
@@ -471,7 +541,7 @@ def build_excel(
         allow_blank=True,
         showErrorMessage=True,
         errorTitle="Valor inválido",
-        error="Selecione: Critico, Alto, Medio ou Baixo.",
+        error="Selecione: Muito Alto, Alto, Moderado ou Baixo.",
         showInputMessage=True,
         promptTitle="Nível de Risco",
         prompt="Selecione a classificação de risco.",
