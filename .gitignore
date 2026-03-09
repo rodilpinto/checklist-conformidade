@@ -1,0 +1,41 @@
+# ---- Segredos e configuracao local ----
+.env
+.env.local
+.env.production
+
+# ---- Python ----
+# SECURITY: Padrao recursivo (**/) necessario para cobrir subdiretorios como
+# lib/__pycache__/ -- sem ele apenas o __pycache__/ na raiz seria ignorado.
+**/__pycache__/
+**/*.py[cod]
+**/*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ---- Ambientes virtuais ----
+venv/
+.venv/
+env/
+
+# ---- Streamlit ----
+# Manter .streamlit/config.toml no repositorio (tema/layout).
+# Ignorar secrets.toml que pode conter chaves.
+.streamlit/secrets.toml
+
+# ---- IDE / Editor ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Arquivos temporarios da aplicacao ----
+*.tmp
+*.bak
