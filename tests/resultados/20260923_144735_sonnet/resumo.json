@@ -1,0 +1,65 @@
+{
+ "inicio": "20260923_144735_sonnet",
+ "referencia": {
+  "n_gabarito": 104,
+  "chars_fonte": 22066,
+  "fidelidade_gabarito": {
+   "exato_pct": 99.0,
+   "quase_pct": 0.0,
+   "divergente_pct": 1.0,
+   "vazio": 0
+  }
+ },
+ "execucoes": [
+  {
+   "modelo": "sonnet",
+   "modo": "lote1500",
+   "run": 1,
+   "avaliacao": {
+    "sucesso": true,
+    "erros": [],
+    "retentativas": 0,
+    "n_itens": 95,
+    "tempo_total_s": 0,
+    "tempo_max_bloco_s": 0,
+    "estouraria_timeout_app": false,
+    "cobertura_pct": 89.4,
+    "cobertura_contido": 4,
+    "itens_sem_par_no_gabarito": 2,
+    "fidelidade": {
+     "exato_pct": 100.0,
+     "quase_pct": 0.0,
+     "divergente_pct": 0.0,
+     "vazio": 0
+    },
+    "responsabilidade": {
+     "n": 93,
+     "algum_ator_em_comum_pct": 73.1,
+     "jaccard_medio": 0.61,
+     "sem_ator_reconhecido": 15
+    },
+    "granularidade": {
+     "artigos": 38,
+     "mesma_contagem_pct": 86.8,
+     "artigos_com_mais_itens": 1,
+     "artigos_com_menos_itens": 4
+    },
+    "risco": {
+     "n": 93,
+     "impacto_exato_pct": 44.1,
+     "impacto_pm1_pct": 93.5,
+     "impacto_vies": 0.47,
+     "probabilidade_exato_pct": 24.7,
+     "probabilidade_pm1_pct": 80.6,
+     "probabilidade_vies": -0.99,
+     "nivel_exato_pct": 63.4
+    },
+    "terminologia": {
+     "oficial": 24,
+     "nao_oficial": 0,
+     "dpo": 0
+    }
+   }
+  }
+ ]
+}

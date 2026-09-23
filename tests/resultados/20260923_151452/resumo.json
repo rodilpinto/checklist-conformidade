@@ -1,0 +1,65 @@
+{
+ "inicio": "20260923_151452",
+ "referencia": {
+  "n_gabarito": 104,
+  "chars_fonte": 22267,
+  "fidelidade_gabarito": {
+   "exato_pct": 99.0,
+   "quase_pct": 0.0,
+   "divergente_pct": 1.0,
+   "vazio": 0
+  }
+ },
+ "execucoes": [
+  {
+   "modelo": "gemma-norazao",
+   "modo": "lote3000",
+   "run": 1,
+   "avaliacao": {
+    "sucesso": true,
+    "erros": [],
+    "retentativas": 0,
+    "n_itens": 94,
+    "tempo_total_s": 768.2,
+    "tempo_max_bloco_s": 514.1,
+    "estouraria_timeout_app": true,
+    "cobertura_pct": 81.7,
+    "cobertura_contido": 4,
+    "itens_sem_par_no_gabarito": 9,
+    "fidelidade": {
+     "exato_pct": 100.0,
+     "quase_pct": 0.0,
+     "divergente_pct": 0.0,
+     "vazio": 0
+    },
+    "responsabilidade": {
+     "n": 85,
+     "algum_ator_em_comum_pct": 95.3,
+     "jaccard_medio": 0.72,
+     "sem_ator_reconhecido": 0
+    },
+    "granularidade": {
+     "artigos": 38,
+     "mesma_contagem_pct": 71.1,
+     "artigos_com_mais_itens": 2,
+     "artigos_com_menos_itens": 9
+    },
+    "risco": {
+     "n": 85,
+     "impacto_exato_pct": 25.9,
+     "impacto_pm1_pct": 68.2,
+     "impacto_vies": 0.94,
+     "probabilidade_exato_pct": 47.1,
+     "probabilidade_pm1_pct": 81.2,
+     "probabilidade_vies": -0.45,
+     "nivel_exato_pct": 24.7
+    },
+    "terminologia": {
+     "oficial": 20,
+     "nao_oficial": 0,
+     "dpo": 0
+    }
+   }
+  }
+ ]
+}

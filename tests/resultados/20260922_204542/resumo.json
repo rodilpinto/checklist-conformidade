@@ -1,0 +1,65 @@
+{
+ "inicio": "20260922_204542",
+ "referencia": {
+  "n_gabarito": 104,
+  "chars_fonte": 22267,
+  "fidelidade_gabarito": {
+   "exato_pct": 99.0,
+   "quase_pct": 0.0,
+   "divergente_pct": 1.0,
+   "vazio": 0
+  }
+ },
+ "execucoes": [
+  {
+   "modelo": "gemma",
+   "modo": "capitulo",
+   "run": 1,
+   "avaliacao": {
+    "sucesso": true,
+    "erros": [],
+    "retentativas": 0,
+    "n_itens": 102,
+    "tempo_total_s": 1931.7,
+    "tempo_max_bloco_s": 342.6,
+    "estouraria_timeout_app": true,
+    "cobertura_pct": 96.2,
+    "cobertura_contido": 4,
+    "itens_sem_par_no_gabarito": 2,
+    "fidelidade": {
+     "exato_pct": 100.0,
+     "quase_pct": 0.0,
+     "divergente_pct": 0.0,
+     "vazio": 0
+    },
+    "responsabilidade": {
+     "n": 100,
+     "algum_ator_em_comum_pct": 65.0,
+     "jaccard_medio": 0.51,
+     "sem_ator_reconhecido": 27
+    },
+    "granularidade": {
+     "artigos": 38,
+     "mesma_contagem_pct": 89.5,
+     "artigos_com_mais_itens": 1,
+     "artigos_com_menos_itens": 3
+    },
+    "risco": {
+     "n": 100,
+     "impacto_exato_pct": 35.0,
+     "impacto_pm1_pct": 79.0,
+     "impacto_vies": 0.72,
+     "probabilidade_exato_pct": 44.0,
+     "probabilidade_pm1_pct": 81.0,
+     "probabilidade_vies": -0.45,
+     "nivel_exato_pct": 39.0
+    },
+    "terminologia": {
+     "oficial": 24,
+     "nao_oficial": 0,
+     "dpo": 0
+    }
+   }
+  }
+ ]
+}

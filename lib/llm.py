@@ -1,19 +1,24 @@
 """
-llm.py -- Integracao com Google Gemini para geracao de checklists normativos.
+llm.py -- Integracao com LLMs (Google Gemini ou servidor local OpenAI-compatible)
+para geracao de checklists normativos.
 
 Funcoes principais:
-    - generate_checklist: envia o texto do normativo ao Gemini e obtem o
-      checklist em JSON.
+    - generate_checklist: envia o texto do normativo ao provider escolhido
+      (Gemini ou LLM local) e obtem o checklist em JSON.
     - validate_items: valida, sanitiza e numera os itens retornados pelo LLM.
 
 Uso:
     from lib.llm import generate_checklist, validate_items
 
-    raw_items = generate_checklist(texto_normativo, api_key="...")
+    raw_items = generate_checklist(texto_normativo, provider="gemini", api_key="...")
+    raw_items = generate_checklist(texto_normativo, provider="local",
+                                    base_url="http://<ip-do-servidor>:1234/v1",
+                                    model="google/gemma-4")
     items = validate_items(raw_items)
 
 Dependencias:
-    - google-genai
+    - google-genai (provider "gemini")
+    - requests (provider "local")
     - lib.prompt_templates (SYSTEM_PROMPT, build_prompt, REQUIRED_FIELDS, VALID_LEVELS)
 """
 
@@ -21,9 +26,11 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 from typing import Any, NoReturn
 
+import requests
 from google import genai
 from google.genai import types
 
@@ -38,10 +45,14 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Constantes internas
 # ---------------------------------------------------------------------------
-_MODEL_NAME: str = "gemini-2.5-flash"
+_MODEL_NAME: str = "gemini-3.6-flash"
 
 # Tamanho maximo (em caracteres) que enviamos de uma vez ao modelo.
 _CHAR_WARN_THRESHOLD: int = 500_000
+
+# Timeout (segundos) para chamadas ao LLM local -- normativos grandes podem
+# levar bastante tempo em hardware sem GPU dedicada.
+_LOCAL_TIMEOUT_SECONDS: int = 300
 
 
 # ---------------------------------------------------------------------------
@@ -68,46 +79,39 @@ class JSONParseError(LLMError):
 # ---------------------------------------------------------------------------
 def generate_checklist(
     text: str,
-    api_key: str,
+    api_key: str = "",
     extra_prompt: str = "",
+    provider: str = "gemini",
+    base_url: str = "",
+    model: str = "",
 ) -> list[dict[str, Any]]:
-    """Envia o texto de um normativo ao Gemini e retorna o checklist em JSON.
+    """Envia o texto de um normativo ao LLM configurado e retorna o checklist em JSON.
 
     Args:
         text: Texto integral do normativo (lei, portaria, decreto, etc.).
-        api_key: Chave de API do Google Gemini.
+        api_key: Chave de API do Google Gemini (obrigatoria quando provider="gemini").
         extra_prompt: Instrucoes adicionais do usuario para o LLM (opcional).
+        provider: "gemini" (padrao) ou "local" (servidor OpenAI-compatible,
+            ex.: LM Studio, na rede interna).
+        base_url: URL base do servidor local (obrigatoria quando provider="local"),
+            ex.: "http://<ip-do-servidor>:1234/v1".
+        model: Nome do modelo no servidor local (obrigatorio quando provider="local"),
+            ex.: "google/gemma-4".
 
     Returns:
         Lista de dicionarios com os itens do checklist (ainda sem validacao
         completa -- use validate_items() em seguida).
 
     Raises:
-        ValueError: Se text ou api_key estiverem vazios.
+        ValueError: Se text ou os parametros obrigatorios do provider estiverem vazios.
         RateLimitError: Se a API retornar erro 429 (limite de requisicoes).
         TokenLimitError: Se o texto exceder o limite do modelo.
         JSONParseError: Se a resposta nao puder ser parseada como JSON.
         LLMError: Para qualquer outro erro na comunicacao com a API.
     """
-    # -- Validacao de entrada --
     if not text or not text.strip():
         raise ValueError("O texto do normativo nao pode estar vazio.")
 
-    api_key = api_key.strip() if api_key else ""
-    if not api_key:
-        raise ValueError(
-            "A chave de API do Gemini e obrigatoria. "
-            "Informe no campo da sidebar ou configure a variavel GEMINI_API_KEY."
-        )
-
-    if not api_key.startswith("AIza") or len(api_key) < 20:
-        raise LLMError(
-            "Formato de chave de API invalido. "
-            "A chave do Google Gemini deve comecar com 'AIza'. "
-            "Verifique sua chave em https://aistudio.google.com/apikey."
-        )
-
-    # Aviso preventivo para textos muito grandes
     if len(text) > _CHAR_WARN_THRESHOLD:
         logger.warning(
             "Texto com %d caracteres. Se a geracao falhar por limite de "
@@ -115,32 +119,14 @@ def generate_checklist(
             len(text),
         )
 
-    # -- Configuracao do cliente (novo SDK google-genai) --
-    client = genai.Client(api_key=api_key)
-
     system_instruction = build_prompt(extra_prompt)
 
-    config = types.GenerateContentConfig(
-        system_instruction=system_instruction,
-        response_mime_type="application/json",
-        temperature=0.1,
-        thinking_config=types.ThinkingConfig(thinking_budget=0),
-    )
-
-    # -- Chamada a API --
-    try:
-        response = client.models.generate_content(
-            model=_MODEL_NAME,
-            contents=text,
-            config=config,
-        )
-
-        raw_text = response.text
-
-    except LLMError:
-        raise
-    except Exception as exc:
-        _handle_api_error(exc)
+    if provider == "local":
+        raw_text = _call_local_llm(text, system_instruction, base_url, model)
+    elif provider == "gemini":
+        raw_text = _call_gemini(text, system_instruction, api_key)
+    else:
+        raise ValueError(f"Provider desconhecido: '{provider}'. Use 'gemini' ou 'local'.")
 
     if not raw_text or not raw_text.strip():
         raise LLMError(
@@ -149,6 +135,112 @@ def generate_checklist(
         )
 
     return _parse_json_response(raw_text)
+
+
+# ---------------------------------------------------------------------------
+# Provider: Google Gemini
+# ---------------------------------------------------------------------------
+def _call_gemini(text: str, system_instruction: str, api_key: str) -> str:
+    """Chama a API do Gemini e retorna o texto bruto da resposta."""
+    api_key = api_key.strip() if api_key else ""
+    if not api_key:
+        raise ValueError(
+            "A chave de API do Gemini e obrigatoria. "
+            "Informe no campo da sidebar ou configure a variavel GEMINI_API_KEY."
+        )
+
+    if not api_key.startswith(("AIza", "AQ.")) or len(api_key) < 20:
+        raise LLMError(
+            "Formato de chave de API invalido. "
+            "A chave do Google Gemini deve comecar com 'AIza' ou 'AQ.'. "
+            "Verifique sua chave em https://aistudio.google.com/apikey."
+        )
+
+    client = genai.Client(api_key=api_key)
+
+    config = types.GenerateContentConfig(
+        system_instruction=system_instruction,
+        response_mime_type="application/json",
+        temperature=0.1,
+        thinking_config=types.ThinkingConfig(thinking_budget=0),
+    )
+
+    try:
+        response = client.models.generate_content(
+            model=os.getenv("GEMINI_MODEL", "").strip() or _MODEL_NAME,
+            contents=text,
+            config=config,
+        )
+        return response.text
+    except LLMError:
+        raise
+    except Exception as exc:
+        _handle_api_error(exc)
+
+
+# ---------------------------------------------------------------------------
+# Provider: LLM local (servidor OpenAI-compatible, ex.: LM Studio)
+# ---------------------------------------------------------------------------
+def _call_local_llm(text: str, system_instruction: str, base_url: str, model: str) -> str:
+    """Chama um servidor LLM local (API compativel com OpenAI) e retorna o texto bruto."""
+    base_url = base_url.strip() if base_url else ""
+    model = model.strip() if model else ""
+
+    if not base_url:
+        raise ValueError(
+            "A URL do servidor LLM local e obrigatoria. "
+            "Configure a variavel LOCAL_LLM_URL (ex.: http://<ip-do-servidor>:1234/v1)."
+        )
+    if not model:
+        raise ValueError(
+            "O nome do modelo do LLM local e obrigatorio. "
+            "Configure a variavel LOCAL_LLM_MODEL (ex.: google/gemma-4)."
+        )
+
+    endpoint = base_url.rstrip("/") + "/chat/completions"
+
+    payload = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system_instruction},
+            {"role": "user", "content": text},
+        ],
+        "temperature": 0.1,
+    }
+    if os.getenv("LOCAL_LLM_DISABLE_THINKING", "").strip() == "1":
+        payload["chat_template_kwargs"] = {"enable_thinking": False}
+
+    try:
+        response = requests.post(endpoint, json=payload, timeout=_LOCAL_TIMEOUT_SECONDS)
+    except requests.exceptions.ConnectionError as exc:
+        raise LLMError(
+            f"Nao foi possivel conectar ao LLM local em '{base_url}'. "
+            "Verifique se o servidor esta em execucao e acessivel pela rede "
+            "(ex.: precisa estar na rede interna da Camara)."
+        ) from exc
+    except requests.exceptions.Timeout as exc:
+        raise LLMError(
+            f"O LLM local em '{base_url}' nao respondeu a tempo "
+            f"({_LOCAL_TIMEOUT_SECONDS}s). O normativo pode ser grande demais "
+            "para o hardware disponivel; tente reduzi-lo."
+        ) from exc
+
+    if response.status_code == 429:
+        raise RateLimitError("Limite de requisicoes do LLM local excedido. Aguarde e tente novamente.")
+    if response.status_code >= 400:
+        raise LLMError(
+            f"Erro na comunicacao com o LLM local (HTTP {response.status_code}): "
+            f"{response.text[:300]}"
+        )
+
+    try:
+        data = response.json()
+        return data["choices"][0]["message"]["content"]
+    except (ValueError, KeyError, IndexError) as exc:
+        raise JSONParseError(
+            "Resposta do LLM local em formato inesperado (nao segue o padrao "
+            "OpenAI chat/completions)."
+        ) from exc
 
 
 # ---------------------------------------------------------------------------

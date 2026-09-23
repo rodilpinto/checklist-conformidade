@@ -28,15 +28,14 @@ from lib.llm import (
     validate_items,
 )
 from lib.excel_builder import build_excel
+from branding.streamlit_cd import cd_brand
+
+_APP_TITLE = "Checklist de Conformidade Normativa"
 
 # ---------------------------------------------------------------------------
 # Configuração da página (DEVE ser a primeira chamada Streamlit)
 # ---------------------------------------------------------------------------
-st.set_page_config(
-    page_title="Checklist de Conformidade",
-    page_icon="\u2705",  # check mark como favicon
-    layout="wide",
-)
+cd_brand.configurar_pagina(_APP_TITLE)
 
 # ---------------------------------------------------------------------------
 # CSS customizado para melhorar a experiência visual
@@ -56,7 +55,7 @@ st.markdown("""
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        background-color: #1F4E79;
+        background-color: #2F7958;
         color: white;
         font-weight: 700;
         font-size: 16px;
@@ -73,19 +72,19 @@ st.markdown("""
     .step-title {
         font-size: 1.15rem;
         font-weight: 600;
-        color: #1A1A2E;
+        color: #414042;
     }
 
     /* Caixa de orientação com fundo suave */
     .orientation-box {
-        background-color: #E8EEF4;
-        border-left: 4px solid #1F4E79;
+        background-color: #E5F7EC;
+        border-left: 4px solid #2F7958;
         border-radius: 4px;
         padding: 12px 16px;
         margin-bottom: 16px;
         font-size: 0.92rem;
         line-height: 1.5;
-        color: #1A1A2E;
+        color: #414042;
     }
 
     /* Esconder o label padrão do file_uploader quando redundante */
@@ -97,7 +96,7 @@ st.markdown("""
     section[data-testid="stSidebar"] .sidebar-instructions {
         font-size: 0.85rem;
         line-height: 1.55;
-        color: #444;
+        color: #414042;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -121,8 +120,12 @@ if "error" not in st.session_state:
 # ---------------------------------------------------------------------------
 # Sidebar -- Chave de API  (Passo 1)
 # ---------------------------------------------------------------------------
-def _render_sidebar() -> str:
-    """Renderiza a sidebar com campo de API key e retorna a chave configurada."""
+def _render_sidebar() -> dict:
+    """Renderiza a sidebar com a escolha de provider de IA e retorna a config escolhida.
+
+    Returns:
+        dict com chaves: provider ("gemini" ou "local"), api_key, base_url, model.
+    """
     with st.sidebar:
         st.markdown(
             '<div class="step-header">'
@@ -132,39 +135,88 @@ def _render_sidebar() -> str:
             unsafe_allow_html=True,
         )
 
-        st.markdown(
-            '<div class="sidebar-instructions">'
-            "Esta ferramenta utiliza o modelo de inteligência artificial "
-            "<b>Google Gemini</b> para analisar o normativo. "
-            "Para funcionar, é necessário informar uma <b>chave de acesso gratuita</b>."
-            "</div>",
-            unsafe_allow_html=True,
-        )
+        env_local_url = os.getenv("LOCAL_LLM_URL", "").strip()
+        provider_options = ["Google Gemini (nuvem)", "LLM local (rede interna)"]
+        default_index = 1 if env_local_url and not os.getenv("GEMINI_API_KEY") else 0
 
-        env_key = os.getenv("GEMINI_API_KEY", "").strip()
-
-        if env_key:
-            st.success("Chave de acesso já configurada. Você pode prosseguir.")
-
-        api_key_input = st.text_input(
-            "Chave de acesso (API Key)",
-            type="password",
-            placeholder="Cole sua chave aqui...",
+        provider_label = st.radio(
+            "Modelo de IA",
+            options=provider_options,
+            index=default_index,
             help=(
-                "A chave é um código alfanumérico fornecido pelo Google. "
-                "Se você já possui uma configurada no ambiente (.env), "
-                "ela será usada automaticamente."
+                "Gemini exige uma chave de API do Google e acesso à internet. "
+                "O LLM local usa um servidor na rede interna e não exige chave."
             ),
         )
+        provider = "gemini" if provider_label == provider_options[0] else "local"
 
-        with st.expander("Como obter a chave de acesso (passo a passo)"):
+        config: dict = {"provider": provider, "api_key": "", "base_url": "", "model": ""}
+
+        if provider == "gemini":
             st.markdown(
-                "1. Acesse [aistudio.google.com/apikey](https://aistudio.google.com/apikey)\n"
-                "2. Faça login com sua conta Google\n"
-                "3. Clique em **Criar chave de API**\n"
-                "4. Copie o código gerado e cole no campo acima\n\n"
-                "A chave é **gratuita** e não requer cartão de crédito."
+                '<div class="sidebar-instructions">'
+                "Esta ferramenta utiliza o modelo de inteligência artificial "
+                "<b>Google Gemini</b> para analisar o normativo. "
+                "Para funcionar, é necessário informar uma <b>chave de acesso gratuita</b>."
+                "</div>",
+                unsafe_allow_html=True,
             )
+
+            env_key = os.getenv("GEMINI_API_KEY", "").strip()
+
+            if env_key:
+                st.success("Chave de acesso já configurada. Você pode prosseguir.")
+
+            api_key_input = st.text_input(
+                "Chave de acesso (API Key)",
+                type="password",
+                placeholder="Cole sua chave aqui...",
+                help=(
+                    "A chave é um código alfanumérico fornecido pelo Google. "
+                    "Se você já possui uma configurada no ambiente (.env), "
+                    "ela será usada automaticamente."
+                ),
+            )
+
+            with st.expander("Como obter a chave de acesso (passo a passo)"):
+                st.markdown(
+                    "1. Acesse [aistudio.google.com/apikey](https://aistudio.google.com/apikey)\n"
+                    "2. Faça login com sua conta Google\n"
+                    "3. Clique em **Criar chave de API**\n"
+                    "4. Copie o código gerado e cole no campo acima\n\n"
+                    "A chave é **gratuita** e não requer cartão de crédito."
+                )
+
+            # Chave digitada manualmente tem prioridade sobre a do ambiente
+            config["api_key"] = api_key_input.strip() if api_key_input.strip() else env_key
+        else:
+            config["base_url"] = env_local_url
+            config["model"] = os.getenv("LOCAL_LLM_MODEL", "").strip()
+
+            st.markdown(
+                '<div class="sidebar-instructions">'
+                "Usando o <b>LLM local</b> configurado na rede interna. "
+                "Só funciona quando este app roda dentro da rede que alcança "
+                "o servidor (não funciona no deploy público do Streamlit Cloud)."
+                "</div>",
+                unsafe_allow_html=True,
+            )
+
+            if config["base_url"]:
+                st.success(f"Servidor: {config['base_url']}")
+            else:
+                st.error(
+                    "Variável LOCAL_LLM_URL não configurada. "
+                    "Defina no .env (ex.: http://<ip-do-servidor>:1234/v1)."
+                )
+
+            if config["model"]:
+                st.caption(f"Modelo: {config['model']}")
+            else:
+                st.error(
+                    "Variável LOCAL_LLM_MODEL não configurada. "
+                    "Defina no .env (ex.: google/gemma-4)."
+                )
 
         st.divider()
 
@@ -172,7 +224,7 @@ def _render_sidebar() -> str:
         st.markdown("**Como funciona esta ferramenta?**")
         st.markdown(
             '<div class="sidebar-instructions">'
-            "<b>Passo 1</b> &mdash; Você configura a chave de acesso (acima)<br>"
+            "<b>Passo 1</b> &mdash; Você configura o acesso (acima)<br>"
             "<b>Passo 2</b> &mdash; Envia o normativo (arquivo, texto ou link)<br>"
             "<b>Passo 3</b> &mdash; A IA analisa e gera o checklist automaticamente<br>"
             "<b>Passo 4</b> &mdash; Você revisa e baixa a planilha Excel pronta"
@@ -180,8 +232,7 @@ def _render_sidebar() -> str:
             unsafe_allow_html=True,
         )
 
-        # Chave digitada manualmente tem prioridade sobre a do ambiente
-        return api_key_input.strip() if api_key_input.strip() else env_key
+        return config
 
 
 # ---------------------------------------------------------------------------
@@ -364,7 +415,7 @@ def _render_result_column() -> None:
 # ---------------------------------------------------------------------------
 # Lógica principal de geração
 # ---------------------------------------------------------------------------
-def _generate(source: str | bytes, source_type: str, api_key: str, extra_prompt: str) -> None:
+def _generate(source: str | bytes, source_type: str, llm_config: dict, extra_prompt: str) -> None:
     """Executa o pipeline completo: extração -> LLM -> validação -> Excel.
 
     Atualiza st.session_state com os resultados ou mensagem de erro.
@@ -393,7 +444,7 @@ def _generate(source: str | bytes, source_type: str, api_key: str, extra_prompt:
             "Etapa 2 de 3: Analisando o normativo com inteligência artificial... "
             "Isso pode levar de 1 a 3 minutos. Por favor, aguarde."
         ):
-            raw_items = generate_checklist(text, api_key=api_key, extra_prompt=extra_prompt)
+            raw_items = generate_checklist(text, extra_prompt=extra_prompt, **llm_config)
 
         # 3. Validar e numerar itens
         with st.spinner("Etapa 3 de 3: Organizando os itens e gerando a planilha..."):
@@ -451,8 +502,7 @@ def _generate(source: str | bytes, source_type: str, api_key: str, extra_prompt:
 def main() -> None:
     """Ponto de entrada da aplicação Streamlit."""
 
-    # Título e subtítulo
-    st.title("Checklist de Conformidade Normativa")
+    cd_brand.cabecalho(_APP_TITLE, "Normativos transformados em checklists de auditoria")
     st.markdown(
         "Transforme **leis, portarias e decretos** em checklists de auditoria prontos para uso. "
         "Basta enviar o normativo e a ferramenta gera automaticamente uma planilha "
@@ -462,7 +512,7 @@ def main() -> None:
     st.divider()
 
     # Sidebar
-    api_key = _render_sidebar()
+    llm_config = _render_sidebar()
 
     # Layout em duas colunas
     col_input, col_result = st.columns([1, 1], gap="large")
@@ -478,21 +528,24 @@ def main() -> None:
         source, source_type, extra_prompt = _render_input_column()
 
         # Condições para habilitar o botão
-        has_api_key = bool(api_key)
+        if llm_config["provider"] == "gemini":
+            has_access = bool(llm_config["api_key"])
+        else:
+            has_access = bool(llm_config["base_url"]) and bool(llm_config["model"])
         has_input = source is not None and source_type != ""
 
         # Botão de geração
         generate_clicked = st.button(
             "Gerar Checklist",
             type="primary",
-            disabled=not (has_api_key and has_input),
+            disabled=not (has_access and has_input),
             use_container_width=True,
         )
 
         # Mensagens de orientação sobre o botão desabilitado
-        if not has_api_key:
+        if not has_access:
             st.warning(
-                "Para continuar, configure a chave de acesso na barra lateral "
+                "Para continuar, configure o acesso ao modelo de IA na barra lateral "
                 "(clique na seta no canto superior esquerdo para abrir).",
                 icon="\u2190",
             )
@@ -504,8 +557,8 @@ def main() -> None:
             )
 
     # Executar geração se o botão foi clicado
-    if generate_clicked and has_api_key and has_input:
-        _generate(source, source_type, api_key, extra_prompt)
+    if generate_clicked and has_access and has_input:
+        _generate(source, source_type, llm_config, extra_prompt)
 
     with col_result:
         st.markdown(
@@ -563,7 +616,7 @@ def _render_footer() -> None:
 
         st.markdown(
             f'<div style="text-align:center; margin-bottom:8px; '
-            f'color:#1F4E79; font-size:0.95rem;">'
+            f'color:#2F7958; font-size:0.95rem;">'
             f'<b>{num_items} itens</b> gerados &mdash; '
             f'tempo manual estimado: <b>{time_str}</b> de trabalho economizado'
             f'</div>',
@@ -600,12 +653,10 @@ def _render_footer() -> None:
                 "a complexidade do normativo e a experiência do profissional."
             )
 
+    cd_brand.rodape()
     st.markdown(
-        f'<div style="text-align:center; color:#888; font-size:0.82rem; '
-        f'line-height:1.6;">'
-        f'Checklist de Conformidade Normativa &mdash; v{_APP_VERSION}<br>'
-        f'Feito por <b>Rodrigo Pinto</b> &mdash; '
-        f'NUATI / SECIN / C&acirc;mara dos Deputados'
+        f'<div style="text-align:right; color:#6D6C6F; font-size:0.78rem;">'
+        f'{_APP_TITLE} v{_APP_VERSION} &middot; Feito por Rodrigo Pinto'
         f'</div>',
         unsafe_allow_html=True,
     )

@@ -17,6 +17,7 @@ from __future__ import annotations
 import io
 import ipaddress
 import logging
+import os
 import socket
 from typing import Union
 from urllib.parse import urlparse
@@ -61,6 +62,35 @@ _TAGS_TO_STRIP = ["script", "style", "noscript", "svg", "canvas"]
 # Dominios/IPs bloqueados para prevenir SSRF.
 # Requisicoes a enderecos privados, loopback e link-local sao recusadas.
 _BLOCKED_HOSTNAMES = {"localhost", "metadata.google.internal"}
+
+# Dominios institucionais confiaveis (ex.: portais legislativos da Camara)
+# que sao permitidos mesmo quando resolvem para IP privado -- situacao normal
+# quando o app roda dentro da rede interna com DNS split-horizon. Nao e uma
+# desativacao geral do bloqueio de IP privado: qualquer outro hostname que
+# resolva para endereco privado continua sendo recusado.
+# Configuravel via EXTRACTOR_TRUSTED_DOMAINS (lista separada por virgula).
+_DEFAULT_TRUSTED_DOMAIN_SUFFIXES = ("camara.leg.br",)
+
+
+def _get_trusted_domain_suffixes() -> tuple[str, ...]:
+    """Le a allowlist de dominios confiaveis do ambiente (ou usa o padrao)."""
+    env_value = os.getenv("EXTRACTOR_TRUSTED_DOMAINS", "").strip()
+    if not env_value:
+        return _DEFAULT_TRUSTED_DOMAIN_SUFFIXES
+    return tuple(
+        domain.strip().lower().lstrip(".")
+        for domain in env_value.split(",")
+        if domain.strip()
+    )
+
+
+def _is_trusted_domain(hostname: str) -> bool:
+    """Verifica se o hostname pertence a um dominio institucional confiavel."""
+    hostname = hostname.lower()
+    for suffix in _get_trusted_domain_suffixes():
+        if hostname == suffix or hostname.endswith("." + suffix):
+            return True
+    return False
 
 
 # ---------------------------------------------------------------------------
@@ -143,6 +173,11 @@ def _validate_url(url: str) -> str:
         raise ValueError(
             f"Acesso bloqueado: o hostname '{hostname}' nao e permitido."
         )
+
+    # Dominios institucionais confiaveis (ex.: camara.leg.br) sao permitidos
+    # mesmo quando resolvem para IP privado (rede interna com DNS split-horizon).
+    if _is_trusted_domain(hostname):
+        return url
 
     # Bloqueia IPs privados / loopback / link-local (prevencao SSRF)
     if _is_private_ip(hostname):

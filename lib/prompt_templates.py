@@ -116,6 +116,11 @@ um checklist de conformidade estruturado em JSON.
 - O campo "texto_literal" deve ser uma copia EXATA do normativo. NUNCA
   parafrasear, resumir, traduzir ou corrigir o texto original.
 - Erros tipograficos presentes no original DEVEM ser preservados.
+- Em TODOS os campos (inclusive requisito, risco, mitigacao e responsavel),
+  use os nomes de cargos, papeis, unidades e orgaos EXATAMENTE como aparecem
+  no normativo (ex.: "Encarregado de Protecao de Dados Pessoais"). NAO
+  substitua por siglas ou termos estrangeiros que nao constem do normativo
+  (ex.: NAO usar "DPO").
 - Cada inciso, paragrafo ou alinea com conteudo normativo autonomo deve
   gerar um item SEPARADO no checklist.
 - Dispositivos puramente declaratorios (ementas, titulos, preambulos) sem

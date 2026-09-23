@@ -1,0 +1,332 @@
+# Fonte: https://www2.camara.leg.br/legin/int/portar/2025/portaria-227-23-dezembro-2025-798596-publicacaooriginal-177616-cd-dg.html (obtido em 2026-09-22)
+PORTARIA Nº 227, DE 23/12/2025
+
+Estabelece a Política de Governança de Inteligência Artificial da Câmara dos Deputados e regulamenta o Ato da Mesa nº 225, de 15 de dezembro de 2025.
+
+O DIRETOR-GERAL DA CÂMARA DOS DEPUTADOS, no uso das atribuições que lhe confere o art. 147, XV, da Resolução nº 20, de 30 de novembro de 1971 , c/c o art. 274, § 1º, do Regimento Interno da Câmara dos Deputados , resolve:
+
+CAPÍTULO I
+DAS DISPOSIÇÕES GERAIS
+
+Art. 1º Esta portaria estabelece a Política de Governança de Inteligência Artificial para a Câmara dos Deputados e regulamenta o Ato da Mesa nº 225, de 15 de dezembro de 2025 .
+
+Art. 2º Para fins desta Portaria, entende-se por:
+
+I - inteligência artificial (IA): tecnologias ou algoritmos capazes de realizar tarefas que normalmente requerem inteligência humana, como aprendizado, reconhecimento de padrões, tomada de decisão, resolução de problemas, compreensão de linguagem natural e interação com o ambiente, fundamentados em dados, regras predefinidas ou aprendizado a partir de experiências;
+
+II - inteligência artificial generativa: modalidade de inteligência artificial capaz de criar novos conteúdos em diversos formatos, como textos, imagens, vídeos, músicas ou outros tipos de mídia, a partir da combinação de padrões aprendidos dos dados em que foi treinada e em novos dados e instruções fornecidos a cada uso;
+
+III - sistemas de inteligência artificial: sistemas ou plataformas digitais que usam a inteligência artificial;
+
+IV - ciclo de vida de sistema de IA: consiste em todas as ações que envolvem desde a concepção do sistema de IA, até a sua desativação, correspondendo às fases de planejamento, desenho e prototipação, coleta e preparação dos dados, modelagem e treinamento, teste e avaliação do modelo, implantação, monitoramento e coleta de feedback, e a desativação;
+
+V - gestor de negócio: titular da unidade administrativa ou colegiado responsável pela visão negocial de soluções de TIC relacionadas a sua área de negócios, nos termos da Portaria nº 88, de 29 de março de 2019 ;
+
+VI - gestor de dados: titular de unidade ou subunidade administrativa formalmente designado como responsável pelo dado, tendo conhecimento e delegação necessários para tomar quaisquer decisões em relação a esses dados;
+
+VII - princípios éticos aplicados à IA: consenso sobre comportamentos aceitos quando se usa, desenvolve, implementa e contrata sistemas de IA, assim como comportamentos aceitos pelos sistemas de IA;
+
+VIII - alucinação: termo usado na IA generativa para descrever respostas fictícias e convincentes que podem ser erroneamente aceitas por quem não conhece profundamente o assunto;
+
+IX - geração aumentada por recuperação (RAG): técnica que combina inteligência artificial generativa com sistemas de busca ou mecanismos de recuperação de informações de bases de dados específicas para contextualizar a geração dos resultados, aumentando sua precisão e confiabilidade;
+
+X - agente de IA: sistema de IA que age de forma autônoma ou semiautônoma, a partir da percepção de informações de seu ambiente para atingir objetivos determinados;
+
+XI - dado pessoal sensível: dado pessoal sobre origem racial ou étnica, convicção religiosa, opinião política, filiação a sindicato ou a organização de caráter religioso, filosófico ou político, dado referente à saúde ou à vida sexual, dado genético ou biométrico, quando vinculado a uma pessoa natural, nos termos da Lei nº 13.709, de 14 de agosto de 2018;
+
+XII - nuvem pública para serviços de IA: ambiente de computação operado por provedor externo, baseado em infraestrutura compartilhada, no qual os serviços de IA são processados em plataformas padronizadas do provedor, podendo ocorrer dentro ou fora do território nacional, conforme a arquitetura e configurações ofertadas;
+
+XIII - nuvem privada para serviços de IA: ambiente de computação dedicado e isolado, operado pela organização ou por provedor em regime exclusivo, no qual os serviços e modelos de IA são processados em infraestrutura localizada no território nacional ou em ambientes cuja localização e soberania sejam controladas e definidas pela Câmara dos Deputados.
+
+Art. 3º Fica estabelecida a Política de Governança de Inteligência Artificial da Câmara dos Deputados, fundamentada em princípios éticos a serem aplicados no uso, no desenvolvimento, na contratação e na implementação de sistemas que utilizem IA.
+
+Parágrafo único. A governança de IA complementa o modelo de governança corporativa e o modelo de governança de tecnologia da informação e comunicação estabelecidos pelo Ato da Mesa nº 245, de 31 de dezembro de 2018 , e pelo Ato do Comitê de Gestão Estratégica nº 7, de 29 de setembro de 2021 , respectivamente.
+
+CAPÍTULO II
+DOS PRINCÍPIOS E OBJETIVOS
+
+Art. 4º A concepção, o uso, o desenvolvimento, a contratação e a implantação de sistemas de IA na Câmara dos Deputados deve observar os seguintes princípios éticos:
+
+I - tratamento de dados com boa fé e finalidade legítima;
+
+II - proteção do direito à privacidade e dos dados pessoais;
+
+III - transparência e publicidade responsável dos procedimentos e decisões;
+
+IV - responsabilização e prestação de contas;
+
+V - apresentação de resultados justos, isentos de vieses, inclusivos e não discriminatórios;
+
+VI - operação de acordo com os propósitos para os quais foram projetados, com dados íntegros, respeitando acessos autorizados, de maneira a possuir resiliência a falhas no funcionamento ou a incidentes de segurança;
+
+VII - primazia da decisão humana, com garantia de autonomia no uso de sistemas de IA e de supervisão contínua sobre o comportamento desses sistemas;
+
+VIII - respeito à propriedade intelectual, ao segredo industrial e aos direitos autorais.
+
+Art. 5º São objetivos da Política de Governança de IA:
+
+I - maximizar os benefícios da IA para a Câmara dos Deputados;
+
+II - minimizar os riscos decorrentes do uso, do desenvolvimento, da contratação e da implementação de sistemas de IA e da aplicação desta tecnologia em processos de trabalho na Câmara dos Deputados.
+
+Parágrafo único. Consideram-se riscos decorrentes do uso inadequado da inteligência artificial as situações em que seus resultados possam:
+
+I - comprometer direitos fundamentais;
+
+II - violar a privacidade ou a autonomia das pessoas;
+
+III - causar danos à integridade física, psicológica ou financeira dos indivíduos;
+
+IV - prejudicar instituições;
+
+V - ameaçar a segurança, a confiança social ou a estabilidade democrática;
+
+VI - produzir conteúdos falsos ou desinformação;
+
+VII - produzir ou ampliar vieses, discriminação e decisões injustas.
+
+CAPÍTULO III
+DAS DIRETRIZES PARA PRIVACIDADE
+
+Art. 6º O uso de dados pessoais por sistemas de IA deve ser evitado.
+
+Art. 7º Quando o tratamento de dados pessoais por sistemas de IA for estritamente necessário, o desenvolvimento, a implementação, a contratação e o uso de sistemas de IA devem respeitar a privacidade dos titulares dos dados pessoais, nos termos estabelecidos na Lei nº 13.709, de 2018, e no Ato da Mesa nº 152, de 16 de dezembro de 2020 .
+
+§ 1º É vedado o tratamento de dados pessoais por sistemas de IA sem a justificativa formal e autorização prévia e expressa do Gestor de Dados e do Encarregado de Proteção de Dados Pessoais.
+
+§ 2º Os dados pessoais devem ser anonimizados para os casos em que seu tratamento implicar o acesso por usuários não autorizados para sua visualização.
+
+Art. 8º É vedada a submissão de dados pessoais, para uso por sistemas de IA em nuvem pública, mesmo que anonimizados, sem autorização prévia e expressa do Gestor de Dados e do Encarregado de Proteção de Dados Pessoais.
+
+Art. 9º Não devem ser utilizadas informações corporativas, como endereço de e-mail ou ponto, para criação de contas em sistemas de IA generativa que funcionem em nuvem não contratada pela Câmara dos Deputados.
+
+CAPÍTULO IV
+DAS DIRETRIZES PARA TRANSPARÊNCIA
+
+Art. 10. Os sistemas de IA em projeto e em funcionamento, assim como os dados por eles utilizados, devem seguir critérios de transparência de maneira a se manter explicabilidade e rastreabilidade sobre as decisões tomadas pela IA.
+
+Art. 11. As ações dirigidas a prover transparência dos sistemas de IA devem contemplar o planejamento, o desenvolvimento, a contratação, a implementação e o monitoramento ao longo do seu ciclo de vida.
+
+Art. 12. Os usuários deverão ser informados quando estiverem interagindo com um agente de IA.
+
+CAPÍTULO V
+DAS DIRETRIZES PARA RESPONSABILIZAÇÃO, PRESTAÇÃO DE CONTAS E AUTONOMIA HUMANA
+
+Art. 13. As unidades administrativas que decidirem utilizar sistemas de IA em seus processos de trabalho devem definir, para os envolvidos, papéis e responsabilidades em cada ação em que a IA seja envolvida, respeitando-se as diretrizes estabelecidas nesta Portaria.
+
+Parágrafo único. Os processos referidos no caput devem considerar a Política de Governança de Dados, a Política de Segurança da Informação e Cibernética e a Política de Proteção de Dados Pessoais.
+
+Art. 14. Os usuários de sistemas de IA generativa são responsáveis pelos documentos que criarem e publicarem a partir dos resultados obtidos com o uso dessa tecnologia e devem revisar os resultados antes de torná-los públicos ou utilizarem em seus processos de trabalho e decisões.
+
+Parágrafo único. Deve ser evitada a adoção de decisões automatizadas criadas pelos sistemas de IA sem revisão humana.
+
+CAPÍTULO VI
+DAS DIRETRIZES PARA RESULTADOS JUSTOS E NÃO DISCRIMINATÓRIOS
+
+Art. 15. São vedados o uso e o desenvolvimento de sistemas de IA que:
+
+I - gerem resultados discriminatórios ilícitos ou abusivos;
+
+II - criem ou reforcem vieses contra qualquer entidade representada nos dados;
+
+III - valorem traços de personalidade, características de comportamentos naturais ou de grupos de pessoas naturais para fins de avaliação de perfis naturais.
+
+CAPÍTULO VII
+DAS DIRETRIZES PARA ROBUSTEZ E SEGURANÇA
+
+Art. 16. Os sistemas de IA desenvolvidos, contratados ou adaptados pela Câmara dos Deputados devem ser submetidos a testes de robustez para aferir sua resiliência a falhas, a erros e a vulnerabilidades de segurança.
+
+Art. 17. Os sistemas de IA devem assegurar a confidencialidade dos dados utilizados, conforme o grau de sigilo atribuído.
+
+Art. 18. O tratamento de dados com restrição de acesso por sistema de IA, em nuvem privada ou em infraestrutura própria da Câmara dos Deputados, somente poderá ser realizado mediante autorização prévia e expressa do Gestor de Dados responsável.
+
+Art. 19. É vedado o tratamento de dados com restrição de acesso sob a responsabilidade da Câmara dos Deputados, ou de qualquer outra organização, para uso por sistemas de IA em nuvem pública.
+
+§ 1º São considerados dados com restrição de acesso aqueles classificados em grau de sigilo com fundamento na segurança da sociedade ou do Estado, dados protegidos por sigilo legal, dados cujo acesso coloque os processos corporativos em risco e dados referentes a credenciais de acesso a sistemas e a dispositivos conectados à rede digital da Câmara dos Deputados.
+
+§ 2º Os titulares de unidades administrativas devem definir formalmente os dados que comprometam os processos corporativos.
+
+§ 3º Enquadram-se nas condições do caput as minutas de documentos com restrição de acesso.
+
+CAPÍTULO VIII
+DAS DIRETRIZES PARA PROPRIEDADE INTELECTUAL
+
+Art. 20. O uso e o desenvolvimento de sistemas de IA devem respeitar a propriedade intelectual de conteúdos representados nos dados que utilizam.
+
+Art. 21. O usuário deve verificar a fonte dos dados e indicá-las, com reconhecimento dos seus respectivos autores, em documentos produzidos a partir de sistema de IA generativa.
+
+Parágrafo único. O disposto no caput também se aplica a pesquisas desenvolvidas pela Câmara dos Deputados em colaboração com outros órgãos.
+
+CAPÍTULO IX
+DA GESTÃO DE RISCOS DE IA
+
+Art. 22. A gestão de riscos de IA deve considerar o ciclo de vida completo de um sistema de IA, nas hipóteses de desenvolvimento interno, de adaptação ou de contratação.
+
+Parágrafo único. A Ditec deve definir o conjunto mínimo de informações que devem ser registradas sobre ações relacionadas aos sistemas de IA.
+
+Art. 23. Fica criado o Comitê de Ética no Uso da Inteligência Artificial (CETIA), de caráter permanente, com atuação de cunho técnico, que terá na sua composição, além do Encarregado de Proteção de Dados Pessoais, representantes das seguintes unidades administrativas:
+
+I - Assessoria de Projetos e Gestão, que exercerá a presidência;
+
+II - Secretaria-Geral da Mesa;
+
+III - Advocacia da Câmara dos Deputados;
+
+IV - Diretoria de Inovação e Tecnologia da Informação;
+
+V - Diretoria de Gestão de Pessoas, preferencialmente por intermédio da Coordenação de Responsabilidade Social;
+
+VI - Centro de Documentação e Informação.
+
+Art. 24. Antes do início de um projeto ou da implementação de sistema de IA, a Ditec fará a avaliação de riscos quanto à violação dos princípios éticos desta Portaria, submetendo-a à análise do CETIA.
+
+§ 1º A análise do CETIA indicará se há condições para a demanda obter aprovação, observados o modelo de governança de TIC, assim como o nível de documentação e de monitoramento necessários.
+
+§ 2º Caso o parecer do CETIA indique alto risco para a Câmara dos Deputados ou para os cidadãos, a demanda será rejeitada, sendo as justificativas comunicadas à Ditec, ao Comitê Diretivo de TIC (CDTI) e ao Comitê de Gestão Estratégica (CGE).
+
+§ 3º Caso envolvam aspectos de segurança da informação e cibernética, antes de emitir seu parecer, o CETIA deve consultar o CGSIC.
+
+§ 4º As demandas por sistemas de IA aprovadas no CDTI devem ser encaminhadas ao CGE para ciência.
+
+Art. 25. A Ditec, apoiada pelas áreas de negócio, devem prover mecanismos que permitam:
+
+I - a verificação da correspondência entre os resultados do sistema de IA e os dados utilizados por ele;
+
+II - a recuperação dos dados utilizados para treinamento de um sistema de IA, salvo os casos de IA generativa ou de modelos de IA refinados a partir de modelos de código aberto pré-treinados;
+
+III - o armazenamento dos seguintes dados, com vista a futura explicação dos resultados encontrados com os sistemas de IA:
+
+a)
+os dados externos à Câmara dos Deputados utilizados no treinamento do modelo;
+
+b)
+o conjunto de dados utilizado por sistema de IA generativa com processo de geração aumentada por recuperação.
+Art. 26. A Ditec deve estabelecer procedimentos com as responsabilidades definidas para cada fase do ciclo de vida dos sistemas de IA, dede sua concepção até a remoção do portfólio de sistemas da Câmara dos Deputados.
+
+§ 1º O processo de desenvolvimento de sistemas de IA deve estabelecer atuação conjunta da unidade de negócio e da Ditec com as respectivas atribuições durante o ciclo de vida do sistema de IA.
+
+§ 2º Para os sistemas de IA de terceiros, as responsabilidades devem envolver a definição de requisitos, o processo de contratação, a implementação, o monitoramento de sistemas de IA de terceiros, e a sua remoção do portfólio de sistemas de terceiros da Câmara dos Deputados.
+
+§ 3º O desenvolvimento dos sistemas de IA deve contemplar, no mínimo, a identificação de riscos de incidentes de segurança e de falhas, além de plano de testes que permita detectar comportamentos não adequados ou não esperados.
+
+§ 4º Os procedimentos previstos no caput deste artigo devem considerar, entre outras, medidas de identificação e controle de vieses e alucinações que possam acarretar distorções dos resultados em contraposição aos objetivos do sistema de IA.
+
+Art. 27. Os sistemas de IA em operação, mesmo que de maneira parcial, devem estar sob a supervisão contínua compartilhada entre gestores de negócio, gestores de dados e a Ditec.
+
+§ 1º A supervisão compartilhada deve considerar testes auxiliares na identificação de riscos que impactem nos princípios éticos previstos nesta Portaria.
+
+§ 2º A supervisão compartilhada deve procurar identificar as seguintes necessidades:
+
+I - de ajustes em dados;
+
+II - de ajustes em outros sistemas que geram dados para o sistema de IA;
+
+III - de novo treinamento do sistema de IA;
+
+IV - de ajustes nas regras de negócio do sistema de IA;
+
+V - de suspensão ou exclusão do sistema de IA do portfólio de sistemas da Casa.
+
+§ 3º Os dados utilizados por sistemas de IA devem ser objeto de contínuo monitoramento quanto a ataques à segurança da informação e cibernética que possam comprometer a integridade e a privacidade para eles definidas.
+
+CAPÍTULO X
+DOS PAPÉIS E RESPONSABILIDADES
+
+Art. 28. Atuam no exercício da governança de IA:
+
+I - a Ditec;
+
+II - os gestores de dados;
+
+III - os gestores de negócio;
+
+IV - os gerentes de projeto;
+
+V - o Encarregado de Proteção de Dados Pessoais, nos termos no Ato da Mesa nº 152, de 2020;
+
+VI - Comitê de Ética no Uso da Inteligência Artificial (CETIA);
+
+VII - o Comitê Diretivo de Tecnologia da Informação e Comunicação (CDTI), nos termos do Ato do Comitê de Gestão Estratégica nº 7, de 2021;
+
+VIII - o Comitê de Gestão Estratégica (CGE), nos termos do Ato da Mesa nº 245, de 2018;
+
+IX - o Comitê Gestor de Segurança da Informação e Cibernética (CGSIC), nos termos do Ato da Mesa nº 231, de 22 de dezembro de 2025 .
+
+Art. 29. Cabe à Ditec:
+
+I - definir e coordenar o processo de desenvolvimento e sustentação de sistemas de IA, contempladas práticas para que os princípios desta Política sejam atendidos durante o ciclo de vida dos sistemas de IA;
+
+II - estabelecer diretrizes técnicas sobre o uso e implementação de prompts e agentes de IA generativa nos processos de trabalho;
+
+III - deliberar sobre contratações de soluções digitais que contenham ou se integrem a sistemas de IA;
+
+IV - definir e coordenar o processo de gestão de riscos de IA, considerados os produtos internos e aqueles de terceiros;
+
+V - definir e coordenar os processos e as práticas que aumentem a resiliência dos sistemas de IA quanto a incidentes de segurança e a falhas;
+
+VI - subsidiar o CETIA, o CGE e o CDTI com informações necessárias à deliberação quando envolverem demandas com IA, sistemas de IA e sobre processos de trabalho com utilização da IA;
+
+VII - deliberar, em parceria com gestores de dados e gestores de negócio, sobre a qualidade dos dados a serem utilizados por sistemas de IA;
+
+VIII - realizar a supervisão contínua dos sistemas de IA, em parceria com os gestores de negócio e os gestores de dados.
+
+Art. 30. Cabe aos Gestores de Dados:
+
+I - deliberar sobre o tratamento dos dados sob sua responsabilidade por sistema de IA em todo o seu ciclo de vida;
+
+II - propor ao gestor de negócio de sistema de IA e ao CETIA a análise sobre a retirada de operação de sistema de IA cujos dados não sejam confiáveis;
+
+III - deliberar, em parceria com a Ditec e com gestores de negócio, sobre a qualidade dos dados a serem utilizados por sistemas de IA;
+
+IV - realizar supervisão contínua dos sistemas de IA, em parceria com os gestores de negócio e com a Ditec.
+
+Art. 31. Cabe aos Gestores de Negócio:
+
+I - solicitar autorização ao gestor de dados para acesso e tratamento de dados e, no caso de dados pessoais, também ao Encarregado de Proteção de Dados Pessoais;
+
+II - submeter à análise da Ditec documentação que apresente como pretende utilizar a IA generativa de maneira contínua em seus processos de trabalho, caso esse uso não esteja contemplado em projeto;
+
+III - supervisionar processos de trabalho que utilizem de maneira contínua a IA generativa, atendendo aos padrões de documentação e comunicação estabelecidos pela Ditec;
+
+IV - suspender o uso de qualquer sistema de IA sob sua responsabilidade que não apresente condições confiáveis de atender aos princípios éticos estabelecidos nesta Portaria;
+
+V - deliberar, em parceria com a Ditec e gestores de dados, sobre a qualidade dos dados a serem utilizados por sistemas de IA;
+
+VI - realizar supervisão contínua dos sistemas de IA e dos processos que façam uso continuado da IA, em parceria com a Ditec e gestores de dados;
+
+VII - atuar, em parceria com a Ditec, no fornecimento tempestivo de requisitos de negócio que possam interferir no comportamento dos sistemas de IA, assim como nas notações, testes, simulações e informações sobre o comportamento desses sistemas durante o seu o desenvolvimento.
+
+Art. 32. Cabe aos Gerentes de Projeto:
+
+I - solicitar ao gestor de dados autorização para acesso e tratamento de dados com foco em sistemas de IA e em processos que utilizam a IA e, no caso de dados pessoais, também ao Encarregado de Proteção de Dados Pessoais;
+
+II - submeter à Ditec, antes do início do projeto, documentação que apresente como pretende utilizar a IA generativa seguindo documentos próprios a esse fim definidos pela Ditec;
+
+III - comunicar periodicamente, durante o projeto, a situação do uso da IA nos padrões estabelecidos pela Ditec;
+
+IV - informar à Ditec quando identificar riscos ou problemas na aplicação de algum princípio ético no uso da IA, seja enquanto projeto, seja como previsão do futuro sistema ou processo operacional.
+
+Art. 33. Cabe ao Encarregado de Proteção de Dados Pessoais deliberar sobre as solicitações de acesso e tratamento de dados pessoais em sistemas de IA.
+
+Art. 34. Cabe ao CETIA
+
+I - avaliar relatório de riscos sobre demandas de sistemas de IA e emitir parecer com condições para que esta demanda seja aprovada;
+
+II - avaliar relatório de riscos sobre sistema de IA em desenvolvimento ou em operação e emitir parecer e recomendações sobre condições para que este sistema continue a ser desenvolvido, continue operacional ou seja desativado, em razão dos riscos apresentados;
+
+III - comunicar os pareceres e recomendações emitidos sobre os riscos de IA avaliados à Ditec, ao CDTI e ao CGE;
+
+IV - emitir periodicamente relatórios executivos sobre as análises que efetuou.
+
+Art. 35. Cabe ao CDTI considerar as análises do CETIA nos seus procedimentos relacionados a demandas e projetos de TIC que prevejam utilizar ou já utilizem a IA.
+
+Art. 36. Cabe ao CGE, com o apoio da Ditec, deliberar sobre uso, desenvolvimento, implementação e contratação de sistemas de IA.
+
+Art. 37. Cabe ao CGSIC deliberar sobre aspectos de segurança da informação e cibernética de sistemas de IA.
+
+Art. 38. Os casos omissos serão analisados pelo CGE, que poderá propor normas complementares à Diretoria-Geral, sempre que necessário.
+
+Art. 39. Esta Portaria entra em vigor na data de sua publicação.
+
+GUILHERME BARBOSA BRANDÃO
+Diretor-Geral
