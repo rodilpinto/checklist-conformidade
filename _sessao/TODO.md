@@ -13,12 +13,13 @@
   - Rever o timeout local (hoje 300 s por chamada).
   - Não depende de nenhuma decisão.
 - [ ] **2. Testar localmente** a Portaria 227 (`tests/fixtures/portaria_227_2025.txt`) com o Gemma sem raciocínio e com o Gemini. Critério mínimo: nenhum lote perdido e cobertura comparável à rodada 2 (`tests/AVALIACAO_MODELOS.md`; dá para medir exportando os itens e usando `--importar`, ou com `eval_modelos.py --modo lote`).
-- [ ] **3. (Rodrigo) Atualizar os *secrets* no Streamlit Cloud** antes do push para o GitHub. Ver `BLOCKED-ON-RODRIGO.md`. *Bloqueado pela decisão de hospedagem.*
-- [ ] **4. Publicar:** `git push github master` (**isso publica**) e conferir o app no ar. *Bloqueado pela etapa 3 e pela decisão de hospedagem.*
+- [ ] **3. (Rodrigo) Atualizar os *secrets* no Streamlit Cloud** (`GEMINI_API_KEY`, `GEMINI_MODEL`). Ver `BLOCKED-ON-RODRIGO.md`. O código novo já foi publicado em 23/09 sem eles, então o app no ar só volta a funcionar depois disso.
+- [ ] **4. Publicar a versão com lotes:** `bash scripts/publicar_github.sh` (**nunca** `git push github` direto: o repo é público) e conferir o app no ar. Primeiro snapshot já publicado em 23/09 (sem lotes).
 - [ ] **5. Em paralelo (Rodrigo):** decidir o faturamento do Gemini e levantar o padrão de deploy interno para o Gemma (`DECISOES.md`, seção "Em aberto").
 
 ## P1: logo depois
 
+- [ ] 📝 Candidato a funcionalidade da **v2.0** do app (ideia do Rodrigo, 23/09/2026): trazer para o app o que hoje só existe nos geradores de `gerador-checklists/`. O item abaixo é o ponto de partida.
 - [ ] Incorporar no app os elementos do v1.08 que o app não tem:
   - colunas "Princípio / Tema" e "Precedência (decorrências)";
   - aba "Ações – Todos os Atores" (ator, fase, ação, artigo, texto literal, entregável, interação com);
@@ -42,7 +43,8 @@
 
 - [x] 2026-09-23: rodada 2 de testes (lotes de artigos × Gemma com e sem raciocínio × subagentes Opus, Sonnet e Haiku), registrada em `tests/AVALIACAO_MODELOS.md`. Commit `dcc3ca3`.
 - [x] 2026-09-23: pesquisa do que é preciso para o Gemini funcionar (`DECISOES.md`).
-- [x] 2026-09-23: commit `dcc3ca3` enviado ao `origin` (GitLab da Câmara). O `github` continua em `3af230a`.
+- [x] 2026-09-23: dados internos movidos para `_sessao/INTERNO.md`; primeiro snapshot público publicado no GitHub via `scripts/publicar_github.sh` (sem `INTERNO.md`; o `gerador-checklists/` foi incluído num segundo snapshot, a pedido do Rodrigo). O Streamlit Cloud republicou; faltam os *secrets*.
+- [x] 2026-09-23: commit `dcc3ca3` enviado ao `origin` (GitLab interno).
 - [x] 2026-09-22: rodada 1 de testes (documento inteiro × por capítulo).
 - [x] 2026-09-22: chave Gemini nova no `.env`, testada com o gemini-3.6-flash.
 - [x] 2026-09-22: guia de identidade visual (`branding/`) criado e aplicado ao app (validado por screenshot local).

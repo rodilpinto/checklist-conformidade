@@ -10,7 +10,7 @@
   GEMINI_API_KEY = "<chave AQ. completa da conta Google da unidade>"
   GEMINI_MODEL = "gemini-3.6-flash"
   ```
-  *Por quê:* é interface web autenticada, e a chave é sua. *Desbloqueia:* o push para o `github`, que republica o app. 📝 Premissa a confirmar: secrets de nível raiz viram variáveis de ambiente lidas pelo `os.getenv` do app.
+  *Por quê:* é interface web autenticada, e a chave é sua. *Desbloqueia:* o app no ar. O código novo **já foi publicado** em 23/09/2026 e fica quebrado até os *secrets* serem atualizados. 📝 Premissa a confirmar: secrets de nível raiz viram variáveis de ambiente lidas pelo `os.getenv` do app.
 - 🟡 **Decidir se habilita o faturamento no projeto Google da unidade** (aistudio.google.com → projeto → "Set up billing"). *Por quê:* envolve custo e talvez as áreas de contratação e TI. *Desbloqueia:* o Gemini em produção (cota de 20 requisições/dia/modelo e uso dos dados no nível gratuito) e a comparação com o Gemini nos testes. Detalhes em `_sessao/DECISOES.md`.
 - 🟡 **Levantar o padrão de deploy das outras soluções na rede da Câmara.** *Desbloqueia:* a hospedagem interna com o Gemma.
 - 🟢 **Rotacionar a chave Gemini** (possível exposição registrada em `_sessao/INTERNO.md`). Atualizar o `.env` e os *secrets* depois.

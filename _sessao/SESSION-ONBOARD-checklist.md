@@ -8,7 +8,7 @@ related: [_sessao/TODO.md, _sessao/DECISOES.md, _sessao/LICOES.md, _sessao/SPEC.
 
 **O que é:** app Streamlit que transforma normativos em checklists de conformidade (Excel). O essencial é extrair os dispositivos e atribuir os responsáveis ([SPEC](SPEC.md)).
 
-**Commits desta linha de trabalho:** `dcc3ca3` (código, branding e testes) e, em seguida, o commit de checkpoint (só documentação de sessão), ambos no `origin` (GitLab da Câmara). O remoto `github` ainda está em `3af230a` e **publica o app** quando recebe um push. Confira o estado atual com `git log --oneline -3` e `git status -sb`: não confie só neste texto.
+**Commits desta linha de trabalho:** `dcc3ca3` (código, branding e testes) e, em seguida, o commit de checkpoint (só documentação de sessão), no `origin` (GitLab interno). O `github` (**público**, e **publica o app**) recebe só snapshots via `scripts/publicar_github.sh`, sem `_sessao/INTERNO.md`. O primeiro snapshot foi publicado em 23/09/2026. Confira o estado atual com `git log --oneline -3` e `git status -sb`: não confie só neste texto.
 
 ## Onde paramos
 
@@ -19,7 +19,7 @@ related: [_sessao/TODO.md, _sessao/DECISOES.md, _sessao/LICOES.md, _sessao/SPEC.
   - terminologia oficial no prompt;
   - duas rodadas exploratórias de teste de modelos, inconclusivas ([AVALIACAO_MODELOS](../tests/AVALIACAO_MODELOS.md)).
 - **Problema central para pôr no ar:** o app manda o normativo inteiro numa chamada. O Gemma resume (16 de 104 itens na Portaria 227), e o Gemini gratuito devolve 503. **É preciso dividir em lotes.**
-- **O app publicado hoje** (Streamlit Cloud) roda o código antigo, com a chave Gemini antiga que caiu, então não funciona.
+- **O app publicado** (Streamlit Cloud) foi republicado com o código novo em 23/09/2026, mas **não funciona até o Rodrigo atualizar os *secrets*** (`GEMINI_API_KEY` nova, `GEMINI_MODEL`). Mesmo depois disso, normativos grandes vão falhar até a divisão em lotes (P0, etapa 1).
 
 ## Próximo passo
 

@@ -17,7 +17,7 @@
 - **2026-09-23** ✅ **Prioridade atual: pôr no ar uma versão funcional do app.** Os testes de modelo (inconclusivos, 1 execução por configuração) e a incorporação dos elementos do v1.08 ficam para depois.
 - **2026-09-23** ✅ Push para o remoto `github` (rodilpinto) **equivale a publicar**: o Streamlit Cloud republica a partir dele. Só fazer como etapa do deploy, depois de atualizar os *secrets*.
 
-- **2026-09-23** ✅ O GitHub `rodilpinto/checklist-conformidade` é **público**. Ele recebe só um snapshot, via `scripts/publicar_github.sh`, **sem** `_sessao/INTERNO.md` (dados de rede, conta e nomes) e **sem** `gerador-checklists/` (material de trabalho da auditoria). O histórico completo fica no GitLab interno. Decidido pelo Rodrigo.
+- **2026-09-23** ✅ O GitHub `rodilpinto/checklist-conformidade` é **público**. Ele recebe só um snapshot, via `scripts/publicar_github.sh`, **sem** `_sessao/INTERNO.md` (dados de rede, conta e nomes). O histórico completo fica no GitLab interno. Decidido pelo Rodrigo. O `gerador-checklists/` chegou a ficar de fora, mas o Rodrigo mudou de ideia no mesmo dia e ele passou a ser publicado.
 - **2026-09-23** ✅ Publicar mesmo antes de atualizar os *secrets* do Streamlit Cloud (o app no ar já estava quebrado; decisão do Rodrigo).
 
 ## Evidência dos testes (não é decisão)

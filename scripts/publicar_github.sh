@@ -6,7 +6,6 @@ set -euo pipefail
 
 EXCLUIR=(
   "_sessao/INTERNO.md"
-  "gerador-checklists"   # material de trabalho da auditoria (decisao do Rodrigo, 2026-09-23)
 )
 
 git fetch github

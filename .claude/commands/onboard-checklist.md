@@ -14,7 +14,7 @@ Você está retomando o trabalho no app **checklist-conformidade**. Leia, nesta 
 8. Se for mexer em modelos ou testes: `tests/AVALIACAO_MODELOS.md`.
 9. Se o estado parecer incompleto: o snapshot mais recente em `~/.claude/projects/C--Users-P-8106-Documents-solucoes-checklist-conformidade/memory/` (índice em `MEMORY.md`).
 
-Rode `git log --oneline -3`, `git status -sb` e `git log --oneline github/master -1` (depois de `git fetch github`), para comparar o estado real com o registrado.
+Rode `git log --oneline -3` e `git status -sb` para comparar o estado real com o registrado. O `github` recebe snapshots com histórico próprio (não é ancestral do `master`); para saber o que já foi publicado, rode `bash scripts/publicar_github.sh --simular`.
 
 Depois, mostre ao usuário um resumo de até 8 linhas: estado atual, último commit, próximo passo e decisões em aberto.
 
