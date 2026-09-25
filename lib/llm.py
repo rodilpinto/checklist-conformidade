@@ -157,17 +157,19 @@ def _call_gemini(text: str, system_instruction: str, api_key: str) -> str:
         )
 
     client = genai.Client(api_key=api_key)
+    modelo = os.getenv("GEMINI_MODEL", "").strip() or _MODEL_NAME
 
     config = types.GenerateContentConfig(
         system_instruction=system_instruction,
         response_mime_type="application/json",
         temperature=0.1,
-        thinking_config=types.ThinkingConfig(thinking_budget=0),
+        # modelos "lite" recusam thinking_budget (erro 400)
+        thinking_config=None if "lite" in modelo else types.ThinkingConfig(thinking_budget=0),
     )
 
     try:
         response = client.models.generate_content(
-            model=os.getenv("GEMINI_MODEL", "").strip() or _MODEL_NAME,
+            model=modelo,
             contents=text,
             config=config,
         )
