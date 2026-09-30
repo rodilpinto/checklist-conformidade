@@ -466,7 +466,7 @@ def main() -> None:
                 "Nenhum modelo de IA está configurado. Para continuar, informe sua "
                 "própria chave de IA na barra lateral "
                 "(clique na seta no canto superior esquerdo para abrir).",
-                icon="\u2190",
+                icon="\U0001F448",  # \ud83d\udc48 (o "\u2190" n\u00e3o \u00e9 emoji e levanta StreamlitAPIException)
             )
         elif not has_input:
             st.info(

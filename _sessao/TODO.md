@@ -29,7 +29,7 @@ Objetivo da rodada: o framework (`nuati-framework` @ `29880aa`, branch `homologa
 - [x] (30/09) `tests/eval_modelos.py` adaptado ao `generate_checklist` novo, com `LLM_SOMENTE`/`LLM_DISABLE_THINKING` por modelo e registro de quem respondeu (commit `2075aa1`).
 - ~~Implantar o fluxo de versões `master` + `homologacao` + app "-v2"~~ (plano de 28/09): **superado pela D-C22** (`main` + `homologacao`, app `<app>-homologacao`, ordem de recriação na própria D-C22). Vira parte do passe por app.
 - [ ] No passe por app: devolver `GEMINI_API_KEY` do app principal ao valor padrão (fim da exceção temporária de 28/09).
-- [ ] 📝 Bug antigo, latente no `master`: `icon="←"` em `st.warning` levanta `StreamlitAPIException` no Streamlit 1.64 quando não há chave. A branch não tem mais esse aviso com ícone.
+- [x] (30/09) Bug do `icon="←"` em `st.warning` (StreamlitAPIException "not a valid emoji" quando nenhum provedor está configurado): **corrigido na `homologacao`** (ícone 👈). A anotação anterior, de que a branch não tinha mais o aviso, estava errada: apareceu no app de homologação em 30/09. ⚠ Continua latente na `main` (produção); vai junto quando a produção receber o framework.
 - [ ] Levar o trabalho da `feat/llm-cadeia` para produção **no passe por app** (D-C23), com o ok do Rodrigo; não há mais "merge no `master`" separado.
 - [x] ~~**(sessão do buscador-normativos)** Criar o módulo comum de LLM para todos os MVPs~~ (feito na origem; adotado aqui em 28/09):
   - sequência LLM local → chave NUATI → chave Rodrigo → chave digitada pelo usuário (📝 sugestão: a do usuário primeiro, quando informada);
