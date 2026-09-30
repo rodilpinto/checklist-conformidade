@@ -1,0 +1,84 @@
+{
+ "inicio": "20260922_203236",
+ "referencia": {
+  "n_gabarito": 104,
+  "chars_fonte": 22267,
+  "fidelidade_gabarito": {
+   "exato_pct": 98.1,
+   "quase_pct": 0.0,
+   "divergente_pct": 1.9,
+   "vazio": 0
+  }
+ },
+ "execucoes": [
+  {
+   "modelo": "gemini",
+   "modo": "inteiro",
+   "run": 1,
+   "avaliacao": {
+    "sucesso": false,
+    "erros": [
+     "bloco 1/1: LLMError: Erro na comunicacao com o modelo Gemini. Verifique sua conexao com a internet e tente novamente."
+    ],
+    "n_itens": 0,
+    "tempo_total_s": 66.1,
+    "tempo_max_bloco_s": 66.1,
+    "estouraria_timeout_app": false,
+    "cobertura_pct": 0.0,
+    "cobertura_contido": 0,
+    "itens_sem_par_no_gabarito": 0,
+    "fidelidade": {
+     "exato_pct": 0.0,
+     "quase_pct": 0.0,
+     "divergente_pct": 0.0,
+     "vazio": 0
+    },
+    "risco": {
+     "n": 0
+    },
+    "terminologia": {
+     "oficial": 0,
+     "nao_oficial": 0,
+     "dpo": 0
+    }
+   }
+  },
+  {
+   "modelo": "gemma",
+   "modo": "inteiro",
+   "run": 1,
+   "avaliacao": {
+    "sucesso": true,
+    "erros": [],
+    "n_itens": 16,
+    "tempo_total_s": 299.3,
+    "tempo_max_bloco_s": 299.3,
+    "estouraria_timeout_app": false,
+    "cobertura_pct": 15.4,
+    "cobertura_contido": 1,
+    "itens_sem_par_no_gabarito": 0,
+    "fidelidade": {
+     "exato_pct": 100.0,
+     "quase_pct": 0.0,
+     "divergente_pct": 0.0,
+     "vazio": 0
+    },
+    "risco": {
+     "n": 16,
+     "impacto_exato_pct": 50.0,
+     "impacto_pm1_pct": 93.8,
+     "impacto_vies": 0.31,
+     "probabilidade_exato_pct": 50.0,
+     "probabilidade_pm1_pct": 75.0,
+     "probabilidade_vies": -0.75,
+     "nivel_exato_pct": 31.2
+    },
+    "terminologia": {
+     "oficial": 8,
+     "nao_oficial": 0,
+     "dpo": 0
+    }
+   }
+  }
+ ]
+}

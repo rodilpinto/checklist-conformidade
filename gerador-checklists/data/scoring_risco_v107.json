@@ -1,0 +1,418 @@
+[
+  {
+    "id": 1, "impacto": 3, "probabilidade": 3, "precedencia": 2,
+    "justificativa": "Sem divulgação ampla, usos informais de IA não observam a Portaria"
+  },
+  {
+    "id": 2, "impacto": 1, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Terminologia inconsistente; impacto limitado na prática"
+  },
+  {
+    "id": 3, "impacto": 3, "probabilidade": 3, "precedencia": 2,
+    "justificativa": "Portaria existe mas sem plano de implementação com cronograma"
+  },
+  {
+    "id": 4, "impacto": 2, "probabilidade": 3, "precedencia": 2,
+    "justificativa": "Governança de IA provavelmente não alinhada com AM 245/2018 e Ato CGE 7/2021"
+  },
+  {
+    "id": 5, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Dados em IA generativa usados sem finalidade documentada"
+  },
+  {
+    "id": 6, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "LGPD parcial; dados pessoais em IA generativa sem RIPD"
+  },
+  {
+    "id": 7, "impacto": 2, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Sem procedimentos de transparência sobre decisões de IA"
+  },
+  {
+    "id": 8, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Responsabilidades por resultados de IA não formalizadas"
+  },
+  {
+    "id": 9, "impacto": 4, "probabilidade": 2, "precedencia": 0,
+    "justificativa": "Risco de discriminação depende do tipo de uso; possível mas não provável no cenário atual"
+  },
+  {
+    "id": 10, "impacto": 2, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Sem testes formais de resiliência em sistemas de IA"
+  },
+  {
+    "id": 11, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Uso informal de IA sem revisão humana obrigatória; viola princípio fundamental"
+  },
+  {
+    "id": 12, "impacto": 3, "probabilidade": 2, "precedencia": 1,
+    "justificativa": "Risco de PI moderado no uso interno; possível em contratações"
+  },
+  {
+    "id": 13, "impacto": 1, "probabilidade": 2, "precedencia": 0,
+    "justificativa": "Objetivo amplo de maximizar benefícios; impacto menor se não atingido"
+  },
+  {
+    "id": 14, "impacto": 2, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Sem framework formal de minimização de riscos de IA"
+  },
+  {
+    "id": 15, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Direitos fundamentais ameaçados por uso de IA sem controles"
+  },
+  {
+    "id": 16, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Privacidade e autonomia violadas por uso informal de IA generativa"
+  },
+  {
+    "id": 17, "impacto": 4, "probabilidade": 2, "precedencia": 1,
+    "justificativa": "Danos à integridade física/psicológica; risco possível mas não provável"
+  },
+  {
+    "id": 18, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Prejuízo institucional por uso inadequado de IA; provável sem controles"
+  },
+  {
+    "id": 19, "impacto": 4, "probabilidade": 2, "precedencia": 1,
+    "justificativa": "Ameaça à segurança/democracia; risco possível em cenário institucional"
+  },
+  {
+    "id": 20, "impacto": 3, "probabilidade": 4, "precedencia": 1,
+    "justificativa": "IA generativa alucina frequentemente; quase certo sem controles de verificação"
+  },
+  {
+    "id": 21, "impacto": 4, "probabilidade": 2, "precedencia": 0,
+    "justificativa": "Vieses em modelos de IA possíveis; monitoramento contínuo necessário"
+  },
+  {
+    "id": 22, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Dados pessoais usados em IA sem verificar necessidade; LGPD parcial"
+  },
+  {
+    "id": 23, "impacto": 4, "probabilidade": 4, "precedencia": 1,
+    "justificativa": "Quase certo não haver RIPD para usos de IA; violação direta da LGPD"
+  },
+  {
+    "id": 24, "impacto": 4, "probabilidade": 4, "precedencia": 1,
+    "justificativa": "Autorização prévia inexistente para tratamento de dados pessoais por IA"
+  },
+  {
+    "id": 25, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Anonimização não aplicada sistematicamente em projetos de IA"
+  },
+  {
+    "id": 26, "impacto": 4, "probabilidade": 4, "precedencia": 1,
+    "justificativa": "Dados pessoais submetidos a nuvem pública via ferramentas de IA generativa"
+  },
+  {
+    "id": 27, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "E-mails corporativos provavelmente usados em contas de ferramentas de IA"
+  },
+  {
+    "id": 28, "impacto": 2, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Sem critérios de explicabilidade e rastreabilidade definidos"
+  },
+  {
+    "id": 29, "impacto": 2, "probabilidade": 3, "precedencia": 0,
+    "justificativa": "Transparência em todas as fases; monitoramento contínuo"
+  },
+  {
+    "id": 30, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Usuários provavelmente não informados sobre interação com agentes de IA"
+  },
+  {
+    "id": 31, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Papéis e responsabilidades não formalizados por projeto de IA"
+  },
+  {
+    "id": 32, "impacto": 2, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Alinhamento com 3 políticas complementares não verificado por projeto"
+  },
+  {
+    "id": 33, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Documentos gerados por IA usados sem revisão obrigatória"
+  },
+  {
+    "id": 34, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Vedação a decisões automatizadas sem revisão humana; provável em uso informal"
+  },
+  {
+    "id": 35, "impacto": 4, "probabilidade": 2, "precedencia": 1,
+    "justificativa": "Vedação a resultados discriminatórios; risco possível depende do uso"
+  },
+  {
+    "id": 36, "impacto": 4, "probabilidade": 2, "precedencia": 1,
+    "justificativa": "Vieses nos modelos; risco possível em uso genérico de IA"
+  },
+  {
+    "id": 37, "impacto": 4, "probabilidade": 2, "precedencia": 0,
+    "justificativa": "Perfilamento por IA improvável no uso atual mas vedação expressa"
+  },
+  {
+    "id": 38, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Sem testes de robustez formais em sistemas de IA"
+  },
+  {
+    "id": 39, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Dados sigilosos processados por IA sem controle de confidencialidade"
+  },
+  {
+    "id": 40, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Dados restritos em nuvem privada sem autorização formal do Gestor de Dados"
+  },
+  {
+    "id": 41, "impacto": 4, "probabilidade": 4, "precedencia": 1,
+    "justificativa": "Vedação absoluta; quase certo que dados restritos vão para nuvem pública"
+  },
+  {
+    "id": 42, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Definição de dados com restrição de acesso não disseminada"
+  },
+  {
+    "id": 43, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Titulares de unidades não definiram formalmente quais dados são críticos"
+  },
+  {
+    "id": 44, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Minutas com restrição de acesso tratadas como dados comuns em IA"
+  },
+  {
+    "id": 45, "impacto": 3, "probabilidade": 2, "precedencia": 1,
+    "justificativa": "Risco de PI em dados de treinamento; possível em contratações"
+  },
+  {
+    "id": 46, "impacto": 3, "probabilidade": 2, "precedencia": 1,
+    "justificativa": "Verificação de fontes e crédito autoral não sistematizada"
+  },
+  {
+    "id": 47, "impacto": 2, "probabilidade": 2, "precedencia": 0,
+    "justificativa": "Pesquisas colaborativas com IA; risco menor e pontual"
+  },
+  {
+    "id": 48, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Gestão de riscos inexistente no ciclo de vida de projetos de IA"
+  },
+  {
+    "id": 49, "impacto": 2, "probabilidade": 4, "precedencia": 2,
+    "justificativa": "Ditec não definiu registro mínimo de informações; pré-requisito para projetos"
+  },
+  {
+    "id": 50, "impacto": 3, "probabilidade": 4, "precedencia": 2,
+    "justificativa": "CETIA não constituído; bloqueia toda avaliação ética e de riscos"
+  },
+  {
+    "id": 51, "impacto": 3, "probabilidade": 4, "precedencia": 2,
+    "justificativa": "Sem avaliação prévia de riscos; projetos de IA não passam por análise formal"
+  },
+  {
+    "id": 52, "impacto": 2, "probabilidade": 4, "precedencia": 1,
+    "justificativa": "Condições de aprovação não definidas pelo CETIA; depende da constituição"
+  },
+  {
+    "id": 53, "impacto": 3, "probabilidade": 4, "precedencia": 2,
+    "justificativa": "Sem mecanismo de rejeição de projetos de IA de alto risco"
+  },
+  {
+    "id": 54, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "CGSIC não consultado sistematicamente em projetos de IA com risco de segurança"
+  },
+  {
+    "id": 55, "impacto": 2, "probabilidade": 3, "precedencia": 0,
+    "justificativa": "Comunicação ao CGE; requisito processual contínuo"
+  },
+  {
+    "id": 56, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Sem mecanismos de verificação resultados-dados em sistemas de IA"
+  },
+  {
+    "id": 57, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Dados de treinamento não recuperáveis; rastreabilidade comprometida"
+  },
+  {
+    "id": 58, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Dados externos e fontes RAG não armazenados sistematicamente"
+  },
+  {
+    "id": 59, "impacto": 3, "probabilidade": 3, "precedencia": 2,
+    "justificativa": "Procedimentos por fase do ciclo de vida não definidos; pré-requisito para projetos"
+  },
+  {
+    "id": 60, "impacto": 2, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Atuação conjunta negócio + Ditec não formalizada"
+  },
+  {
+    "id": 61, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Responsabilidades para IA de terceiros não definidas em contrato"
+  },
+  {
+    "id": 62, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Sem plano de testes e identificação de riscos de incidentes"
+  },
+  {
+    "id": 63, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Sem medidas formais de controle de vieses e alucinações"
+  },
+  {
+    "id": 64, "impacto": 3, "probabilidade": 3, "precedencia": 0,
+    "justificativa": "Supervisão contínua compartilhada não implementada"
+  },
+  {
+    "id": 65, "impacto": 2, "probabilidade": 3, "precedencia": 0,
+    "justificativa": "Testes auxiliares para riscos éticos não planejados"
+  },
+  {
+    "id": 66, "impacto": 3, "probabilidade": 3, "precedencia": 0,
+    "justificativa": "Ajustes em dados de IA não monitorados sistematicamente"
+  },
+  {
+    "id": 67, "impacto": 2, "probabilidade": 2, "precedencia": 0,
+    "justificativa": "Ajustes em sistemas upstream; impacto indireto e menor"
+  },
+  {
+    "id": 68, "impacto": 3, "probabilidade": 3, "precedencia": 0,
+    "justificativa": "Necessidade de retreinamento não monitorada"
+  },
+  {
+    "id": 69, "impacto": 2, "probabilidade": 2, "precedencia": 0,
+    "justificativa": "Ajustes em regras de negócio; impacto operacional baixo"
+  },
+  {
+    "id": 70, "impacto": 3, "probabilidade": 3, "precedencia": 0,
+    "justificativa": "Critérios de suspensão/exclusão de sistemas de IA não definidos"
+  },
+  {
+    "id": 71, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Dados de IA sem monitoramento contra ataques cibernéticos"
+  },
+  {
+    "id": 72, "impacto": 3, "probabilidade": 4, "precedencia": 2,
+    "justificativa": "9 entidades de governança não formalmente constituídas; bloqueio estrutural"
+  },
+  {
+    "id": 73, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Ditec sem processo de desenvolvimento com princípios éticos integrados"
+  },
+  {
+    "id": 74, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Sem diretrizes técnicas para uso de prompts e agentes de IA"
+  },
+  {
+    "id": 75, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Contratações de soluções com IA sem deliberação formal da Ditec"
+  },
+  {
+    "id": 76, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Gestão de riscos de IA não coordenada centralmente pela Ditec"
+  },
+  {
+    "id": 77, "impacto": 2, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Processos de resiliência de sistemas de IA não definidos"
+  },
+  {
+    "id": 78, "impacto": 2, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Ditec não subsidia comitês com informações sobre IA"
+  },
+  {
+    "id": 79, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Qualidade de dados para sistemas de IA não deliberada formalmente"
+  },
+  {
+    "id": 80, "impacto": 3, "probabilidade": 3, "precedencia": 0,
+    "justificativa": "Supervisão contínua de sistemas de IA não implementada pela Ditec"
+  },
+  {
+    "id": 81, "impacto": 2, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Gestores de Dados não deliberam sobre tratamento de dados por IA"
+  },
+  {
+    "id": 82, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Sem mecanismo de propor retirada de IA por dados não conformes"
+  },
+  {
+    "id": 83, "impacto": 2, "probabilidade": 2, "precedencia": 0,
+    "justificativa": "Qualidade de dados; deliberação contínua de baixo impacto direto"
+  },
+  {
+    "id": 84, "impacto": 3, "probabilidade": 3, "precedencia": 0,
+    "justificativa": "Supervisão contínua por Gestores de Dados não implementada"
+  },
+  {
+    "id": 85, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Gestores de Negócio não solicitam autorização para dados em IA"
+  },
+  {
+    "id": 86, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Uso contínuo de IA generativa não documentado junto à Ditec"
+  },
+  {
+    "id": 87, "impacto": 2, "probabilidade": 3, "precedencia": 0,
+    "justificativa": "Supervisão de processos com IA generativa não formalizada"
+  },
+  {
+    "id": 88, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Sem mecanismo de suspensão de sistema de IA não confiável"
+  },
+  {
+    "id": 89, "impacto": 2, "probabilidade": 3, "precedencia": 0,
+    "justificativa": "Deliberação sobre qualidade de dados; atividade contínua"
+  },
+  {
+    "id": 90, "impacto": 2, "probabilidade": 3, "precedencia": 0,
+    "justificativa": "Supervisão contínua por Gestores de Negócio não implementada"
+  },
+  {
+    "id": 91, "impacto": 2, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Requisitos de negócio não formalizados para projetos de IA"
+  },
+  {
+    "id": 92, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Gerentes de Projeto sem autorização formal de dados; violação LGPD provável"
+  },
+  {
+    "id": 93, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Documentação pré-projeto não submetida à Ditec"
+  },
+  {
+    "id": 94, "impacto": 2, "probabilidade": 2, "precedencia": 0,
+    "justificativa": "Comunicação periódica à Ditec; baixo impacto direto"
+  },
+  {
+    "id": 95, "impacto": 3, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Riscos éticos identificados durante projeto não reportados à Ditec"
+  },
+  {
+    "id": 96, "impacto": 4, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Encarregado não envolvido nas deliberações de dados pessoais em IA"
+  },
+  {
+    "id": 97, "impacto": 3, "probabilidade": 4, "precedencia": 2,
+    "justificativa": "CETIA não existe; avaliação de demandas e emissão de pareceres impossível"
+  },
+  {
+    "id": 98, "impacto": 3, "probabilidade": 4, "precedencia": 1,
+    "justificativa": "CETIA não avalia sistemas em desenvolvimento ou operação"
+  },
+  {
+    "id": 99, "impacto": 3, "probabilidade": 4, "precedencia": 1,
+    "justificativa": "CETIA não comunica pareceres e recomendações aos comitês"
+  },
+  {
+    "id": 100, "impacto": 2, "probabilidade": 3, "precedencia": 0,
+    "justificativa": "Relatórios executivos periódicos; atividade contínua do CETIA"
+  },
+  {
+    "id": 101, "impacto": 3, "probabilidade": 3, "precedencia": 2,
+    "justificativa": "CDTI deve considerar análises do CETIA; pré-requisito para deliberações"
+  },
+  {
+    "id": 102, "impacto": 2, "probabilidade": 3, "precedencia": 1,
+    "justificativa": "Capacitação geral sobre uso responsável de IA não sistematizada"
+  },
+  {
+    "id": 103, "impacto": 3, "probabilidade": 2, "precedencia": 0,
+    "justificativa": "CGSIC pode não estar deliberando sobre segurança específica de IA"
+  },
+  {
+    "id": 104, "impacto": 1, "probabilidade": 1, "precedencia": 0,
+    "justificativa": "Casos omissos; vigência imediata; impacto mínimo"
+  }
+]

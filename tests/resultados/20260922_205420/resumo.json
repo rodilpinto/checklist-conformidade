@@ -1,0 +1,57 @@
+{
+ "inicio": "20260922_205420",
+ "referencia": {
+  "n_gabarito": 104,
+  "chars_fonte": 22267,
+  "fidelidade_gabarito": {
+   "exato_pct": 99.0,
+   "quase_pct": 0.0,
+   "divergente_pct": 1.0,
+   "vazio": 0
+  }
+ },
+ "execucoes": [
+  {
+   "modelo": "gemini",
+   "modo": "capitulo",
+   "run": 1,
+   "avaliacao": {
+    "sucesso": false,
+    "erros": [
+     "bloco 1/10: LLMError: Erro na comunicacao com o modelo Gemini. Verifique sua conexao com a internet e tente novamente. | causa: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}",
+     "bloco 2/10: LLMError: Erro na comunicacao com o modelo Gemini. Verifique sua conexao com a internet e tente novamente. | causa: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}",
+     "bloco 3/10: RateLimitError: Limite de requisicoes da API Gemini excedido. Aguarde alguns minutos e tente novamente. | causa: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n*",
+     "bloco 4/10: RateLimitError: Limite de requisicoes da API Gemini excedido. Aguarde alguns minutos e tente novamente. | causa: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n*",
+     "bloco 5/10: RateLimitError: Limite de requisicoes da API Gemini excedido. Aguarde alguns minutos e tente novamente. | causa: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n*",
+     "bloco 6/10: RateLimitError: Limite de requisicoes da API Gemini excedido. Aguarde alguns minutos e tente novamente. | causa: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n*",
+     "bloco 7/10: RateLimitError: Limite de requisicoes da API Gemini excedido. Aguarde alguns minutos e tente novamente. | causa: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n*",
+     "bloco 8/10: RateLimitError: Limite de requisicoes da API Gemini excedido. Aguarde alguns minutos e tente novamente. | causa: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n*",
+     "bloco 9/10: RateLimitError: Limite de requisicoes da API Gemini excedido. Aguarde alguns minutos e tente novamente. | causa: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n*",
+     "bloco 10/10: RateLimitError: Limite de requisicoes da API Gemini excedido. Aguarde alguns minutos e tente novamente. | causa: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n*"
+    ],
+    "retentativas": 4,
+    "n_itens": 0,
+    "tempo_total_s": 421.7,
+    "tempo_max_bloco_s": 206.9,
+    "estouraria_timeout_app": false,
+    "cobertura_pct": 0.0,
+    "cobertura_contido": 0,
+    "itens_sem_par_no_gabarito": 0,
+    "fidelidade": {
+     "exato_pct": 0.0,
+     "quase_pct": 0.0,
+     "divergente_pct": 0.0,
+     "vazio": 0
+    },
+    "risco": {
+     "n": 0
+    },
+    "terminologia": {
+     "oficial": 0,
+     "nao_oficial": 0,
+     "dpo": 0
+    }
+   }
+  }
+ ]
+}

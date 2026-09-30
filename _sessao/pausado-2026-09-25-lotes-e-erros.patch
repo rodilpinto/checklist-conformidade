@@ -1,0 +1,263 @@
+diff --git a/lib/llm.py b/lib/llm.py
+index 51d3e94..f5ce609 100644
+--- a/lib/llm.py
++++ b/lib/llm.py
+@@ -66,6 +66,10 @@ class RateLimitError(LLMError):
+     """Limite de requisicoes excedido na API do Gemini."""
+ 
+ 
++class ServiceUnavailableError(LLMError):
++    """Servico do modelo sobrecarregado ou indisponivel (ex.: 503 do Gemini)."""
++
++
+ class TokenLimitError(LLMError):
+     """Texto excede o limite de tokens do modelo."""
+ 
+@@ -420,30 +424,47 @@ def _ensure_list(data: Any) -> list[dict[str, Any]]:
+ 
+ 
+ def _handle_api_error(exc: Exception) -> NoReturn:
+-    """Classifica e relanca excecoes da API com mensagens em portugues."""
+-    error_msg = str(exc).lower()
++    """Classifica e relanca excecoes da API Gemini com a causa real, em portugues."""
++    bruto = str(exc)
++    msg = bruto.lower()
++    logger.warning("Erro da API Gemini: %s", bruto[:500])
++    detalhe = re.sub(r"\s+", " ", bruto)[:180]
++
++    if "429" in msg or "resource_exhausted" in msg or "quota" in msg or "rate limit" in msg:
++        espera = re.search(r"retrydelay'?:\s*'?(\d+)s", msg)
++        raise RateLimitError(
++            "Cota da chave Gemini esgotada (erro 429). No nivel gratuito o limite e de cerca "
++            "de 20 requisicoes por dia por modelo."
++            + (f" Nova tentativa possivel em {espera.group(1)} s." if espera else "")
++        ) from exc
++
++    if "503" in msg or "unavailable" in msg or "high demand" in msg or "overloaded" in msg:
++        raise ServiceUnavailableError(
++            "O Gemini esta sobrecarregado no momento (erro 503) e recusou a requisicao. "
++            "Isso e comum no nivel gratuito; tente novamente em alguns minutos."
++        ) from exc
+ 
+-    logger.debug("Erro bruto da API Gemini: %s", exc, exc_info=True)
++    if "404" in msg or "not_found" in msg or "no longer available" in msg:
++        raise LLMError(
++            f"O modelo Gemini configurado nao esta disponivel para esta chave (erro 404). "
++            f"Verifique GEMINI_MODEL. Detalhe: {detalhe}"
++        ) from exc
+ 
+-    if "429" in error_msg or "rate limit" in error_msg or "quota" in error_msg:
+-        raise RateLimitError(
+-            "Limite de requisicoes da API Gemini excedido. "
+-            "Aguarde alguns minutos e tente novamente."
++    if ("api key" in msg or "api_key_invalid" in msg or "invalid auth" in msg
++            or "401" in msg or "403" in msg or "permission_denied" in msg):
++        raise LLMError(
++            "Chave de API do Gemini invalida, incompleta ou sem permissao. "
++            "Verifique a chave em https://aistudio.google.com/apikey."
+         ) from exc
+ 
+-    if any(term in error_msg for term in ("token", "context length", "too long", "max_tokens")):
++    if any(term in msg for term in ("context length", "too long", "max_tokens", "token limit")):
+         raise TokenLimitError(
+-            "O texto do normativo excede o limite de tokens do modelo. "
+-            "Divida o normativo em partes menores."
++            "O trecho enviado excede o limite de tokens do modelo."
+         ) from exc
+ 
+-    if "api key" in error_msg or "api_key_invalid" in error_msg or "401" in error_msg or "403" in error_msg:
++    if any(term in msg for term in ("connection", "timed out", "timeout", "name resolution")):
+         raise LLMError(
+-            "Chave de API invalida ou expirada. Verifique sua chave "
+-            "em https://aistudio.google.com/apikey."
++            f"Falha de rede ao falar com a API do Gemini. Detalhe: {detalhe}"
+         ) from exc
+ 
+-    raise LLMError(
+-        "Erro na comunicacao com o modelo Gemini. "
+-        "Verifique sua conexao com a internet e tente novamente."
+-    ) from exc
++    raise LLMError(f"Erro inesperado da API Gemini ({type(exc).__name__}): {detalhe}") from exc
+diff --git a/lib/lotes.py b/lib/lotes.py
+new file mode 100644
+index 0000000..fc54c44
+--- /dev/null
++++ b/lib/lotes.py
+@@ -0,0 +1,134 @@
++"""Divisao de normativos em lotes e geracao do checklist lote a lote.
++
++Normativos grandes numa unica chamada fazem o Gemma resumir por conta propria e o Gemini
++gratuito recusar com 503 (ver tests/AVALIACAO_MODELOS.md). Lotes de ~800 tokens de entrada
++mantem a cobertura e cada chamada abaixo do timeout.
++"""
++
++from __future__ import annotations
++
++import re
++from dataclasses import dataclass, field
++from typing import Any, Callable
++
++from lib.llm import JSONParseError, generate_checklist
++
++# Medido no Gemma 4: Portaria 227/2025 = 22.267 caracteres / 5.384 tokens.
++CHARS_POR_TOKEN = 4.1
++LOTE_TOKENS_PADRAO = 800
++
++_CABECALHO = re.compile(r"^\s*(CAP[IÍ]TULO|T[IÍ]TULO|SE[CÇ][AÃ]O|SUBSE[CÇ][AÃ]O|LIVRO|PARTE)\b", re.I)
++_ARTIGO = re.compile(r"^\s*Art(?:igo)?\.?\s*\d+", re.I)
++
++
++def _tokens(texto: str) -> float:
++    return len(texto) / CHARS_POR_TOKEN
++
++
++def _contexto(pendente: str, anterior: str) -> str:
++    """Cabecalho (ex.: 'CAPITULO II') + linha de titulo seguinte, se houver cabecalho no trecho."""
++    linhas = [l.strip() for l in pendente.splitlines() if l.strip()]
++    for i in range(len(linhas) - 1, -1, -1):
++        if _CABECALHO.match(linhas[i]):
++            return " - ".join(linhas[i:i + 2])
++    return anterior
++
++
++def _unidades(texto: str) -> list[tuple[str, str]]:
++    """Quebra o texto em (contexto, trecho): um trecho por artigo, com o cabecalho corrente."""
++    contexto, pendente, unidades, atual = "", "", [], None
++    for linha in texto.splitlines(keepends=True):
++        if _CABECALHO.match(linha):
++            if atual is not None:
++                unidades.append(atual)
++                atual = None
++            pendente += linha
++        elif _ARTIGO.match(linha):
++            if atual is not None:
++                unidades.append(atual)
++            contexto = _contexto(pendente, contexto)
++            atual = (contexto, pendente + linha)
++            pendente = ""
++        elif atual is not None:
++            atual = (atual[0], atual[1] + linha)
++        else:
++            pendente += linha  # preambulo ou titulo do cabecalho
++    if atual is not None:
++        unidades.append(atual)
++    if pendente.strip():
++        if unidades:
++            ctx, t = unidades[-1]
++            unidades[-1] = (ctx, t + pendente)
++        else:
++            unidades.append(("", pendente))
++    return unidades
++
++
++def _por_paragrafos(texto: str, max_tokens: int) -> list[tuple[str, str]]:
++    blocos, atual = [], ""
++    for par in re.split(r"(\n\s*\n)", texto):
++        if atual and _tokens(atual + par) > max_tokens:
++            blocos.append(("", atual))
++            atual = ""
++        atual += par
++    if atual.strip():
++        blocos.append(("", atual))
++    return blocos
++
++
++def dividir_em_lotes(texto: str, max_tokens: int = LOTE_TOKENS_PADRAO) -> list[str]:
++    """Agrupa artigos consecutivos ate ~max_tokens de entrada; cada lote leva o cabecalho corrente."""
++    unidades = _unidades(texto)
++    if len(unidades) <= 1 and _tokens(texto) > max_tokens:
++        unidades = _por_paragrafos(texto, max_tokens)  # normativo sem artigos numerados
++
++    lotes, atual, ctx_lote = [], "", ""
++    for ctx, trecho in unidades:
++        if atual and _tokens(atual + trecho) > max_tokens:
++            lotes.append((ctx_lote, atual))
++            atual = ""
++        if not atual:
++            ctx_lote = ctx
++        atual += trecho
++    if atual.strip():
++        lotes.append((ctx_lote, atual))
++
++    return [
++        (f"[Trecho do normativo. Capitulo/secao em vigor no inicio do trecho: {ctx}]\n\n"
++         if ctx and not _CABECALHO.match(t) else "") + t
++        for ctx, t in lotes
++    ]
++
++
++@dataclass
++class ResultadoLotes:
++    itens: list[dict[str, Any]] = field(default_factory=list)
++    falhas: list[str] = field(default_factory=list)
++    total_lotes: int = 0
++
++
++def gerar_em_lotes(
++    texto: str,
++    llm_config: dict,
++    extra_prompt: str = "",
++    max_tokens: int = LOTE_TOKENS_PADRAO,
++    ao_avancar: Callable[[int, int], None] | None = None,
++    gerar: Callable[..., list[dict[str, Any]]] = generate_checklist,
++) -> ResultadoLotes:
++    """Gera o checklist lote a lote. Um lote que falha nao descarta os demais."""
++    lotes = dividir_em_lotes(texto, max_tokens)
++    res = ResultadoLotes(total_lotes=len(lotes))
++    for i, lote in enumerate(lotes, 1):
++        if ao_avancar:
++            ao_avancar(i, len(lotes))
++        for tentativa in (1, 2):
++            try:
++                res.itens.extend(gerar(lote, extra_prompt=extra_prompt, **llm_config))
++                break
++            except JSONParseError as exc:
++                if tentativa == 2:
++                    res.falhas.append(f"Trecho {i} de {len(lotes)}: {exc}")
++            except Exception as exc:
++                res.falhas.append(f"Trecho {i} de {len(lotes)}: {exc}")
++                break
++    return res
+diff --git a/tests/eval_modelos.py b/tests/eval_modelos.py
+index 1919671..ca4a0f8 100644
+--- a/tests/eval_modelos.py
++++ b/tests/eval_modelos.py
+@@ -85,37 +85,7 @@ def carregar_gabarito() -> list[dict]:
+     return itens
+ 
+ 
+-CHARS_POR_TOKEN = 4.1  # medido no Gemma: Portaria 227 = 22.267 chars / 5.384 tokens
+-
+-
+-def dividir_em_lotes(texto: str, max_tokens: int) -> list[str]:
+-    """Agrupa artigos consecutivos ate ~max_tokens; cada lote leva o capitulo corrente."""
+-    unidades = re.split(r"(?m)^(?=CAP[IÍ]TULO |Art\. \d+)", texto)
+-    artigos, capitulo, pendente = [], "", ""
+-    for u in unidades:
+-        if re.match(r"CAP[IÍ]TULO ", u):
+-            capitulo = " - ".join(l.strip() for l in u.strip().splitlines()[:2])
+-            pendente += u
+-        elif re.match(r"Art\. \d+", u):
+-            artigos.append((capitulo, pendente + u))
+-            pendente = ""
+-        else:
+-            pendente += u  # preambulo
+-    lotes, atual, cap_lote = [], "", ""
+-    for cap, art in artigos:
+-        if atual and (len(atual) + len(art)) / CHARS_POR_TOKEN > max_tokens:
+-            lotes.append((cap_lote, atual))
+-            atual = ""
+-        if not atual:
+-            cap_lote = cap
+-        atual += art
+-    if atual:
+-        lotes.append((cap_lote, atual))
+-    return [
+-        (f"[Trecho do normativo. Capitulo em vigor no inicio do trecho: {cap}]\n\n" if cap
+-         and not t.lstrip().startswith("CAP") else "") + t
+-        for cap, t in lotes
+-    ]
++from lib.lotes import CHARS_POR_TOKEN, dividir_em_lotes  # noqa: E402,F401  (fonte unica, usada pelo app)
+ 
+ 
+ def dividir_por_capitulo(texto: str) -> list[str]:

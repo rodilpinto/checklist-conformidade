@@ -1,0 +1,67 @@
+{
+ "inicio": "20260923_145937",
+ "referencia": {
+  "n_gabarito": 104,
+  "chars_fonte": 22267,
+  "fidelidade_gabarito": {
+   "exato_pct": 99.0,
+   "quase_pct": 0.0,
+   "divergente_pct": 1.0,
+   "vazio": 0
+  }
+ },
+ "execucoes": [
+  {
+   "modelo": "gemma-norazao",
+   "modo": "lote1500",
+   "run": 1,
+   "avaliacao": {
+    "sucesso": false,
+    "erros": [
+     "bloco 2/4: JSONParseError: Nao foi possivel interpretar a resposta do modelo como JSON. Tente novamente ou reduza o tamanho do normativo."
+    ],
+    "retentativas": 0,
+    "n_itens": 74,
+    "tempo_total_s": 906.3,
+    "tempo_max_bloco_s": 282.5,
+    "estouraria_timeout_app": false,
+    "cobertura_pct": 64.4,
+    "cobertura_contido": 7,
+    "itens_sem_par_no_gabarito": 10,
+    "fidelidade": {
+     "exato_pct": 98.6,
+     "quase_pct": 0.0,
+     "divergente_pct": 1.4,
+     "vazio": 0
+    },
+    "responsabilidade": {
+     "n": 67,
+     "algum_ator_em_comum_pct": 89.6,
+     "jaccard_medio": 0.67,
+     "sem_ator_reconhecido": 1
+    },
+    "granularidade": {
+     "artigos": 38,
+     "mesma_contagem_pct": 44.7,
+     "artigos_com_mais_itens": 2,
+     "artigos_com_menos_itens": 19
+    },
+    "risco": {
+     "n": 67,
+     "impacto_exato_pct": 22.4,
+     "impacto_pm1_pct": 64.2,
+     "impacto_vies": 1.13,
+     "probabilidade_exato_pct": 41.8,
+     "probabilidade_pm1_pct": 80.6,
+     "probabilidade_vies": -0.58,
+     "nivel_exato_pct": 31.3
+    },
+    "terminologia": {
+     "oficial": 13,
+     "nao_oficial": 0,
+     "dpo": 0
+    }
+   }
+  }
+ ]
+}

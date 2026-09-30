@@ -1,0 +1,114 @@
+{
+ "inicio": "20260922_204055",
+ "referencia": {
+  "n_gabarito": 104,
+  "chars_fonte": 22267,
+  "fidelidade_gabarito": {
+   "exato_pct": 99.0,
+   "quase_pct": 0.0,
+   "divergente_pct": 1.0,
+   "vazio": 0
+  }
+ },
+ "execucoes": [
+  {
+   "modelo": "gemini",
+   "modo": "inteiro",
+   "run": 1,
+   "avaliacao": {
+    "sucesso": false,
+    "erros": [
+     "bloco 1/1: LLMError: Erro na comunicacao com o modelo Gemini. Verifique sua conexao com a internet e tente novamente. | causa: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+    ],
+    "retentativas": 2,
+    "n_itens": 0,
+    "tempo_total_s": 196.0,
+    "tempo_max_bloco_s": 196.0,
+    "estouraria_timeout_app": false,
+    "cobertura_pct": 0.0,
+    "cobertura_contido": 0,
+    "itens_sem_par_no_gabarito": 0,
+    "fidelidade": {
+     "exato_pct": 0.0,
+     "quase_pct": 0.0,
+     "divergente_pct": 0.0,
+     "vazio": 0
+    },
+    "risco": {
+     "n": 0
+    },
+    "terminologia": {
+     "oficial": 0,
+     "nao_oficial": 0,
+     "dpo": 0
+    }
+   }
+  },
+  {
+   "modelo": "gemini",
+   "modo": "inteiro",
+   "run": 2,
+   "avaliacao": {
+    "sucesso": false,
+    "erros": [
+     "bloco 1/1: LLMError: Erro na comunicacao com o modelo Gemini. Verifique sua conexao com a internet e tente novamente. | causa: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+    ],
+    "retentativas": 2,
+    "n_itens": 0,
+    "tempo_total_s": 170.7,
+    "tempo_max_bloco_s": 170.7,
+    "estouraria_timeout_app": false,
+    "cobertura_pct": 0.0,
+    "cobertura_contido": 0,
+    "itens_sem_par_no_gabarito": 0,
+    "fidelidade": {
+     "exato_pct": 0.0,
+     "quase_pct": 0.0,
+     "divergente_pct": 0.0,
+     "vazio": 0
+    },
+    "risco": {
+     "n": 0
+    },
+    "terminologia": {
+     "oficial": 0,
+     "nao_oficial": 0,
+     "dpo": 0
+    }
+   }
+  },
+  {
+   "modelo": "gemini",
+   "modo": "inteiro",
+   "run": 3,
+   "avaliacao": {
+    "sucesso": false,
+    "erros": [
+     "bloco 1/1: LLMError: Erro na comunicacao com o modelo Gemini. Verifique sua conexao com a internet e tente novamente. | causa: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+    ],
+    "retentativas": 2,
+    "n_itens": 0,
+    "tempo_total_s": 164.8,
+    "tempo_max_bloco_s": 164.8,
+    "estouraria_timeout_app": false,
+    "cobertura_pct": 0.0,
+    "cobertura_contido": 0,
+    "itens_sem_par_no_gabarito": 0,
+    "fidelidade": {
+     "exato_pct": 0.0,
+     "quase_pct": 0.0,
+     "divergente_pct": 0.0,
+     "vazio": 0
+    },
+    "risco": {
+     "n": 0
+    },
+    "terminologia": {
+     "oficial": 0,
+     "nao_oficial": 0,
+     "dpo": 0
+    }
+   }
+  }
+ ]
+}

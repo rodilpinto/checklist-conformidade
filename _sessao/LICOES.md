@@ -1,0 +1,48 @@
+# LICOES — checklist-conformidade
+
+<!-- problema → causa → correção → regra; mais recentes no topo -->
+
+- **2026-09-25** **Compatibilidade dos modelos Gemini com chaves novas (plano gratuito, testado em 23 e 25/09):**
+
+  | Modelo | Situação | `thinking_budget=0` |
+  |---|---|---|
+  | `gemini-2.5-*` | 404 "no longer available to new users" | - |
+  | `gemini-3.6-flash` | 503 "high demand" frequente com requisições grandes | aceita |
+  | `gemini-3.5-flash` | funciona; 503 esporádico | aceita (sem ele, deu 503) |
+  | `gemini-3.5-flash-lite` | **fez a Portaria 227 inteira numa chamada em 75 s** (91 itens) | **recusa, com 400 INVALID_ARGUMENT** |
+
+  Regra: enviar `thinking_config` só para os modelos que aceitam (`69f8c53`: nada para os "lite").
+- **2026-09-25** **A cota gratuita é por projeto e por modelo** (`GenerateRequestsPerDayPerProjectPerModel-FreeTier`, 20 por dia). O buscador usa a chave da NUATI com o `gemini-3.5-flash-lite`: se o checklist usar a mesma chave e o mesmo modelo, **os dois apps dividem a cota**. Hoje o checklist usa a chave do Rodrigo. Uma lista de modelos por chave multiplica a cota.
+- **2026-09-25** **Assinaturas de erro do Gemini:**
+  - 429 `RESOURCE_EXHAUSTED`, com `quotaId` e `retryDelay`;
+  - 503 `UNAVAILABLE` "high demand";
+  - 404 `NOT_FOUND` "no longer available to new users";
+  - 400 "Invalid Auth key" (chave truncada);
+  - 400 `INVALID_ARGUMENT` (`thinking_budget` num modelo "lite").
+
+  O app atual mostra todas como "verifique sua conexão". A correção está no patch pausado.
+- **2026-09-25** No Streamlit Cloud, os *secrets* de nível raiz chegam ao app como variáveis de ambiente: o `os.getenv("GEMINI_API_KEY")` do checklist funcionou. Depois de mudar os *secrets*, use Reboot.
+- **2026-09-25** O buscador **não** tem sequência de chaves e modelos no código, em nenhuma branch: lê só `GEMINI_API_KEY` (`llm/gemini_client.py:58`). Ele "nunca quebra" porque engole erros (`None` e heurística) e faz requisições pequenas (lotes de 20).
+
+- **2026-09-23** **O GitHub `rodilpinto/checklist-conformidade` é PÚBLICO.** A documentação e o código tinham IP interno, a conta Google e o nome de um colega. Correção: esses valores foram para `_sessao/INTERNO.md`, os demais arquivos ganharam marcadores, e a publicação passou a ser feita por `scripts/publicar_github.sh`, que envia um snapshot sem `INTERNO.md` e sem o histórico interno e aborta se achar dado interno. Regra: dado interno novo vai só para `INTERNO.md`.
+
+- **2026-09-23** **Push para o GitLab interno:** a partir de um subagente não interativo, falha com "Authentication failed" (o Git Credential Manager não consegue pedir login). Na sessão principal, `GCM_INTERACTIVE=always git push origin master` funcionou: o login foi autorizado pelo Rodrigo no navegador. Regra: pushes para o GitLab da Câmara devem ser feitos da sessão principal, e o Rodrigo deve estar disponível para autorizar no navegador.
+- **2026-09-23** **O remoto `github` publica o app:** o Streamlit Cloud (checklist-conformidade.streamlit.app) republica a partir de `rodilpinto/checklist-conformidade`. `git push github master` equivale a um deploy. Atualize os *secrets* antes.
+- **2026-09-23** **Métrica condicional engana:** "responsável certo" calculado só sobre os itens cobertos inflou configurações com cobertura baixa (64% de cobertura "virou" 90% de acerto). Regra: métricas por item devem ter também a versão **efetiva**, sobre o total da referência. Correção registrada em `tests/AVALIACAO_MODELOS.md`.
+- **2026-09-23** **Proveniência da referência:** repeti "gabarito validado" (vindo do `TODO-sync-gerador-nuati.md`) sem conferir. Na verdade, o v1.08 foi gerado com coautoria do Claude Opus 4.6 e os scores não foram revisados. Regra: antes de usar um artefato como referência, conferir o `git log` e a coautoria e registrar a proveniência.
+- **2026-09-23** O Gemma 4 aceita desligar o raciocínio por requisição: `"chat_template_kwargs": {"enable_thinking": false}` (no app, `LOCAL_LLM_DISABLE_THINKING=1`). `reasoning_budget: 0` **não** tem efeito. Sem raciocínio, uma pergunta curta caiu de 10,4 s para 0,6 s.
+- **2026-09-22** **Arquivos com CRLF** (`app.py`, `lib/*.py`): edições de várias linhas com a ferramenta Edit às vezes não casam. Faça trechos de uma linha, ou use um script Python que leia e grave com `newline=''`.
+- **2026-09-22** **Reiniciar o Streamlit local** (ele não recarrega `lib/` alterado de forma confiável): `netstat -ano | grep ":8501 " | grep LISTENING` → `taskkill //F //PID <pid>` → `py -m streamlit run app.py --server.headless true --server.port 8501 &`.
+- **2026-09-22** O Playwright MCP só grava screenshots dentro do repo ou de `.playwright-mcp/`, que está no `.gitignore`. O screenshot de página inteira não captura o rodapé do Streamlit, porque a rolagem é de um contêiner interno: capture o elemento (`target: .cd-rod`).
+
+- **2026-09-22** A URL de deploy do Streamlit Community Cloud não fica em nenhum arquivo do repo, só no painel da conta. Agora está no `README.md`. O app lá é privado: acesso anônimo recebe um 303 para `/-/login`.
+- **2026-09-22** O servidor LLM interno (llama.cpp/LM Studio; endereço em `INTERNO.md`) roda `google/gemma-4` com `n_ctx=20480`. O `/v1/models` lista `capabilities: ["completion"]`, mas `/v1/chat/completions` funciona. A resposta traz `reasoning_content` além de `content`, e esse raciocínio também consome tokens da janela.
+- **2026-09-22** Na rede da Câmara, `www2.camara.leg.br` resolve para um IP privado (DNS split-horizon; detalhe em `INTERNO.md`). Por isso a checagem anti-SSRF de IP privado bloqueava URLs legítimas da Câmara.
+- **2026-09-22** Nesta máquina, `python` no PATH é o alias da Microsoft Store e não funciona. Use `py` (Python 3.13). Os scripts do pip (ex.: `streamlit.exe`) não estão no PATH: rode `py -m streamlit run app.py`.
+- **2026-09-22** As chaves Gemini novas começam com `AQ.` e têm cerca de 53 caracteres. Uma chave truncada responde 400 "Invalid Auth key.", e não um erro de formato. O `gemini-2.5-flash` devolve 404 para contas novas. Para ver os modelos disponíveis, use `GET /v1beta/models?key=`. No Gemini 3.6, `thinking_budget=0` continua aceito.
+- **2026-09-22** `load_dotenv()` sem argumento falha dentro de `py - <<EOF` (heredoc no stdin: `find_dotenv` quebra). Use `load_dotenv('.env')`.
+- **2026-09-22** O Gemma 4 com a Portaria 227 inteira numa chamada entregou só 16 itens de 104. O motivo **não é estouro de contexto**: `finish_reason=stop`, com 15.112 de 20.480 tokens usados. O próprio raciocínio mostra que ele resumiu de propósito ("focus on the most critical ones... fits within output limits"). Ele gera a ~27,7 tokens/s e levou 291 s, no limite do timeout de 300 s do app. Normativos grandes precisam ser divididos (por capítulo).
+- **2026-09-22** O Gemini 3.6 Flash devolve 503 "high demand" de forma intermitente. O `_handle_api_error` do app converte isso em "verifique sua conexão com a internet", o que engana o usuário, e o app não tenta de novo.
+- **2026-09-22** A chave Gemini da conta Google da unidade é do **nível gratuito**: `GenerateRequestsPerDayPerProjectPerModel-FreeTier`, limite de **20 requisições por dia por modelo**, confirmado no erro 429. Requisições grandes do nível gratuito levam 503 sob carga (0 de 9 com a Portaria inteira). Com divisão por capítulo, cada normativo gasta cerca de 10 requisições, o que dá uns 2 normativos por dia. Não serve para produção nem para os testes comparativos sem habilitar faturamento.
+- **2026-09-22** O servidor llama.cpp expõe `POST /tokenize` na raiz (fora do `/v1`), o que permite medir tokens exatos. Portaria 227: 5.384 tokens. Prompt de sistema: 1.677.
+- **2026-09-22** A API de grupos do GitLab interno (endpoint em `INTERNO.md`) responde "Not found" sem token. Para listar os repos do grupo, é preciso um token pessoal.
