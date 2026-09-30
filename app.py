@@ -2,7 +2,7 @@
 """
 app.py -- Interface Streamlit para geração de checklists de conformidade normativa.
 
-Integra os módulos de extração de texto (extractor), geração via LLM (llm)
+Integra os módulos de extração de texto (extracao_texto), geração via LLM (llm)
 e construção de planilha Excel (excel_builder) em uma interface web simples
 voltada para usuários leigos.
 
@@ -13,22 +13,23 @@ Execução:
 
 from __future__ import annotations
 
-import os
 from datetime import datetime
 
 import streamlit as st
 from dotenv import load_dotenv
 
-from lib.extractor import extract_text
+from extracao_texto import extract_text
 from lib.llm import (
     LLMError,
-    RateLimitError,
-    TokenLimitError,
     generate_checklist,
     validate_items,
 )
+import llm_cadeia
+from llm_cadeia.painel_streamlit import painel_llm
 from lib.excel_builder import build_excel
 from branding.streamlit_cd import cd_brand
+from tempo_economizado import Etapa, estimar
+from tempo_economizado.painel_streamlit import mostrar_tempo_economizado
 
 _APP_TITLE = "Checklist de Conformidade Normativa"
 
@@ -120,11 +121,11 @@ if "error" not in st.session_state:
 # ---------------------------------------------------------------------------
 # Sidebar -- Chave de API  (Passo 1)
 # ---------------------------------------------------------------------------
-def _render_sidebar() -> dict:
-    """Renderiza a sidebar com a escolha de provider de IA e retorna a config escolhida.
+def _render_sidebar() -> None:
+    """Renderiza a sidebar: acesso à IA (painel do llm_cadeia) e instruções.
 
-    Returns:
-        dict com chaves: provider ("gemini" ou "local"), api_key, base_url, model.
+    O painel_llm() tem de rodar antes de qualquer chamada ao LLM: ele instala a
+    chave que o usuário digitar (vale só na sessão dele) e mostra quem vai responder.
     """
     with st.sidebar:
         st.markdown(
@@ -135,88 +136,16 @@ def _render_sidebar() -> dict:
             unsafe_allow_html=True,
         )
 
-        env_local_url = os.getenv("LOCAL_LLM_URL", "").strip()
-        provider_options = ["Google Gemini (nuvem)", "LLM local (rede interna)"]
-        default_index = 1 if env_local_url and not os.getenv("GEMINI_API_KEY") else 0
-
-        provider_label = st.radio(
-            "Modelo de IA",
-            options=provider_options,
-            index=default_index,
-            help=(
-                "Gemini exige uma chave de API do Google e acesso à internet. "
-                "O LLM local usa um servidor na rede interna e não exige chave."
-            ),
+        st.markdown(
+            '<div class="sidebar-instructions">'
+            "Esta ferramenta usa <b>inteligência artificial</b> para analisar o normativo. "
+            "Os modelos abaixo são tentados em ordem até um responder. "
+            "Se quiser, informe <b>sua própria chave</b>: ela tem prioridade e vale só nesta sessão."
+            "</div>",
+            unsafe_allow_html=True,
         )
-        provider = "gemini" if provider_label == provider_options[0] else "local"
 
-        config: dict = {"provider": provider, "api_key": "", "base_url": "", "model": ""}
-
-        if provider == "gemini":
-            st.markdown(
-                '<div class="sidebar-instructions">'
-                "Esta ferramenta utiliza o modelo de inteligência artificial "
-                "<b>Google Gemini</b> para analisar o normativo. "
-                "Para funcionar, é necessário informar uma <b>chave de acesso gratuita</b>."
-                "</div>",
-                unsafe_allow_html=True,
-            )
-
-            env_key = os.getenv("GEMINI_API_KEY", "").strip()
-
-            if env_key:
-                st.success("Chave de acesso já configurada. Você pode prosseguir.")
-
-            api_key_input = st.text_input(
-                "Chave de acesso (API Key)",
-                type="password",
-                placeholder="Cole sua chave aqui...",
-                help=(
-                    "A chave é um código alfanumérico fornecido pelo Google. "
-                    "Se você já possui uma configurada no ambiente (.env), "
-                    "ela será usada automaticamente."
-                ),
-            )
-
-            with st.expander("Como obter a chave de acesso (passo a passo)"):
-                st.markdown(
-                    "1. Acesse [aistudio.google.com/apikey](https://aistudio.google.com/apikey)\n"
-                    "2. Faça login com sua conta Google\n"
-                    "3. Clique em **Criar chave de API**\n"
-                    "4. Copie o código gerado e cole no campo acima\n\n"
-                    "A chave é **gratuita** e não requer cartão de crédito."
-                )
-
-            # Chave digitada manualmente tem prioridade sobre a do ambiente
-            config["api_key"] = api_key_input.strip() if api_key_input.strip() else env_key
-        else:
-            config["base_url"] = env_local_url
-            config["model"] = os.getenv("LOCAL_LLM_MODEL", "").strip()
-
-            st.markdown(
-                '<div class="sidebar-instructions">'
-                "Usando o <b>LLM local</b> configurado na rede interna. "
-                "Só funciona quando este app roda dentro da rede que alcança "
-                "o servidor (não funciona no deploy público do Streamlit Cloud)."
-                "</div>",
-                unsafe_allow_html=True,
-            )
-
-            if config["base_url"]:
-                st.success(f"Servidor: {config['base_url']}")
-            else:
-                st.error(
-                    "Variável LOCAL_LLM_URL não configurada. "
-                    "Defina no .env (ex.: http://<ip-do-servidor>:1234/v1)."
-                )
-
-            if config["model"]:
-                st.caption(f"Modelo: {config['model']}")
-            else:
-                st.error(
-                    "Variável LOCAL_LLM_MODEL não configurada. "
-                    "Defina no .env (ex.: google/gemma-4)."
-                )
+        painel_llm()
 
         st.divider()
 
@@ -224,7 +153,7 @@ def _render_sidebar() -> dict:
         st.markdown("**Como funciona esta ferramenta?**")
         st.markdown(
             '<div class="sidebar-instructions">'
-            "<b>Passo 1</b> &mdash; Você configura o acesso (acima)<br>"
+            "<b>Passo 1</b> &mdash; Confira o acesso à IA (acima)<br>"
             "<b>Passo 2</b> &mdash; Envia o normativo (arquivo, texto ou link)<br>"
             "<b>Passo 3</b> &mdash; A IA analisa e gera o checklist automaticamente<br>"
             "<b>Passo 4</b> &mdash; Você revisa e baixa a planilha Excel pronta"
@@ -232,7 +161,6 @@ def _render_sidebar() -> dict:
             unsafe_allow_html=True,
         )
 
-        return config
 
 
 # ---------------------------------------------------------------------------
@@ -361,6 +289,8 @@ def _render_result_column() -> None:
     st.success(
         f"Checklist gerado com sucesso: **{len(items)} itens** encontrados."
     )
+    if st.session_state.get("llm_origem"):
+        st.caption(f"Gerado por {st.session_state['llm_origem']}")
 
     # Preview em tabela -- selecionar colunas mais relevantes para leitura rápida
     preview_keys = ["artigo", "requisito", "probabilidade", "impacto", "nivel", "responsavel"]
@@ -415,7 +345,7 @@ def _render_result_column() -> None:
 # ---------------------------------------------------------------------------
 # Lógica principal de geração
 # ---------------------------------------------------------------------------
-def _generate(source: str | bytes, source_type: str, llm_config: dict, extra_prompt: str) -> None:
+def _generate(source: str | bytes, source_type: str, extra_prompt: str) -> None:
     """Executa o pipeline completo: extração -> LLM -> validação -> Excel.
 
     Atualiza st.session_state com os resultados ou mensagem de erro.
@@ -424,6 +354,7 @@ def _generate(source: str | bytes, source_type: str, llm_config: dict, extra_pro
     st.session_state["checklist_items"] = None
     st.session_state.excel_bytes = None
     st.session_state.error = None
+    st.session_state["llm_origem"] = None
 
     try:
         # 1. Extrair texto da fonte
@@ -444,7 +375,8 @@ def _generate(source: str | bytes, source_type: str, llm_config: dict, extra_pro
             "Etapa 2 de 3: Analisando o normativo com inteligência artificial... "
             "Isso pode levar de 1 a 3 minutos. Por favor, aguarde."
         ):
-            raw_items = generate_checklist(text, extra_prompt=extra_prompt, **llm_config)
+            raw_items, origem = generate_checklist(text, extra_prompt=extra_prompt)
+        st.session_state["llm_origem"] = origem
 
         # 3. Validar e numerar itens
         with st.spinner("Etapa 3 de 3: Organizando os itens e gerando a planilha..."):
@@ -465,17 +397,6 @@ def _generate(source: str | bytes, source_type: str, llm_config: dict, extra_pro
         st.session_state["checklist_items"] = items
         st.session_state.excel_bytes = excel_bytes
 
-    except RateLimitError:
-        st.session_state.error = (
-            "O serviço de inteligência artificial está temporariamente sobrecarregado. "
-            "Aguarde cerca de 30 segundos e tente novamente."
-        )
-    except TokenLimitError:
-        st.session_state.error = (
-            "O normativo é muito extenso para ser processado de uma só vez. "
-            "Sugestão: divida o texto em partes menores (por capítulo ou seção) "
-            "e gere o checklist de cada parte separadamente."
-        )
     except LLMError as exc:
         st.session_state.error = (
             f"Ocorreu um problema na análise do texto: {exc}"
@@ -512,7 +433,7 @@ def main() -> None:
     st.divider()
 
     # Sidebar
-    llm_config = _render_sidebar()
+    _render_sidebar()
 
     # Layout em duas colunas
     col_input, col_result = st.columns([1, 1], gap="large")
@@ -528,10 +449,7 @@ def main() -> None:
         source, source_type, extra_prompt = _render_input_column()
 
         # Condições para habilitar o botão
-        if llm_config["provider"] == "gemini":
-            has_access = bool(llm_config["api_key"])
-        else:
-            has_access = bool(llm_config["base_url"]) and bool(llm_config["model"])
+        has_access = llm_cadeia.disponivel()
         has_input = source is not None and source_type != ""
 
         # Botão de geração
@@ -545,7 +463,8 @@ def main() -> None:
         # Mensagens de orientação sobre o botão desabilitado
         if not has_access:
             st.warning(
-                "Para continuar, configure o acesso ao modelo de IA na barra lateral "
+                "Nenhum modelo de IA está configurado. Para continuar, informe sua "
+                "própria chave de IA na barra lateral "
                 "(clique na seta no canto superior esquerdo para abrir).",
                 icon="\u2190",
             )
@@ -558,7 +477,9 @@ def main() -> None:
 
     # Executar geração se o botão foi clicado
     if generate_clicked and has_access and has_input:
-        _generate(source, source_type, llm_config, extra_prompt)
+        _generate(source, source_type, extra_prompt)
+        # Roda de novo para a barra lateral mostrar "Última resposta" (quem gerou).
+        st.rerun()
 
     with col_result:
         st.markdown(
@@ -579,79 +500,32 @@ def main() -> None:
 # ---------------------------------------------------------------------------
 _APP_VERSION = "1.1"
 
-# Parâmetros da estimativa de tempo manual (minutos por etapa, por item)
-_TIME_BREAKDOWN = {
-    "Leitura e interpretação do dispositivo legal": 2.0,
-    "Identificação do requisito de conformidade": 1.0,
-    "Avaliação de probabilidade e impacto (MCGR)": 1.5,
-    "Cálculo de criticidade e classificação de nível": 1.0,
-    "Definição do responsável pelo atendimento": 0.5,
-    "Elaboração de sugestão de mitigação": 1.5,
-    "Identificação de evidência comprobatória": 1.0,
-    "Preenchimento e formatação na planilha": 0.5,
-}
-_MINUTES_PER_ITEM = sum(_TIME_BREAKDOWN.values())  # 8.0
-
-
-def _format_time(total_min: float) -> str:
-    """Formata minutos em string legível (ex: '1h52min', '45 min')."""
-    total_min = int(total_min)
-    if total_min >= 60:
-        hours = total_min // 60
-        mins = total_min % 60
-        return f"{hours}h{mins:02d}min" if mins else f"{hours}h"
-    return f"{total_min} min"
+# Estimativa de tempo manual (recurso tempo_economizado do nuati-framework): cada etapa que
+# um profissional faria à mão, para cada item do checklist, com os minutos de cada vez.
+# As 8 etapas somam 9,0 min por item (o comentário antigo dizia 8,0; o número exibido era
+# 9,0 × itens e continua o mesmo).
+_ETAPAS_MANUAIS = [
+    ("Ler e interpretar cada dispositivo legal", 2.0),
+    ("Identificar o requisito de conformidade de cada item", 1.0),
+    ("Avaliar probabilidade e impacto de cada item (MCGR)", 1.5),
+    ("Calcular a criticidade e classificar o nível de cada item", 1.0),
+    ("Definir o responsável pelo atendimento de cada item", 0.5),
+    ("Elaborar a sugestão de mitigação de cada item", 1.5),
+    ("Identificar a evidência comprobatória de cada item", 1.0),
+    ("Preencher e formatar cada item na planilha", 0.5),
+]
 
 
 def _render_footer() -> None:
-    """Renderiza o rodapé com versão, autor e estimativa de tempo economizado."""
+    """Renderiza o rodapé com a estimativa de tempo economizado e a assinatura da Câmara."""
     items = st.session_state.get("checklist_items")
     num_items = len(items) if items else 0
 
     st.markdown("---")
 
-    if num_items > 0:
-        total_min = num_items * _MINUTES_PER_ITEM
-        time_str = _format_time(total_min)
-
-        st.markdown(
-            f'<div style="text-align:center; margin-bottom:8px; '
-            f'color:#2F7958; font-size:0.95rem;">'
-            f'<b>{num_items} itens</b> gerados &mdash; '
-            f'tempo manual estimado: <b>{time_str}</b> de trabalho economizado'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
-
-        with st.expander("Como calculamos essa estimativa?"):
-            st.markdown(
-                "A estimativa considera o tempo que um profissional levaria "
-                "para executar **manualmente** cada etapa da análise, "
-                "**para cada item** do checklist:"
-            )
-
-            # Tabela com a memória de cálculo
-            breakdown_rows = ""
-            for etapa, minutos in _TIME_BREAKDOWN.items():
-                total_etapa = minutos * num_items
-                breakdown_rows += (
-                    f"| {etapa} | {minutos:.1f} min | "
-                    f"{_format_time(total_etapa)} |\n"
-                )
-
-            st.markdown(
-                f"| Etapa | Por item | Total ({num_items} itens) |\n"
-                f"|:------|:--------:|:--------:|\n"
-                f"{breakdown_rows}"
-                f"| **Total** | **{_MINUTES_PER_ITEM:.1f} min** | "
-                f"**{time_str}** |"
-            )
-
-            st.caption(
-                "Estimativa baseada em experiência de trabalhos de auditoria "
-                "de conformidade normativa. O tempo real pode variar conforme "
-                "a complexidade do normativo e a experiência do profissional."
-            )
+    # Sem descontar o tempo da ferramenta (automatico_min=0), como a conta anterior.
+    est = estimar([Etapa(descricao, num_items, minutos) for descricao, minutos in _ETAPAS_MANUAIS])
+    mostrar_tempo_economizado(est)
 
     cd_brand.rodape()
     st.markdown(

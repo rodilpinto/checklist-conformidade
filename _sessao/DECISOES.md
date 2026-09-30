@@ -1,6 +1,6 @@
 # DECISOES — checklist-conformidade
 
-<!-- last_updated: 2026-09-25 -->
+<!-- last_updated: 2026-09-29 -->
 
 ## Tomadas
 
@@ -23,6 +23,14 @@
 - **2026-09-25** ✅ **MVP:** hospedagem no Streamlit Cloud até o servidor interno ficar pronto; só então o LLM local passa a ser usado (Rodrigo). Modelo `gemini-3.5-flash-lite`, o mesmo do buscador, com a chave gratuita do Rodrigo em `GEMINI_API_KEY`. Sem divisão em lotes e sem sequência de chaves, para não correr risco de regressão (Rodrigo). O trabalho pausado está em `pausado-2026-09-25-lotes-e-erros.patch`.
 - **2026-09-25** ✅ O Rodrigo tornou o app **público** no Streamlit Cloud.
 - **2026-09-25** ✅ A sequência de provedores e chaves (LLM local → chave NUATI → chave Rodrigo → chave do usuário) vira um **módulo comum** para todos os MVPs. Será desenvolvido **na sessão do buscador-normativos** e depois trazido para cá (Rodrigo).
+- **2026-09-28** ✅ A versão no ar fica **congelada** para a reunião de 29/09: `master` e `github/master` não recebem push. Tag anotada `pre-llm-cadeia` no `eab1039`. A adoção do `llm_cadeia` vai para a branch `feat/llm-cadeia`, com deploy num **segundo app** do Streamlit Cloud (Rodrigo).
+- **2026-09-28** ✅ ~~Limpar os dados internos do `llm_cadeia` na origem antes de publicar~~ (decisão revista no mesmo dia). **O Rodrigo decidiu publicar a cópia como está:** avaliou que o IP privado do LLM local e o login da conta Google são pouco sensíveis e considera o buscador já público (⚠ em 28/09, o app buscador-normativos.streamlit.app era público, mas o repositório no GitHub respondia 404 sem login). A trava do `publicar_github.sh` ganhou uma exceção só para esses dois padrões dentro de `llm_cadeia/`; os demais padrões continuam barrados em todo o snapshot. O script passou a aceitar `--ramo <branch>`.
+- **2026-09-28** ✅ Adotado o fluxo de versões: estável no `master`, teste no v2, trabalho em branches (Rodrigo). ⚠ **Superado em 29/09 pela D-C22** (`main` + `homologacao`); ver a entrada de 29/09 abaixo.
+- **2026-09-28** ✅ Bloco padrão de *secrets* (igual em todos os apps) inclui também `GEMINI_MODEL = "gemini-3.5-flash-lite"`, lido pelo código antigo e ignorado pelo `llm_cadeia`. ⚠ `GEMINI_MODELS` (plural) **não** entra no bloco padrão, porque substituiria a lista de modelos da cadeia. **Exceção temporária:** no app principal (código antigo, sem sequência de chaves), `GEMINI_API_KEY` recebe o valor da chave `_2`, até o merge de `feat/llm-cadeia` (Rodrigo). (29/09: o "merge" passa a ser o passe por app da D-C23.)
+- **2026-09-28** ✅ Consequência da adoção: o modelo padrão do Gemini deixa de ser o `_MODEL_NAME = "gemini-3.6-flash"` do `lib/llm.py` e passa a ser a lista `GEMINI_MODELOS_PADRAO` do `llm_cadeia` (troca por `GEMINI_MODELS`). As variáveis `LOCAL_LLM_URL`/`LOCAL_LLM_MODEL`/`GEMINI_MODEL` viram `LLM_BASE_URL`/`LLM_MODEL`/`GEMINI_MODELS`. O botão "Gemini ou local" da barra lateral sai: a ordem da cadeia decide quem atende.
+
+- **2026-09-29** ✅ **Pausa para o framework central** (Rodrigo). As decisões D-C22 (dois ambientes: `main` estável e `homologacao` playground; o servidor do Nuati espelha `main`), D-C23 (framework em repositório próprio e privado, `rodilpinto/nuati-framework`, origem única do que é comum, distribuído por copiar e colar; um passe por app adota o framework e migra os ambientes) e D-C24 (`llm_cadeia/` congelada; defeito vira pedido à sessão do framework) moram no ledger compartilhado `buscador-normativos/_DECISOES-PENDENTES.md` (`origin/master` @ `ab8011b`). Aqui fica só o ponteiro.
+- **2026-09-29** ✅ **Framework sem scripts** (Rodrigo): "vamos abandonar essa ideia de scripts. vamos começar com copia e cola e log de versões mesmo". Com isso e com a D-C23, fica **superado** o repositório `Nuati-SECIN/framework` que esta sessão criou em 28/09 (spec e plano de `replicar.py`/`verificar.py`, revisão adversária). Ele guarda o levantamento entregue para a sessão nova (`LEVANTAMENTO-FRAMEWORK.md` @ `4c751ba`). **Destino decidido pela D-C25 (opção a, Rodrigo, 29/09): vira espelho interno** do `rodilpinto/nuati-framework`.
 
 ## Evidência dos testes (não é decisão)
 
@@ -41,13 +49,13 @@ Todos os números ficam em **`tests/AVALIACAO_MODELOS.md`** (fonte única). Leit
 
 ## Em aberto (só o Rodrigo decide)
 
-- **App público com chave gratuita:** colocar o aviso "não envie documentos internos" ou voltar a deixá-lo privado? No plano gratuito, o Google pode usar os textos enviados.
+- **App público com chave gratuita:** colocar o aviso "não envie documentos internos" ou voltar a deixá-lo privado? No plano gratuito, o Google pode usar os textos enviados. (29/09: a **D-C26** do ledger compartilhado decidiu manter os apps públicos, com o faturamento conferido **desligado** nos dois projetos Google; ela cobre cota e custo. O aviso sobre o uso dos textos no nível gratuito continua em aberto aqui.)
 - **Usar a chave paga da Anthropic (o Rodrigo tem créditos) ou habilitar o faturamento do Gemini?** Resolveria cota e uso dos dados, mas o app não tem provider Claude (é código novo). **Bloqueia:** nada no MVP; entra no desenho do módulo comum.
 - (decidido em 25/09: Streamlit Cloud até o servidor interno ficar pronto) **Onde hospedar a versão funcional agora.**
   - (a) Streamlit Cloud (URL atual), paliativo: só com o Gemini, sujeito à cota e ao uso dos dados do nível gratuito (ou pago, se habilitado).
   - (b) Servidor na rede da Câmara: funciona com o Gemma, sem custo e sem os dados saírem da rede, mas depende do levantamento de padrão de deploy.
   - (Não bloqueia mais nada: o MVP está no ar no Streamlit Cloud.)
-- **Habilitar faturamento no projeto Google da unidade?** É condição para usar o Gemini em produção, tanto pela cota (20 requisições/dia/modelo) quanto pelo uso dos dados. Talvez envolva as áreas de contratação e TI. **Bloqueia:** a opção (a) acima para uso real e a comparação com o Gemini nos testes.
+- **Habilitar faturamento no projeto Google da unidade?** É condição para usar o Gemini em produção, tanto pela cota (20 requisições/dia/modelo) quanto pelo uso dos dados. Talvez envolva as áreas de contratação e TI. **Bloqueia:** a opção (a) acima para uso real e a comparação com o Gemini nos testes. ⚠ Ligar o faturamento reabre a D-C26.
 - 📝 Confirmar com a Comid (publicidade@camara.leg.br) se ferramentas internas precisam de autorização prévia para usar a marca (MIV p.20-21). **Bloqueia:** nada técnico; é conformidade do `branding/`.
 - 📝 Confirmar a grafia e a hierarquia oficiais das unidades na assinatura do rodapé. **Bloqueia:** a versão final do `branding/`.
 - Revisar as adaptações digitais do `branding/` (itens 📝 acima). **Bloqueia:** aplicar o `branding/` nos outros apps.

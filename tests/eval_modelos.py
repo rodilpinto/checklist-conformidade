@@ -33,18 +33,20 @@ load_dotenv(ROOT / ".env", override=True)
 
 import openpyxl  # noqa: E402
 
+import llm_cadeia  # noqa: E402
 import lib.llm as llm  # noqa: E402
 
 FONTE = ROOT / "tests" / "fixtures" / "portaria_227_2025.txt"
 GABARITO = ROOT / "gerador-checklists" / "checklists" / "Checklist_Portaria_227_2025_IA_v1.08.xlsx"
-TIMEOUT_APP_SEGUNDOS = 300  # timeout real do app para o LLM local
+TIMEOUT_APP_SEGUNDOS = 300  # timeout padrao do llm_cadeia para o LLM local (LLM_TIMEOUT_S)
 
+# Cada modelo = ajustes do llm_cadeia no ambiente (LLM_SOMENTE isola um provedor; ver
+# llm_cadeia/README.md). Qualquer outro nome de provedor da cadeia (gemini-2, groq-2, ...)
+# tambem funciona: vira LLM_SOMENTE=<nome>.
 MODELOS = {
-    "gemma": lambda: dict(provider="local", base_url=os.getenv("LOCAL_LLM_URL", ""),
-                          model=os.getenv("LOCAL_LLM_MODEL", "")),
-    "gemma-norazao": lambda: dict(provider="local", base_url=os.getenv("LOCAL_LLM_URL", ""),
-                                  model=os.getenv("LOCAL_LLM_MODEL", "")),
-    "gemini": lambda: dict(provider="gemini", api_key=os.getenv("GEMINI_API_KEY", "")),
+    "gemma": {"LLM_SOMENTE": "local", "LLM_DISABLE_THINKING": ""},
+    "gemma-norazao": {"LLM_SOMENTE": "local", "LLM_DISABLE_THINKING": "1"},
+    "gemini": {"LLM_SOMENTE": "gemini", "LLM_DISABLE_THINKING": ""},
 }
 
 TERMO_OFICIAL = "encarregado de protecao de dados pessoais"
@@ -139,15 +141,17 @@ def dividir(texto: str, modo: str, lote_tokens: int) -> list[str]:
 
 
 def executar(nome: str, texto: str, modo: str, lote_tokens: int = 1500) -> dict:
-    cfg = MODELOS[nome]()
-    os.environ["LOCAL_LLM_DISABLE_THINKING"] = "1" if nome == "gemma-norazao" else ""
+    os.environ.update(MODELOS.get(nome, {"LLM_SOMENTE": nome, "LLM_DISABLE_THINKING": ""}))
+    llm_cadeia.recarregar()
     blocos = dividir(texto, modo, lote_tokens)
-    itens, erros, tempos, retentativas = [], [], [], 0
+    itens, erros, tempos, retentativas, origens = [], [], [], 0, []
     for i, bloco in enumerate(blocos, 1):
         t0 = time.time()
         for tentativa in range(1, 4):
             try:
-                itens.extend(llm.generate_checklist(bloco, **cfg))
+                novos, origem = llm.generate_checklist(bloco)
+                itens.extend(novos)
+                origens.append(origem)
                 break
             except Exception as exc:  # registrar e seguir: robustez e uma das metricas
                 causa = f"{exc} | causa: {exc.__cause__}" if exc.__cause__ else str(exc)
@@ -163,6 +167,7 @@ def executar(nome: str, texto: str, modo: str, lote_tokens: int = 1500) -> dict:
         "itens": llm.validate_items(itens),
         "erros": erros,
         "retentativas": retentativas,
+        "origens": sorted(set(origens)),
         "blocos": len(blocos),
         "tempo_total_s": round(sum(tempos), 1),
         "tempo_max_bloco_s": round(max(tempos), 1),
@@ -304,6 +309,7 @@ def avaliar(resultado: dict, gabarito: list[dict], fonte_norm: str) -> dict:
         "sucesso": not resultado["erros"],
         "erros": resultado["erros"],
         "retentativas": resultado.get("retentativas", 0),
+        "origens": resultado.get("origens", []),
         "n_itens": len(itens),
         "tempo_total_s": resultado["tempo_total_s"],
         "tempo_max_bloco_s": resultado["tempo_max_bloco_s"],
@@ -425,7 +431,7 @@ def main() -> None:
         importar(Path(args.importar), args.nome, args.lote_tokens)
         return
 
-    llm._LOCAL_TIMEOUT_SECONDS = 1800  # medir o tempo real em vez de cortar no timeout do app
+    os.environ["LLM_TIMEOUT_S"] = "1800"  # medir o tempo real em vez de cortar no timeout do app
     fonte = carregar_fonte()
     fonte_norm = norm(fonte)
     gabarito = carregar_gabarito()

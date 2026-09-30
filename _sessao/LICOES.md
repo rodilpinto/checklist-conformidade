@@ -2,6 +2,17 @@
 
 <!-- problema → causa → correção → regra; mais recentes no topo -->
 
+- **2026-09-29** **Decisão tomada por uma sessão em outra máquina não aparece no checkout local:** as D-C22 a D-C24 foram escritas pela sessão do buscador na máquina "Rodrigo"; aqui, o `buscador-normativos/_DECISOES-PENDENTES.md` local estava atrás (`3edba4d`) e não tinha nenhuma delas. Correção: `git -C ../buscador-normativos fetch origin` e ler com `git -C ../buscador-normativos show origin/master:_DECISOES-PENDENTES.md`, sem mexer no checkout de lá. Regra: antes de ler o ledger compartilhado, faça o fetch.
+
+- **2026-09-28** **Padronizar os *secrets* quebrou o app congelado sem nenhuma mudança de código:** o app principal usa nomes antigos (`GEMINI_MODEL`, uma chave só) e perdeu o modelo configurado. Regra: antes de trocar os *secrets* de um app, confira quais variáveis o código **daquele branch** lê (`grep getenv`/`st.secrets`). Sintoma que denuncia: traceback do ícone "←" (só acontece sem chave) ou a volta da mensagem genérica "Erro na comunicacao com o modelo Gemini".
+
+- **2026-09-28** **"Travou" na nuvem pode ser só a cadeia rodando:** com a Portaria 227 inteira, o v2 ficou cerca de 7,5 min em "Etapa 2", passou por 503 em todos os modelos da chave sem sufixo e terminou com o `gemini-2`. O log do app ("Manage app") mostra cada falha (`LLM <provedor>/<modelo> falhou ...`); só quem atende não gera linha. Regra: antes de concluir que travou, leia o log. Mesmo assim, o transporte Gemini não tem tempo limite (pedido 5 à origem).
+- **2026-09-28** **Provedor configurado e inalcançável custa pouco:** na nuvem, o `local` falha por tempo de conexão em 5 s e fica fora por 5 min por processo. Por isso os *secrets* podem ser iguais em todos os apps (decisão do Rodrigo).
+
+- **2026-09-28** **O Gemma pelo `llm_cadeia` estoura o tempo limite:** o módulo espera 120 s e sempre deixa o raciocínio ligado. Com o prompt do app e 5.000 caracteres da Portaria 227 (2.944 tokens de entrada), foram 154 s e 3.669 tokens de saída com raciocínio, contra 54 s e 877 tokens sem. Uma chamada mínima (`sistema=` + `json=True`) respondeu em 7,7 s com JSON que passa em `json.loads`. Regra: até a origem corrigir, na prática o `local` só atende pedidos pequenos. Pedido registrado no `TODO.md`.
+- **2026-09-28** **A rede da Câmara deixa passar todos os provedores externos:** no `python -m llm_cadeia` desta máquina, responderam gemini, gemini-2, groq-2, cerebras-2 e openrouter-2 (falhas só de 503, 404, 500 e 429 do próprio provedor, nenhuma de proxy). groq, cerebras e openrouter sem sufixo não aparecem porque as chaves estão vazias no `~/.streamlit/secrets.toml`.
+- **2026-09-28** **O `st.secrets` lê o `~/.streamlit/secrets.toml` global mesmo fora do `streamlit run`**, e o `llm_cadeia` dá prioridade a ele sobre as variáveis de ambiente. Para isolar um provedor num script de teste, é preciso bloquear o import (`sys.modules["streamlit"] = None`) antes de importar o módulo. Receita completa: num script, `sys.modules["streamlit"] = None`; ler o `~/.streamlit/secrets.toml` com `tomllib` e copiar para `os.environ` só as chaves do provedor desejado (ex.: `LLM_BASE_URL` e `LLM_MODEL`); `os.environ["LLM_ORDEM"] = "local"`; só então `import llm_cadeia` e chamar `gerar(...)`; conferir `r.origem`.
+
 - **2026-09-25** **Compatibilidade dos modelos Gemini com chaves novas (plano gratuito, testado em 23 e 25/09):**
 
   | Modelo | Situação | `thinking_budget=0` |

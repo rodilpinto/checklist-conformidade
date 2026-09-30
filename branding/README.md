@@ -6,12 +6,16 @@ Guia de referência para **todos os aplicativos** do Núcleo de Auditoria de TI.
 - **Arquivos oficiais da marca:** `RGB_Logotipo_Camara_dos_Deputados.zip`, na mesma página. Os SVGs estão em [`assets/logos/`](assets/logos/).
 - **Valores legíveis por máquina:** [`tokens.json`](tokens.json) (cada valor traz a fonte e o status).
 
-## Como apontar um app para este guia
+**Versão 1.0.0** · **Origem:** `github.com/rodilpinto/nuati-framework` (privado), pasta `branding/`. Histórico:
+[`CHANGELOG.md`](CHANGELOG.md). Regras de cópia e registro de onde há cópias: README da raiz do framework.
 
-1. No `README.md` ou `CLAUDE.md` do app, adicione:
-   > Identidade visual: seguir `branding/README.md` do repo `Nuati-SECIN/checklist-conformidade` (GitLab interno da Câmara, pasta `branding/`; URL em `_sessao/INTERNO.md`).
-2. **App Streamlit:** copie a pasta `branding/` para a raiz do app (ou use `git subtree`) e:
-   - copie `branding/streamlit_cd/config.toml` para `.streamlit/config.toml`;
+## Como adotar num app
+
+1. **Copie a pasta inteira** `branding/` para a raiz do app (ao lado do `app.py`), sem editar nada, e registre a cópia
+   no README da raiz do framework ("Registro de cópias").
+2. **App Streamlit:**
+   - copie `branding/streamlit_cd/config.toml` para `.streamlit/config.toml` (se o app já tiver um, junte as seções:
+     o `[theme]` vem daqui);
    - no `app.py`:
      ```python
      from branding.streamlit_cd import cd_brand
@@ -21,6 +25,9 @@ Guia de referência para **todos os aplicativos** do Núcleo de Auditoria de TI.
      cd_brand.rodape()
      ```
 3. **App web (HTML/CSS):** importe `branding/tokens.css` e use as variáveis `--cd-*`.
+4. Rode, da pasta que contém `branding/`: `python -m pytest branding -q`.
+
+Dependências: `streamlit` (só para `streamlit_cd/`); o resto é CSS, JSON, SVG e PNG.
 
 Ao atualizar o guia, atualize primeiro o `tokens.json` e depois `tokens.css` e `streamlit_cd/config.toml`.
 

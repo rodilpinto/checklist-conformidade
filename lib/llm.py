@@ -1,38 +1,35 @@
 """
-llm.py -- Integracao com LLMs (Google Gemini ou servidor local OpenAI-compatible)
-para geracao de checklists normativos.
+llm.py -- Geracao de checklists normativos via LLM, pela cadeia de provedores
+``llm_cadeia`` (pasta ao lado do app.py; ver llm_cadeia/README.md).
 
 Funcoes principais:
-    - generate_checklist: envia o texto do normativo ao provider escolhido
-      (Gemini ou LLM local) e obtem o checklist em JSON.
+    - generate_checklist: envia o texto do normativo a cadeia de provedores
+      (chave do usuario -> LLM local -> Gemini -> Groq -> ...) e obtem o checklist em JSON.
     - validate_items: valida, sanitiza e numera os itens retornados pelo LLM.
 
 Uso:
     from lib.llm import generate_checklist, validate_items
 
-    raw_items = generate_checklist(texto_normativo, provider="gemini", api_key="...")
-    raw_items = generate_checklist(texto_normativo, provider="local",
-                                    base_url="http://<ip-do-servidor>:1234/v1",
-                                    model="google/gemma-4")
+    raw_items, origem = generate_checklist(texto_normativo)
     items = validate_items(raw_items)
 
+Quem responde e decidido pelos segredos (LLM_BASE_URL/LLM_MODEL para o LLM local,
+GEMINI_API_KEY, GROQ_API_KEY etc.; tabela em llm_cadeia/README.md) e pela chave
+que o usuario digitar na barra lateral (painel_llm).
+
 Dependencias:
-    - google-genai (provider "gemini")
-    - requests (provider "local")
-    - lib.prompt_templates (SYSTEM_PROMPT, build_prompt, REQUIRED_FIELDS, VALID_LEVELS)
+    - llm_cadeia (requests; google-genai para os provedores Gemini)
+    - lib.prompt_templates (build_prompt, REQUIRED_FIELDS, VALID_LEVELS)
 """
 
 from __future__ import annotations
 
 import json
 import logging
-import os
 import re
-from typing import Any, NoReturn
+from typing import Any
 
-import requests
-from google import genai
-from google.genai import types
+from llm_cadeia import gerar
 
 from lib.prompt_templates import (
     REQUIRED_FIELDS,
@@ -45,14 +42,14 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Constantes internas
 # ---------------------------------------------------------------------------
-_MODEL_NAME: str = "gemini-3.6-flash"
-
 # Tamanho maximo (em caracteres) que enviamos de uma vez ao modelo.
 _CHAR_WARN_THRESHOLD: int = 500_000
 
-# Timeout (segundos) para chamadas ao LLM local -- normativos grandes podem
-# levar bastante tempo em hardware sem GPU dedicada.
-_LOCAL_TIMEOUT_SECONDS: int = 300
+_TEMPERATURE: float = 0.1
+
+# Teto de tokens da resposta. Um checklist completo e longo (Portaria 227/2025:
+# 91 itens); o llm_cadeia aplica um piso de 4096.
+_MAX_TOKENS: int = 32_768
 
 
 # ---------------------------------------------------------------------------
@@ -62,52 +59,30 @@ class LLMError(Exception):
     """Erro base para falhas na comunicacao com o LLM."""
 
 
-class RateLimitError(LLMError):
-    """Limite de requisicoes excedido na API do Gemini."""
-
-
-class TokenLimitError(LLMError):
-    """Texto excede o limite de tokens do modelo."""
-
-
 class JSONParseError(LLMError):
     """Resposta do LLM nao e JSON valido."""
 
 
 # ---------------------------------------------------------------------------
-# Funcao principal: gerar checklist via Gemini
+# Funcao principal: gerar checklist pela cadeia de provedores
 # ---------------------------------------------------------------------------
-def generate_checklist(
-    text: str,
-    api_key: str = "",
-    extra_prompt: str = "",
-    provider: str = "gemini",
-    base_url: str = "",
-    model: str = "",
-) -> list[dict[str, Any]]:
-    """Envia o texto de um normativo ao LLM configurado e retorna o checklist em JSON.
+def generate_checklist(text: str, extra_prompt: str = "") -> tuple[list[dict[str, Any]], str]:
+    """Envia o texto de um normativo a cadeia de LLMs e retorna o checklist em JSON.
 
     Args:
         text: Texto integral do normativo (lei, portaria, decreto, etc.).
-        api_key: Chave de API do Google Gemini (obrigatoria quando provider="gemini").
         extra_prompt: Instrucoes adicionais do usuario para o LLM (opcional).
-        provider: "gemini" (padrao) ou "local" (servidor OpenAI-compatible,
-            ex.: LM Studio, na rede interna).
-        base_url: URL base do servidor local (obrigatoria quando provider="local"),
-            ex.: "http://<ip-do-servidor>:1234/v1".
-        model: Nome do modelo no servidor local (obrigatorio quando provider="local"),
-            ex.: "google/gemma-4".
 
     Returns:
-        Lista de dicionarios com os itens do checklist (ainda sem validacao
-        completa -- use validate_items() em seguida).
+        (itens, origem): lista de dicionarios com os itens do checklist (ainda sem
+        validacao completa -- use validate_items() em seguida) e o "provedor (modelo)"
+        que respondeu.
 
     Raises:
-        ValueError: Se text ou os parametros obrigatorios do provider estiverem vazios.
-        RateLimitError: Se a API retornar erro 429 (limite de requisicoes).
-        TokenLimitError: Se o texto exceder o limite do modelo.
+        ValueError: Se o texto estiver vazio.
         JSONParseError: Se a resposta nao puder ser parseada como JSON.
-        LLMError: Para qualquer outro erro na comunicacao com a API.
+        LLMError: Se nenhum provedor responder ou a resposta vier vazia; a mensagem
+            lista as tentativas (nunca contem chave).
     """
     if not text or not text.strip():
         raise ValueError("O texto do normativo nao pode estar vazio.")
@@ -121,128 +96,19 @@ def generate_checklist(
 
     system_instruction = build_prompt(extra_prompt)
 
-    if provider == "local":
-        raw_text = _call_local_llm(text, system_instruction, base_url, model)
-    elif provider == "gemini":
-        raw_text = _call_gemini(text, system_instruction, api_key)
-    else:
-        raise ValueError(f"Provider desconhecido: '{provider}'. Use 'gemini' ou 'local'.")
+    r = gerar(text, sistema=system_instruction, json=True,
+              temperatura=_TEMPERATURE, max_tokens=_MAX_TOKENS)
 
-    if not raw_text or not raw_text.strip():
-        raise LLMError(
-            "O modelo retornou uma resposta vazia. "
-            "Tente novamente ou reduza o tamanho do normativo."
-        )
+    if r.texto is None:
+        if r.origem:
+            raise LLMError(
+                f"O modelo {r.origem} retornou uma resposta vazia. "
+                "Tente novamente ou reduza o tamanho do normativo."
+            )
+        tentativas = "\n".join(f"- {t}" for t in r.tentativas) or "- nenhum provedor de IA configurado"
+        raise LLMError("Nenhum modelo de IA respondeu. Tentativas:\n\n" + tentativas)
 
-    return _parse_json_response(raw_text)
-
-
-# ---------------------------------------------------------------------------
-# Provider: Google Gemini
-# ---------------------------------------------------------------------------
-def _call_gemini(text: str, system_instruction: str, api_key: str) -> str:
-    """Chama a API do Gemini e retorna o texto bruto da resposta."""
-    api_key = api_key.strip() if api_key else ""
-    if not api_key:
-        raise ValueError(
-            "A chave de API do Gemini e obrigatoria. "
-            "Informe no campo da sidebar ou configure a variavel GEMINI_API_KEY."
-        )
-
-    if not api_key.startswith(("AIza", "AQ.")) or len(api_key) < 20:
-        raise LLMError(
-            "Formato de chave de API invalido. "
-            "A chave do Google Gemini deve comecar com 'AIza' ou 'AQ.'. "
-            "Verifique sua chave em https://aistudio.google.com/apikey."
-        )
-
-    client = genai.Client(api_key=api_key)
-    modelo = os.getenv("GEMINI_MODEL", "").strip() or _MODEL_NAME
-
-    config = types.GenerateContentConfig(
-        system_instruction=system_instruction,
-        response_mime_type="application/json",
-        temperature=0.1,
-        # modelos "lite" recusam thinking_budget (erro 400)
-        thinking_config=None if "lite" in modelo else types.ThinkingConfig(thinking_budget=0),
-    )
-
-    try:
-        response = client.models.generate_content(
-            model=modelo,
-            contents=text,
-            config=config,
-        )
-        return response.text
-    except LLMError:
-        raise
-    except Exception as exc:
-        _handle_api_error(exc)
-
-
-# ---------------------------------------------------------------------------
-# Provider: LLM local (servidor OpenAI-compatible, ex.: LM Studio)
-# ---------------------------------------------------------------------------
-def _call_local_llm(text: str, system_instruction: str, base_url: str, model: str) -> str:
-    """Chama um servidor LLM local (API compativel com OpenAI) e retorna o texto bruto."""
-    base_url = base_url.strip() if base_url else ""
-    model = model.strip() if model else ""
-
-    if not base_url:
-        raise ValueError(
-            "A URL do servidor LLM local e obrigatoria. "
-            "Configure a variavel LOCAL_LLM_URL (ex.: http://<ip-do-servidor>:1234/v1)."
-        )
-    if not model:
-        raise ValueError(
-            "O nome do modelo do LLM local e obrigatorio. "
-            "Configure a variavel LOCAL_LLM_MODEL (ex.: google/gemma-4)."
-        )
-
-    endpoint = base_url.rstrip("/") + "/chat/completions"
-
-    payload = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": system_instruction},
-            {"role": "user", "content": text},
-        ],
-        "temperature": 0.1,
-    }
-    if os.getenv("LOCAL_LLM_DISABLE_THINKING", "").strip() == "1":
-        payload["chat_template_kwargs"] = {"enable_thinking": False}
-
-    try:
-        response = requests.post(endpoint, json=payload, timeout=_LOCAL_TIMEOUT_SECONDS)
-    except requests.exceptions.ConnectionError as exc:
-        raise LLMError(
-            f"Nao foi possivel conectar ao LLM local em '{base_url}'. "
-            "Verifique se o servidor esta em execucao e acessivel pela rede "
-            "(ex.: precisa estar na rede interna da Camara)."
-        ) from exc
-    except requests.exceptions.Timeout as exc:
-        raise LLMError(
-            f"O LLM local em '{base_url}' nao respondeu a tempo "
-            f"({_LOCAL_TIMEOUT_SECONDS}s). O normativo pode ser grande demais "
-            "para o hardware disponivel; tente reduzi-lo."
-        ) from exc
-
-    if response.status_code == 429:
-        raise RateLimitError("Limite de requisicoes do LLM local excedido. Aguarde e tente novamente.")
-    if response.status_code >= 400:
-        raise LLMError(
-            f"Erro na comunicacao com o LLM local (HTTP {response.status_code}): "
-            f"{response.text[:300]}"
-        )
-
-    try:
-        data = response.json()
-        return data["choices"][0]["message"]["content"]
-    except (ValueError, KeyError, IndexError) as exc:
-        raise JSONParseError(
-            "Resposta do LLM local em formato inesperado (nao segue o padrao "
-            "OpenAI chat/completions)."
-        ) from exc
+    return _parse_json_response(r.texto), r.origem
 
 
 # ---------------------------------------------------------------------------
@@ -419,33 +285,3 @@ def _ensure_list(data: Any) -> list[dict[str, Any]]:
         f"Formato inesperado na resposta do modelo (tipo: {type(data).__name__}). "
         "Esperado: array JSON de objetos."
     )
-
-
-def _handle_api_error(exc: Exception) -> NoReturn:
-    """Classifica e relanca excecoes da API com mensagens em portugues."""
-    error_msg = str(exc).lower()
-
-    logger.debug("Erro bruto da API Gemini: %s", exc, exc_info=True)
-
-    if "429" in error_msg or "rate limit" in error_msg or "quota" in error_msg:
-        raise RateLimitError(
-            "Limite de requisicoes da API Gemini excedido. "
-            "Aguarde alguns minutos e tente novamente."
-        ) from exc
-
-    if any(term in error_msg for term in ("token", "context length", "too long", "max_tokens")):
-        raise TokenLimitError(
-            "O texto do normativo excede o limite de tokens do modelo. "
-            "Divida o normativo em partes menores."
-        ) from exc
-
-    if "api key" in error_msg or "api_key_invalid" in error_msg or "401" in error_msg or "403" in error_msg:
-        raise LLMError(
-            "Chave de API invalida ou expirada. Verifique sua chave "
-            "em https://aistudio.google.com/apikey."
-        ) from exc
-
-    raise LLMError(
-        "Erro na comunicacao com o modelo Gemini. "
-        "Verifique sua conexao com a internet e tente novamente."
-    ) from exc

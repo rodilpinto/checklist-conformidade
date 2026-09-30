@@ -1,0 +1,24 @@
+# Configuracao do publicar_snapshot para ESTE app. Copie para publicar_snapshot.conf na raiz do repo do app.
+# E um trecho de bash (lido com "source"). Este arquivo nunca vai para o snapshot publico.
+
+# Remoto do GitHub publico (o que o Streamlit Cloud le) e branch publicada sem --ramo.
+REMOTO="github"
+RAMO_PADRAO="main"
+
+# Caminhos que ficam SO no servidor interno (arquivo ou pasta).
+EXCLUIR=(
+  "_sessao/INTERNO.md"
+)
+
+# Trava: expressoes regulares (git grep -E) de dado interno. Se alguma aparecer no snapshot, nada e enviado.
+# Escreva o ponto como [.] para o padrao nao casar com o proprio texto do padrao.
+# Os valores reais (IP do servidor local, logins, host git interno, nomes de pessoas) estao no
+# segredos.exemplo.toml da raiz do nuati-framework.
+TRAVA=(
+  '10[.]0[.]0[.]1'          # exemplo: IP de servidor interno
+  'login[.]institucional'   # exemplo: login de conta
+  'git[.]interno[.]exemplo' # exemplo: servidor git interno
+)
+
+# Caminhos que a trava NAO olha (evite; cada excecao e um lugar por onde dado interno pode sair).
+TRAVA_EXCETO=()
