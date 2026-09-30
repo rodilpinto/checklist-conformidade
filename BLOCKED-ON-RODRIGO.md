@@ -4,7 +4,15 @@
 
 ## Abertas
 
-- 🟡 **Não padronizar os *secrets* do app principal até o passe por app.** Eles têm uma exceção desde o incidente de 28/09 (valor da chave `_2` em `GEMINI_API_KEY`, mais `GEMINI_MODEL`). *Por quê:* o código no ar lê só essas variáveis. *Desbloqueia:* nada; evita quebrar produção. Ver `_sessao/DECISOES.md` (28/09).
+- 🔴 **Passo 6 do passe por app (30/09): Streamlit Cloud** (share.streamlit.io; o Streamlit não troca a branch de um app, é apagar e recriar):
+  1. No app de produção (`checklist-conformidade.streamlit.app`, hoje na branch `master`): **copiar o texto dos Secrets** e guardar fora do navegador.
+  2. **Apagar** esse app e **recriá-lo com a mesma URL** (`checklist-conformidade`), repo `rodilpinto/checklist-conformidade`, branch **`main`** (se não aparecer na lista, digitar), arquivo `app.py`; colar **os mesmos Secrets** (sem mudança, com a exceção da `GEMINI_API_KEY` e o `GEMINI_MODEL`).
+  3. Criar o app **`checklist-conformidade-homologacao`**, mesmo repo, branch **`homologacao`**, arquivo `app.py`; Secrets = bloco padrão abaixo.
+  4. Não apagar o `-v2` ainda (passo 8, depois da conferência no ar).
+  *Desbloqueia:* passo 7 (conferir os dois apps no ar) e a evidência para a v0.1.0 do framework.
+  - Secrets da **produção** (código da `main` = `master`, lê `GEMINI_API_KEY`, `GEMINI_MODEL`, `LOCAL_LLM_URL`, `LOCAL_LLM_MODEL`, `LOCAL_LLM_DISABLE_THINKING`, `EXTRACTOR_TRUSTED_DOMAINS`): colar o que está lá hoje, sem mudança.
+  - Secrets da **homologação** (código da `homologacao`, lê os nomes do `llm_cadeia` 1.1.0 e `EXTRACTOR_TRUSTED_DOMAINS`). 📝 Atalho: copiar os Secrets do app `-v2`, que já usa esses nomes desde 28/09. O conteúdo esperado é o bloco padrão do `segredos.exemplo.toml` do framework: `LLM_BASE_URL` e `LLM_MODEL` (valores de lá; inalcançável na nuvem, custa 5 s por processo), `GEMINI_API_KEY`, `GEMINI_API_KEY_2`, `GROQ_API_KEY(_2)`, `CEREBRAS_API_KEY(_2)`, `OPENROUTER_API_KEY(_2)` (chaves, iguais às dos outros apps), `GEMINI_MODEL = "gemini-3.5-flash-lite"` (ignorado pelo `llm_cadeia`; inofensivo). **Não** incluir `GEMINI_MODELS` (plural). 📝 `LLM_DISABLE_THINKING = "1"` só no servidor do Nuati, onde o `local` é alcançável.
+- 🟡 **Não padronizar os *secrets* do app principal até a produção receber o framework** (numa rodada futura, depois da v0.1.0). Eles têm uma exceção desde o incidente de 28/09 (valor da chave `_2` em `GEMINI_API_KEY`, mais `GEMINI_MODEL`). *Por quê:* o código no ar lê só essas variáveis. *Desbloqueia:* nada; evita quebrar produção. Ver `_sessao/DECISOES.md` (28/09 e 30/09).
 - 🟢 **Acrescentar `GEMINI_MODEL = "gemini-3.5-flash-lite"` aos *secrets* dos outros apps** (bloco padrão). *Por quê:* apps com código antigo que leem `GEMINI_MODEL` voltam ao `gemini-3.6-flash` sem ela. *Desbloqueia:* *secrets* realmente uniformes. Ver `_sessao/DECISOES.md` (28/09).
 - 🟡 **App público com chave gratuita:** decidir entre colocar o aviso "não envie documentos internos" ou voltar a deixá-lo privado. *Desbloqueia:* uso seguro do MVP. Ver `_sessao/DECISOES.md`.
 - ℹ Push para o servidor interno (Gitea): às vezes funciona sem login (credencial em cache); se der "Authentication failed", rode `! GCM_INTERACTIVE=always git push origin <branch>` e autorize no navegador.

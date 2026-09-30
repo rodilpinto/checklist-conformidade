@@ -2,6 +2,20 @@
 
 <!-- linha do tempo, mais recente no topo; só acrescentar -->
 
+## 2026-09-30 | passe por app: framework na homologação (passos 0 a 5)
+
+- Passo 0 (confirmado pelo Rodrigo): `master` (app principal) → `main`; `feat/llm-cadeia` (app `-v2`) → `homologacao`; produção sem framework nesta rodada. Entre o snapshot no ar (`69f8c53`) e o `master` interno (`eab1039`), só documentação e `.gitattributes` mudam.
+- Passo 1: tags anotadas `pre-framework-2026-09-30-master` (`eab1039`) e `pre-framework-2026-09-30-feat-llm-cadeia` (`0401040`), enviadas ao interno.
+- Passo 2, linha de base: 19 testes passam (todos do `llm_cadeia` 1.0.0); fumaça com `AppTest` sem exceção.
+- Passo 3, `homologacao` (de `feat/llm-cadeia`), framework @ `29880aa`, cópia por `git archive` e hashes conferidos contra a origem:
+  - `llm_cadeia` 1.1.0 (`2075aa1`): a cópia 1.0.0 tinha o código idêntico ao buscador @ `3edba4d`; só o README tinha uma linha de procedência posta na adoção (`2357a2e`), sem edição de código. `tests/eval_modelos.py` adaptado. 31 testes.
+  - `branding` 1.0.0 (`f84d7e9`), `extracao_texto` 1.0.0 (`aff5294`, sai `lib/extractor.py`, mesmo hash), `tempo_economizado` 1.0.0 (`9c19a60`, mesmos minutos; número igual de 1 a 118 itens, ex.: 92 itens = 13h48min), `publicar_snapshot` 1.0.0 (`3dfd59e`, sai `scripts/publicar_github.sh`; trava sem exceção).
+  - Testes depois: 113 passam, 1 `xfail` (defeito conhecido do `extracao_texto`); fumaça sem exceção.
+  - `python -m llm_cadeia` (chaves carregadas no processo): local, gemini, gemini-2, groq-2, cerebras-2 e openrouter-2 respondem em ao menos um modelo; 404 nos `gemini-2.5-*` da chave sem sufixo, 500 no `gemma-4-31b-it` do Gemini, 429 nos `:free` nomeados do OpenRouter.
+  - Geração local com a Portaria 227 inteira (cadeia completa, `lib.llm.generate_checklist`): com raciocínio, o `local` estourou os 300 s e o `gemini-3.5-flash-lite` respondeu, 362 s no total, 79 itens válidos. Sem raciocínio (`LLM_DISABLE_THINKING=1`): o `local` também estourou os 300 s, e o `gemini-3.5-flash-lite` respondeu, 351 s no total, 84 itens válidos. 📝 Leitura: com o normativo inteiro numa chamada, o Gemma não termina em 300 s nem sem raciocínio (o trecho de 5.000 caracteres levou 54 s em 28/09); a saída estrutural continua sendo a divisão em lotes (patch pausado). O log não mostra se o campo `enable_thinking` foi aceito nessa chamada (o framework conferiu que o servidor aceita em 29/09).
+- Passo 4: `main` = `master` (`eab1039`) no interno; snapshots no GitHub `main` = `3709a25` (primeiro snapshot, sem pai) e `homologacao` = `2233c9a`, sem `INTERNO.md` nem `.conf`. Defeito do `publicar_snapshot` ao publicar a `main` a partir da `homologacao` aberta, contornado com worktree (`LICOES.md`).
+- Passo 5: *Secrets* × código levantados; blocos entregues ao Rodrigo (`BLOCKED-ON-RODRIGO.md`).
+
 ## 2026-09-29 | checkpoint da pausa e entregas para o framework
 
 - Entregue à sessão do framework: `solucoes/framework/LEVANTAMENTO-FRAMEWORK.md` (repositório `Nuati-SECIN/framework` @ `4c751ba`), com os candidatos por tema nos 8 apps, os defeitos do `llm_cadeia`, as lições e a situação daquele repositório.

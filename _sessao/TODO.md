@@ -1,15 +1,22 @@
 # TODO — checklist-conformidade
 
-<!-- last_audit: 2026-09-29 · itens concretos, mais urgentes no topo · ações que só o Rodrigo pode fazer: BLOCKED-ON-RODRIGO.md (raiz) -->
+<!-- last_audit: 2026-09-30 · itens concretos, mais urgentes no topo · ações que só o Rodrigo pode fazer: BLOCKED-ON-RODRIGO.md (raiz) -->
 
-## ⏸ Em pausa desde 29/09 (D-C23): tudo abaixo espera o passe por app
+## ▶ Passe por app em andamento (30/09): 1º app a receber o framework
 
-O próximo trabalho neste app é o **passe por app** (D-C23): adotar o framework `rodilpinto/nuati-framework` e migrar para `main` + `homologacao` (D-C22), num passe só. Os itens do P0 são insumo para esse passe. `llm_cadeia/` está congelada (D-C24): os pedidos abaixo vão para a sessão do framework, e **nenhum** estava corrigido na 1.0.1 (conferido em 29/09; cópia para ela em `solucoes/framework/LEVANTAMENTO-FRAMEWORK.md`, seção A).
+Objetivo da rodada: o framework (`nuati-framework` @ `29880aa`, branch `homologacao` de lá) entra só na **homologação** deste app, e o que for visto no ar vira evidência para a v0.1.0 do framework. A **produção não recebe o framework** nesta rodada: a `main` nasceu do `master`, sem mudança de código.
+
+- [x] (30/09) Passos 0 a 5: tags `pre-framework-2026-09-30-master` e `pre-framework-2026-09-30-feat-llm-cadeia` (interno); linha de base 19 testes; `homologacao` (de `feat/llm-cadeia`) com os 5 recursos adotados, um commit cada; `main` = `master` (`eab1039`); snapshots no GitHub `main` = `3709a25`, `homologacao` = `2233c9a`. Detalhes no `log.md` de 30/09.
+- [ ] **(Rodrigo) Passo 6, Streamlit Cloud:** ver `BLOCKED-ON-RODRIGO.md`.
+- [ ] Passo 7: conferir os dois apps no ar com o Rodrigo, recurso por recurso (branding, llm_cadeia, extracao_texto com PDF/DOCX/URL, tempo_economizado, publicar_snapshot).
+- [ ] Passo 8 (só com o OK do Rodrigo): `main` como padrão no GitHub; listar e, com nova confirmação, apagar `master`/`feat/llm-cadeia` (GitHub e interno) e o app `-v2`. No Gitea, a branch padrão se troca na tela (Rodrigo).
+- [ ] Passo 9: atualizar as linhas do checklist no registro de cópias (README §4 do framework, branch `homologacao` de lá).
+- [ ] Pedido ao framework: `publicar_snapshot` 1.0.0 falha ao publicar uma branch diferente da aberta (ver `LICOES.md` de 30/09).
 
 ## P0: módulo comum de provedores e chaves de LLM (a partir de 25/09/2026)
 
 - [x] (28/09) `llm_cadeia` 1.0.0 (buscador @ `3edba4d`) adotado na branch `feat/llm-cadeia`. Tag `pre-llm-cadeia` marca a versão no ar. Detalhes no `log.md` de 28/09.
-- [ ] **Pedidos para a origem (agora a sessão do framework, D-C24), a serem corrigidos lá e recopiados. Não editar a cópia:**
+- [x] (30/09) **Pedidos para a origem (sessão do framework, D-C24): os 5 resolvidos no `llm_cadeia` 1.1.0**, adotado na `homologacao` (1: `LLM_TIMEOUT_S`, padrão 300 s; 2: `LLM_DISABLE_THINKING`; 3: pasta sem dado interno, e a trava do snapshot passou sem exceção; 4: `LLM_SOMENTE`; 5: 120 s no Gemini). Histórico dos pedidos:
   1. **Tempo limite do LLM local de 120 s é curto** (`nucleo.py`, `timeout=(5, 120)`). Medido em 28/09, trecho de 5.000 caracteres da Portaria 227 com o prompt do app: 154 s com raciocínio (como o módulo envia), 54 s sem. Resultado: o `local` nunca atende um normativo real, e a cadeia passa para o Gemini. O app antigo usava 300 s.
   2. **Não há como desligar o raciocínio do Gemma** (`chat_template_kwargs: {enable_thinking: false}`; no app antigo, `LOCAL_LLM_DISABLE_THINKING=1`). Sem ele, a mesma chamada cai de 154 s para 54 s.
   3. **A pasta tem dados internos** (IP do servidor local e login da conta Google) no `README.md`, no `nucleo.py` (docstring e comentário) e no `test_llm_cadeia.py`. 📝 Continua valendo como higiene na origem, mas **não bloqueia mais**: em 28/09, o Rodrigo decidiu publicar assim mesmo (exceção na trava; ver `DECISOES.md`).
@@ -19,7 +26,7 @@ O próximo trabalho neste app é o **passe por app** (D-C23): adotar o framework
 - [ ] **App v2 instável com a Portaria 227 inteira na nuvem:** a 1ª tentativa teve JSON inválido do `gemini-3.5-flash-lite`; a 2ª deu 47 itens em cerca de 7,5 min, depois de 503 em toda a chave sem sufixo. Localmente: de 92 a 118 itens. Próximos passos (📝 propostas, aguardam ok): subir `_MAX_TOKENS` de 32768 para 65536 (o MVP não tinha teto); pôr na mensagem de erro de JSON qual modelo respondeu. 📝 A solução estrutural é a divisão em lotes (patch pausado).
 - [x] (28/09) Push de `feat/llm-cadeia` e da tag `pre-llm-cadeia` ao GitLab.
 - ~~Tirar `LLM_BASE_URL` dos *secrets* do v2~~: o Rodrigo decidiu manter os *secrets* iguais em todos os apps.
-- [ ] Adaptar `tests/eval_modelos.py` ao `generate_checklist` novo (hoje ele passa `provider=`/`base_url=` e quebra). Depende do pedido 4.
+- [x] (30/09) `tests/eval_modelos.py` adaptado ao `generate_checklist` novo, com `LLM_SOMENTE`/`LLM_DISABLE_THINKING` por modelo e registro de quem respondeu (commit `2075aa1`).
 - ~~Implantar o fluxo de versões `master` + `homologacao` + app "-v2"~~ (plano de 28/09): **superado pela D-C22** (`main` + `homologacao`, app `<app>-homologacao`, ordem de recriação na própria D-C22). Vira parte do passe por app.
 - [ ] No passe por app: devolver `GEMINI_API_KEY` do app principal ao valor padrão (fim da exceção temporária de 28/09).
 - [ ] 📝 Bug antigo, latente no `master`: `icon="←"` em `st.warning` levanta `StreamlitAPIException` no Streamlit 1.64 quando não há chave. A branch não tem mais esse aviso com ícone.

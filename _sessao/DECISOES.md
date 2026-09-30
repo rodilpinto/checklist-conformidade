@@ -1,6 +1,6 @@
 # DECISOES — checklist-conformidade
 
-<!-- last_updated: 2026-09-29 -->
+<!-- last_updated: 2026-09-30 -->
 
 ## Tomadas
 
@@ -31,6 +31,9 @@
 
 - **2026-09-29** ✅ **Pausa para o framework central** (Rodrigo). As decisões D-C22 (dois ambientes: `main` estável e `homologacao` playground; o servidor do Nuati espelha `main`), D-C23 (framework em repositório próprio e privado, `rodilpinto/nuati-framework`, origem única do que é comum, distribuído por copiar e colar; um passe por app adota o framework e migra os ambientes) e D-C24 (`llm_cadeia/` congelada; defeito vira pedido à sessão do framework) moram no ledger compartilhado `buscador-normativos/_DECISOES-PENDENTES.md` (`origin/master` @ `ab8011b`). Aqui fica só o ponteiro.
 - **2026-09-29** ✅ **Framework sem scripts** (Rodrigo): "vamos abandonar essa ideia de scripts. vamos começar com copia e cola e log de versões mesmo". Com isso e com a D-C23, fica **superado** o repositório `Nuati-SECIN/framework` que esta sessão criou em 28/09 (spec e plano de `replicar.py`/`verificar.py`, revisão adversária). Ele guarda o levantamento entregue para a sessão nova (`LEVANTAMENTO-FRAMEWORK.md` @ `4c751ba`). **Destino decidido pela D-C25 (opção a, Rodrigo, 29/09): vira espelho interno** do `rodilpinto/nuati-framework`.
+
+- **2026-09-30** ✅ **Passe por app, 1ª rodada** (Rodrigo, confirmado no passo 0): mapeamento `master` → `main` e `feat/llm-cadeia` → `homologacao`; o framework (`29880aa`, ainda não promovido a `main` lá) entra **só na homologação**; a produção mantém o código e os *Secrets* de hoje (inclusive a exceção da `GEMINI_API_KEY`); o app `-v2` sai quando o `checklist-conformidade-homologacao` estiver no ar, com o OK dele; os 3 arquivos não rastreados ficam como estão (decisão continua no BLOCKED).
+- **2026-09-30** 📝 Tempo economizado sem descontar o tempo da ferramenta (`automatico_min=0`), para o número exibido não mudar na adoção. Descontar a duração da geração é melhoria possível, que muda o número.
 
 ## Evidência dos testes (não é decisão)
 
