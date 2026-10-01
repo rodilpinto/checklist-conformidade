@@ -6,7 +6,11 @@
 
 Na `homologacao`. Referência: `gerador-checklists/checklists/Checklist_Portaria_227_2025_IA_v1.08.xlsx`, gerada por `gerador-checklists/scripts/create_v108.py` (dados em `gerador-checklists/data/`); notas em `TODO-sync-gerador-nuati.md`. O código da planilha do app é `lib/excel_builder.py`.
 
-- [ ] Levantar a diferença entre a planilha do app e a v1.08 (o Rodrigo citou, em 01/10): **colunas novas**, **abas novas** e **sem as linhas de separação de capítulo** (a planilha do app ainda as tem: conferido no Excel baixado da homologação em 01/10). A lista detalhada dos elementos está no P1 abaixo.
+- [ ] Levantar a diferença entre a planilha do app e a v1.08 (o Rodrigo citou, em 01/10): **colunas novas**, **abas novas** e **sem as linhas de separação de capítulo** (a planilha do app ainda as tem: conferido no Excel baixado da homologação em 01/10). Medido em 01/10 (`openpyxl` sobre os dois):
+  - app (`lib/excel_builder.py`, `COLUMNS`): 2 abas ("Checklist de Conformidade", "Legenda"), 14 colunas, com linhas de capítulo;
+  - v1.08: 5 abas ("Checklist Conformidade", "Curso IA Aplicada — SECIN", "Ações — Todos os Atores", "Resumo por Capítulo", "Legenda e Instruções"); a principal tem 18 colunas, entre elas "Princípio / Tema", "Criticidade (I×P)", "Nível de Risco MCGR" e "Precedência (decorrências)", sem linhas de capítulo e ordenada por criticidade;
+  - a v1.08 não é gerada do zero: `create_v108.py` copia a v1.07 e a edita, que veio do `create_v107.py` sobre a v1.06 (`create_v106.py`); as abas "Ações" e "Curso" e a "Precedência" vêm de dados curados (`gerador-checklists/data/*.json`), não de LLM.
+- [ ] 📝 Decisão a propor ao Rodrigo antes de codar: o que o app passa a gerar pelo LLM para **qualquer** normativo (colunas novas, abas "Ações", "Resumo por Capítulo") e o que fica específico da Portaria 227 (ex.: aba "Curso", dados curados). A metodologia MCGR usada na v1.08 tem como fonte os 2 arquivos MCGR não rastreados da raiz (ver `BLOCKED-ON-RODRIGO.md`).
 - [ ] **v1.09: separar os atores.** Hoje responsável e atores são campos multivalorados, o que dificulta o rastreamento (Rodrigo, 01/10). 📝 Desenho em aberto, a propor ao Rodrigo antes de codar: por exemplo, uma linha por par item × ator numa aba própria, ou colunas por ator.
 - [ ] O que muda no prompt e na validação para o modelo devolver os campos novos (`lib/prompt_templates.py`, `lib/llm.py`).
 - A v1.08 foi feita **por iteração, sem skill** (Rodrigo, 01/10): o que ela tem está na própria planilha, no `create_v108.py` e nos dados de `gerador-checklists/data/`.
@@ -22,7 +26,8 @@ Objetivo da rodada: o framework (`nuati-framework` @ `29880aa`, branch `homologa
 - [x] (01/10) Passo 8, com o OK do Rodrigo: `main` padrão no GitHub; apagados o app `-v2` (Rodrigo), `master` e `feat/llm-cadeia` no GitHub, `feat/llm-cadeia` e `master` no interno (depois que o Rodrigo trocou a padrão do Gitea para `main`) e as duas branches locais.
 - [x] (01/10) Passo 9: registro de cópias no README §4 do framework (commit `975970b` na `homologacao` de lá).
 - [ ] Depois da v0.1.0 do framework: levar o framework para a produção (`homologacao` → `main` com tag), padronizando antes os *Secrets* da produção (fim da exceção de 28/09).
-- [ ] **Pedido ao framework** (entregue no relatório do passe, 01/10): `publicar_snapshot` 1.0.0 falha ao publicar uma branch diferente da aberta, quando um arquivo de `EXCLUIR` difere entre as duas (`git rm -r --cached` sem `-f` no índice temporário); saída real em `LICOES.md` de 30/09.
+- [x] (01/10) **Pedido ao framework** (relatório do passe): `publicar_snapshot` 1.0.0 falhava ao publicar uma branch diferente da aberta. **Corrigido lá na 1.0.1** (`nuati-framework` `56d7eb0`, `-f` no `git rm --cached`; teste novo).
+- [ ] **Recopiar o `publicar_snapshot` 1.0.1** na `homologacao`: conferir antes a cópia 1.0.0 por hash contra `29880aa` (regra §2.3 do README do framework), copiar a pasta inteira de `56d7eb0` por `git archive`, rodar `py -m pytest publicar_snapshot -q`, commit "adota publicar_snapshot 1.0.1 (nuati-framework @ 56d7eb0)", e atualizar a linha do checklist no README §4 do framework. Depois disso, o contorno do worktree (`LICOES.md`, 30/09) deixa de ser necessário.
 
 ## P0: módulo comum de provedores e chaves de LLM (a partir de 25/09/2026)
 

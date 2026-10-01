@@ -46,7 +46,7 @@ A tabela abaixo é a do código da `main` (produção, sem framework). Na `homol
 | `main` | estável (produção); padrão no GitHub | checklist-conformidade.streamlit.app |
 | `homologacao` | trabalho do dia a dia | checklist-conformidade-homologacao.streamlit.app |
 
-Receita do dia a dia (trabalhar, testar na homologação, promover com tag, voltar atrás) e regra de sincronia das pastas do framework: README do `nuati-framework`, §2 e §3. Neste app, todo push no interno é seguido do snapshot da branch que mudou (`bash publicar_snapshot/publicar_snapshot.sh --simular --ramo <branch>` e depois sem `--simular`); para publicar uma branch que não é a aberta, use um worktree (`LICOES.md`, 30/09). Tags de retorno: `pre-framework-2026-09-30-master`, `pre-framework-2026-09-30-feat-llm-cadeia`, `pre-llm-cadeia`.
+Receita do dia a dia (trabalhar, testar na homologação, promover com tag, voltar atrás) e regra de sincronia das pastas do framework: README do `nuati-framework`, §2 e §3. Neste app, todo push no interno é seguido do snapshot da branch que mudou (`bash publicar_snapshot/publicar_snapshot.sh --simular --ramo <branch>` e depois sem `--simular`); para publicar uma branch que não é a aberta, use um worktree (`LICOES.md`, 30/09) enquanto a cópia daqui for a 1.0.0 (a 1.0.1 do framework corrige; recópia no `TODO.md`). Tags de retorno: `pre-framework-2026-09-30-master`, `pre-framework-2026-09-30-feat-llm-cadeia`, `pre-llm-cadeia`.
 
 ## Fluxo de versões: estável no ar, trabalho em branches (decidido em 28/09/2026)
 

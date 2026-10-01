@@ -18,7 +18,7 @@ Este foi o **1º app a receber o `nuati-framework`**. O framework (`29880aa`, br
 - **Homologação:** https://checklist-conformidade-homologacao.streamlit.app/ na branch `homologacao` (`llm_cadeia` 1.1.0, `branding` 1.0.0, `extracao_texto` 1.0.0, `tempo_economizado` 1.0.0, `publicar_snapshot` 1.0.0). Os 5 recursos conferidos no ar; o dropdown do tempo economizado validado pelo Rodrigo (01/10).
 - **Limpeza (passo 8):** apagados o app `-v2`, `master` e `feat/llm-cadeia` no GitHub e `feat/llm-cadeia` e `master` no interno (depois que o Rodrigo trocou a branch padrão do Gitea para `main`) e localmente.
 - **Registro de cópias** no README §4 do framework atualizado (commit `975970b` na `homologacao` de lá).
-- Publicar no GitHub: `bash publicar_snapshot/publicar_snapshot.sh [--simular] --ramo <branch>`. ⚠ Para publicar uma branch diferente da aberta, use um worktree ([LICOES](LICOES.md), 30/09).
+- Publicar no GitHub: `bash publicar_snapshot/publicar_snapshot.sh [--simular] --ramo <branch>`. ⚠ A cópia daqui é a 1.0.0: para publicar uma branch diferente da aberta, use um worktree ([LICOES](LICOES.md), 30/09) até recopiar a 1.0.1, que corrige isso ([TODO](TODO.md)).
 
 ## Branches e ponto de retorno
 
@@ -29,13 +29,14 @@ Este foi o **1º app a receber o `nuati-framework`**. O framework (`29880aa`, br
 ## Próximo passo
 
 1. **Próximo trabalho neste app (Rodrigo, 01/10): planilha de saída no padrão v1.08, já como v1.09.** Na `homologacao`. A v1.08 (`gerador-checklists/checklists/Checklist_Portaria_227_2025_IA_v1.08.xlsx`, feita por iteração, sem skill; gerada por `gerador-checklists/scripts/create_v108.py`) tem colunas novas e abas novas, e não tem as linhas de separação de capítulo que a planilha do app ainda tem. A v1.09 acrescenta a **separação de atores**: hoje responsável e atores são campos multivalorados, o que dificulta o rastreamento. Detalhes e itens: [TODO](TODO.md), seção do próximo trabalho.
-2. Outra sessão (framework): aprovar a v0.1.0 com a evidência deste passe e corrigir o defeito do `publicar_snapshot` (relatório entregue pelo Rodrigo em 01/10).
-3. Depois da v0.1.0: levar o framework para a produção (`homologacao` → `main` com tag, *Secrets* da produção padronizados antes) e retomar o P0 (patch dos lotes, `_MAX_TOKENS`).
+2. Neste app, antes ou junto da planilha: recopiar o `publicar_snapshot` 1.0.1 do framework (`56d7eb0`, 01/10: corrige o pedido 6.1), conferindo antes a cópia 1.0.0 por hash (regra §2.3 do README do framework).
+3. Outra sessão (framework): aprovar a v0.1.0 (F-A3) com a evidência deste passe (relatório entregue pelo Rodrigo em 01/10).
+4. Depois da v0.1.0: levar o framework para a produção (`homologacao` → `main` com tag, *Secrets* da produção padronizados antes) e retomar o P0 (patch dos lotes, `_MAX_TOKENS`).
 
 ## Decisões em aberto
 
 - Deste app: [DECISOES](DECISOES.md), seção "Em aberto".
-- Compartilhadas: `buscador-normativos/_DECISOES-PENDENTES.md` (`origin/master` de lá; D-C22 a D-C26 decididas em 01/10; a D-C26 toca a pergunta local sobre o app público) e `nuati-framework/DECISOES.md` (`origin/homologacao` de lá; em 01/10, abertas F-A3 = promover a v0.1.0, que depende da evidência deste passe, F-A4 e F-A6). Leia sempre a versão do servidor (receita no passo 4 do onboard).
+- Compartilhadas: `buscador-normativos/_DECISOES-PENDENTES.md` (`origin/master` de lá; D-C22 a D-C26 decididas, a última em 29/09, conferido em 01/10; a D-C26 toca a pergunta local sobre o app público) e `nuati-framework/DECISOES.md` (`origin/homologacao` de lá; em 01/10, abertas F-A3 = promover a v0.1.0, que depende da evidência deste passe, F-A4 e F-A6). Leia sempre a versão do servidor (receita no passo 4 do onboard).
 
 ## Ações que dependem do Rodrigo
 

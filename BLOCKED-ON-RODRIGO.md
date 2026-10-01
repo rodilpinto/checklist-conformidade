@@ -13,7 +13,7 @@
 - 🟢 **Rotacionar a chave Gemini** (possível exposição registrada em `_sessao/INTERNO.md`). Atualizar o `.env` e os *secrets* depois.
 - 🟢 **Revisar `branding/README.md`**, principalmente as adaptações digitais marcadas com 📝. Confirmar a grafia e a hierarquia das unidades na assinatura do rodapé e, se necessário, consultar a Comid (publicidade@camara.leg.br) sobre o uso da marca em ferramentas internas.
 - 🟢 **Decidir o destino de 3 arquivos não rastreados na raiz**, que já existiam antes da sessão de 22/09/2026 e nunca foram commitados:
-  - `MCGR-Modelo-Corporativo-Gestao-Riscos-CD.md` e `Modelo Corporativo de Gestão de Riscos da Câmara dos Deputados.pdf`: parecem a fonte da metodologia MCGR citada no commit `3af230a`. Commitar, mover para `gerador-checklists/` ou descartar.
+  - `MCGR-Modelo-Corporativo-Gestao-Riscos-CD.md` e `Modelo Corporativo de Gestão de Riscos da Câmara dos Deputados.pdf`: parecem a fonte da metodologia MCGR citada no commit `3af230a`. Commitar, mover para `gerador-checklists/` ou descartar. ⚠ São a fonte da metodologia MCGR usada na v1.08, que é a referência do próximo trabalho (planilha v1.08/v1.09): descartar perde essa fonte.
   - `.claude/settings.local.json`: configuração local do Claude Code. Sugestão: incluir no `.gitignore`.
   *Desbloqueia:* uma árvore de trabalho limpa.
 - 🟢 (opcional) **`ANTHROPIC_API_KEY` no `.env`**, para testar o Claude pelo pipeline do app.

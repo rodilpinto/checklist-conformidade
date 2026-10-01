@@ -9,7 +9,7 @@
 - O Rodrigo trocou a branch padrão do Gitea interno para `main`; em seguida o `master` interno foi apagado (era igual à `main`, `eab1039`).
 - Registro de cópias no README §4 do framework (só as linhas do checklist), commit `975970b` na `homologacao` do `nuati-framework`.
 - Relatório do passe entregue ao Rodrigo para a sessão do framework (evidência por recurso, pedidos).
-- Próximo trabalho decidido pelo Rodrigo: planilha de saída no padrão v1.08, já como v1.09 (atores separados). Checkpoint.
+- Próximo trabalho decidido pelo Rodrigo: planilha de saída no padrão v1.08, já como v1.09 (atores separados). Checkpoint; o dogfood achou que o framework soltou o `publicar_snapshot` 1.0.1 (`56d7eb0`) durante o checkpoint (recópia no TODO) e detalhou a diferença entre a planilha do app e a v1.08 (TODO).
 
 ## 2026-09-30 | passe por app: passos 6 e 7 (apps no ar e conferência)
 
