@@ -37,6 +37,8 @@
 
 - **2026-10-01** ✅ O Rodrigo validou no ar a explicação do tempo economizado (dropdown do recurso `tempo_economizado`) e autorizou o passo 8: `main` padrão no GitHub e remoção das branches velhas e do app `-v2`. Ele trocou a branch padrão do Gitea interno para `main` no mesmo dia, e o `master` interno foi apagado.
 
+- **2026-10-01** ✅ **Próximo trabalho no app: planilha de saída no padrão v1.08, já como v1.09** (Rodrigo): colunas novas, abas novas, sem as linhas de separação de capítulo, e a v1.09 melhora a separação de atores, porque hoje são campos multivalorados que dificultam o rastreamento. O desenho da separação está em aberto (📝 a propor; `TODO.md`).
+
 ## Evidência dos testes (não é decisão)
 
 Todos os números ficam em **`tests/AVALIACAO_MODELOS.md`** (fonte única). Leituras qualitativas relevantes para decidir:

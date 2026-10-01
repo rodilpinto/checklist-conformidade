@@ -2,13 +2,22 @@
 
 <!-- last_audit: 2026-10-01 · itens concretos, mais urgentes no topo · ações que só o Rodrigo pode fazer: BLOCKED-ON-RODRIGO.md (raiz) -->
 
+## ▶ Próximo trabalho (Rodrigo, 01/10): planilha de saída no padrão v1.08, já como v1.09
+
+Na `homologacao`. Referência: `gerador-checklists/checklists/Checklist_Portaria_227_2025_IA_v1.08.xlsx`, gerada por `gerador-checklists/scripts/create_v108.py` (dados em `gerador-checklists/data/`); notas em `TODO-sync-gerador-nuati.md`. O código da planilha do app é `lib/excel_builder.py`.
+
+- [ ] Levantar a diferença entre a planilha do app e a v1.08 (o Rodrigo citou, em 01/10): **colunas novas**, **abas novas** e **sem as linhas de separação de capítulo** (a planilha do app ainda as tem: conferido no Excel baixado da homologação em 01/10). A lista detalhada dos elementos está no P1 abaixo.
+- [ ] **v1.09: separar os atores.** Hoje responsável e atores são campos multivalorados, o que dificulta o rastreamento (Rodrigo, 01/10). 📝 Desenho em aberto, a propor ao Rodrigo antes de codar: por exemplo, uma linha por par item × ator numa aba própria, ou colunas por ator.
+- [ ] O que muda no prompt e na validação para o modelo devolver os campos novos (`lib/prompt_templates.py`, `lib/llm.py`).
+- A v1.08 foi feita **por iteração, sem skill** (Rodrigo, 01/10): o que ela tem está na própria planilha, no `create_v108.py` e nos dados de `gerador-checklists/data/`.
+
 ## ✅ Passe por app concluído (30/09-01/10): 1º app a receber o framework
 
 Objetivo da rodada: o framework (`nuati-framework` @ `29880aa`, branch `homologacao` de lá) entra só na **homologação** deste app, e o que for visto no ar vira evidência para a v0.1.0 do framework. A **produção não recebe o framework** nesta rodada: a `main` nasceu do `master`, sem mudança de código.
 
-- [x] (30/09) Passos 0 a 5: tags `pre-framework-2026-09-30-master` e `pre-framework-2026-09-30-feat-llm-cadeia` (interno); linha de base 19 testes; `homologacao` (de `feat/llm-cadeia`) com os 5 recursos adotados, um commit cada; `main` = `master` (`eab1039`); snapshots no GitHub `main` = `3709a25`, `homologacao` = `2233c9a`. Detalhes no `log.md` de 30/09.
+- [x] (30/09) Passos 0 a 5: tags `pre-framework-2026-09-30-master` e `pre-framework-2026-09-30-feat-llm-cadeia` (interno); linha de base dos testes (números no `log.md` de 30/09); `homologacao` (de `feat/llm-cadeia`) com os 5 recursos adotados, um commit cada; `main` = `master` (`eab1039`); snapshots no GitHub `main` = `3709a25`, `homologacao` = `2233c9a`. Detalhes no `log.md` de 30/09.
 - [x] (30/09) Passo 6 (Rodrigo): produção na `main` (mesma URL) e `checklist-conformidade-homologacao` na `homologacao`.
-- [x] (01/10) Passo 7: os 5 recursos conferidos no ar e a produção igual a antes (`log.md`). Falta só o julgamento do Rodrigo sobre a clareza do dropdown do tempo economizado.
+- [x] (01/10) Passo 7: os 5 recursos conferidos no ar e a produção igual a antes (`log.md`). O dropdown do tempo economizado foi validado pelo Rodrigo em 01/10.
 - [ ] 📝 Limpeza do app: `use_container_width` está obsoleto no Streamlit 1.64 (avisos no log da nuvem); trocar por `width="stretch"`.
 - [x] (01/10) Passo 8, com o OK do Rodrigo: `main` padrão no GitHub; apagados o app `-v2` (Rodrigo), `master` e `feat/llm-cadeia` no GitHub, `feat/llm-cadeia` e `master` no interno (depois que o Rodrigo trocou a padrão do Gitea para `main`) e as duas branches locais.
 - [x] (01/10) Passo 9: registro de cópias no README §4 do framework (commit `975970b` na `homologacao` de lá).
@@ -25,14 +34,14 @@ Objetivo da rodada: o framework (`nuati-framework` @ `29880aa`, branch `homologa
   4. 📝 Não há como forçar um só provedor num teste: `_segredo` lê `st.secrets` antes das variáveis de ambiente, e o `st.secrets` carrega o `~/.streamlit/secrets.toml` global mesmo fora do `streamlit run`. O `LLM_ORDEM` só reordena. Isso afeta o `tests/eval_modelos.py`, que precisa comparar modelos um a um.
   5. **O transporte Gemini não tem tempo limite** (`_gerar_gemini` não passa `http_options`/`timeout`). Em 28/09, o app v2 ficou mais de 8 min parado em "Etapa 2" com a Portaria 227 inteira.
 - [x] (28/09) Branch publicada no GitHub (`da8ccd4`) e segundo app criado pelo Rodrigo: https://checklist-conformidade-v2.streamlit.app/.
-- [ ] **App v2 instável com a Portaria 227 inteira na nuvem:** a 1ª tentativa teve JSON inválido do `gemini-3.5-flash-lite`; a 2ª deu 47 itens em cerca de 7,5 min, depois de 503 em toda a chave sem sufixo. Localmente: de 92 a 118 itens. Próximos passos (📝 propostas, aguardam ok): subir `_MAX_TOKENS` de 32768 para 65536 (o MVP não tinha teto); pôr na mensagem de erro de JSON qual modelo respondeu. 📝 A solução estrutural é a divisão em lotes (patch pausado).
+- [ ] **App v2 instável com a Portaria 227 inteira na nuvem** (01/10: no app de homologação, a URL da Portaria inteira gerou 83 itens em cerca de 1 min 15 s, numa execução só; não basta para dar por resolvido): a 1ª tentativa teve JSON inválido do `gemini-3.5-flash-lite`; a 2ª deu 47 itens em cerca de 7,5 min, depois de 503 em toda a chave sem sufixo. Localmente: de 92 a 118 itens. Próximos passos (📝 propostas, aguardam ok): subir `_MAX_TOKENS` de 32768 para 65536 (o MVP não tinha teto); pôr na mensagem de erro de JSON qual modelo respondeu. 📝 A solução estrutural é a divisão em lotes (patch pausado).
 - [x] (28/09) Push de `feat/llm-cadeia` e da tag `pre-llm-cadeia` ao GitLab.
 - ~~Tirar `LLM_BASE_URL` dos *secrets* do v2~~: o Rodrigo decidiu manter os *secrets* iguais em todos os apps.
 - [x] (30/09) `tests/eval_modelos.py` adaptado ao `generate_checklist` novo, com `LLM_SOMENTE`/`LLM_DISABLE_THINKING` por modelo e registro de quem respondeu (commit `2075aa1`).
 - ~~Implantar o fluxo de versões `master` + `homologacao` + app "-v2"~~ (plano de 28/09): **superado pela D-C22** (`main` + `homologacao`, app `<app>-homologacao`, ordem de recriação na própria D-C22). Vira parte do passe por app.
-- [ ] No passe por app: devolver `GEMINI_API_KEY` do app principal ao valor padrão (fim da exceção temporária de 28/09).
+- [ ] Quando a produção receber o framework (depois da v0.1.0): devolver `GEMINI_API_KEY` da produção ao valor padrão (fim da exceção temporária de 28/09).
 - [x] (30/09) Bug do `icon="←"` em `st.warning` (StreamlitAPIException "not a valid emoji" quando nenhum provedor está configurado): **corrigido na `homologacao`** (ícone 👈). A anotação anterior, de que a branch não tinha mais o aviso, estava errada: apareceu no app de homologação em 30/09. ⚠ Continua latente na `main` (produção); vai junto quando a produção receber o framework.
-- [ ] Levar o trabalho da `feat/llm-cadeia` para produção **no passe por app** (D-C23), com o ok do Rodrigo; não há mais "merge no `master`" separado.
+- ~~Levar o trabalho da `feat/llm-cadeia` para produção no passe por app~~ (01/10): a homologação recebeu no passe; a produção vai depois da v0.1.0 (item na seção do passe por app, acima).
 - [x] ~~**(sessão do buscador-normativos)** Criar o módulo comum de LLM para todos os MVPs~~ (feito na origem; adotado aqui em 28/09):
   - sequência LLM local → chave NUATI → chave Rodrigo → chave digitada pelo usuário (📝 sugestão: a do usuário primeiro, quando informada);
   - vários modelos por chave;
@@ -52,7 +61,7 @@ Objetivo da rodada: o framework (`nuati-framework` @ `29880aa`, branch `homologa
   - colunas "Princípio / Tema" e "Precedência (decorrências)";
   - aba "Ações – Todos os Atores" (ator, fase, ação, artigo, texto literal, entregável, interação com);
   - "Resumo por Capítulo" e "Legenda e Instruções".
-  - O v1.08 foi aprimorado por uma skill nunca incorporada ao app. Ver também `TODO-sync-gerador-nuati.md` e os scripts em `gerador-checklists/scripts/create_v108.py`.
+  - O v1.08 foi aprimorado por iteração, sem skill (Rodrigo, 01/10), e nunca foi incorporado ao app. Ver também `TODO-sync-gerador-nuati.md` e os scripts em `gerador-checklists/scripts/create_v108.py`.
 - [ ] 📝 Prompt: instruir o modelo a usar como responsáveis só os papéis nomeados no normativo, com o nome oficial. O Gemma inventou "Gestor do sistema de IA"; o Sonnet e o Haiku erraram o nome da Ditec.
 
 ## P2: testes de modelo (pausados; roteiro em `tests/AVALIACAO_MODELOS.md`, seção 8)

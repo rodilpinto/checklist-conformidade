@@ -8,6 +8,8 @@
 - `main` virou a branch padrão do GitHub (`gh repo edit`). Apagados, com confirmação dele: o app `-v2` (pelo Rodrigo), `master` e `feat/llm-cadeia` no GitHub (pela API), `feat/llm-cadeia` no interno, `master` e `feat/llm-cadeia` locais. Conferido antes: `master` = `main` e `feat/llm-cadeia` contida na `homologacao`; as tags `pre-framework-*` estão no interno.
 - O Rodrigo trocou a branch padrão do Gitea interno para `main`; em seguida o `master` interno foi apagado (era igual à `main`, `eab1039`).
 - Registro de cópias no README §4 do framework (só as linhas do checklist), commit `975970b` na `homologacao` do `nuati-framework`.
+- Relatório do passe entregue ao Rodrigo para a sessão do framework (evidência por recurso, pedidos).
+- Próximo trabalho decidido pelo Rodrigo: planilha de saída no padrão v1.08, já como v1.09 (atores separados). Checkpoint.
 
 ## 2026-09-30 | passe por app: passos 6 e 7 (apps no ar e conferência)
 

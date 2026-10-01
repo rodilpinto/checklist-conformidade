@@ -33,6 +33,7 @@ A tabela abaixo é a do código da `main` (produção, sem framework). Na `homol
 - **Rodar o app local:** `py -m pip install -r requirements.txt`, depois `cp .env.example .env` e preencher, depois `py -m streamlit run app.py --server.headless true --server.port 8501`. Para reiniciar, ver `LICOES.md`.
 - **Testar o LLM local:** `curl -s $LOCAL_LLM_URL/models` (URL no `.env`)
 - **Testar a chave Gemini sem exibi-la:** `py -c "from dotenv import load_dotenv; load_dotenv('.env'); import os; from google import genai; print(genai.Client(api_key=os.environ['GEMINI_API_KEY']).models.generate_content(model='gemini-3.6-flash', contents='responda: ok').text)"`
+- **Rodar os testes:** `py -m pytest -q` da raiz (inclui os testes das pastas do framework).
 - **Avaliação de modelos:** ver `tests/AVALIACAO_MODELOS.md`, seção 9.
 - **Push para o servidor git interno (Gitea):** `git push origin <branch>` costuma funcionar direto (credencial em cache); se der "Authentication failed", `GCM_INTERACTIVE=always git push origin <branch>` da sessão principal, com o Rodrigo autorizando no navegador. Repositório novo precisa ser criado antes pela tela (o servidor não cria por push).
 - **Publicar uma branch no GitHub** (desde 30/09, recurso `publicar_snapshot` do framework): `bash publicar_snapshot/publicar_snapshot.sh --ramo <branch>` (`main` alimenta a produção, `homologacao` o app de homologação; sem `--ramo`, publica a `main`). Use `--simular` antes, para ver o que muda. Configuração do app (exclusões e padrões da trava) em `publicar_snapshot.conf`, que nunca vai para o snapshot.
