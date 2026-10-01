@@ -7,8 +7,9 @@
 Objetivo da rodada: o framework (`nuati-framework` @ `29880aa`, branch `homologacao` de lá) entra só na **homologação** deste app, e o que for visto no ar vira evidência para a v0.1.0 do framework. A **produção não recebe o framework** nesta rodada: a `main` nasceu do `master`, sem mudança de código.
 
 - [x] (30/09) Passos 0 a 5: tags `pre-framework-2026-09-30-master` e `pre-framework-2026-09-30-feat-llm-cadeia` (interno); linha de base 19 testes; `homologacao` (de `feat/llm-cadeia`) com os 5 recursos adotados, um commit cada; `main` = `master` (`eab1039`); snapshots no GitHub `main` = `3709a25`, `homologacao` = `2233c9a`. Detalhes no `log.md` de 30/09.
-- [ ] **(Rodrigo) Passo 6, Streamlit Cloud:** ver `BLOCKED-ON-RODRIGO.md`.
-- [ ] Passo 7: conferir os dois apps no ar com o Rodrigo, recurso por recurso (branding, llm_cadeia, extracao_texto com PDF/DOCX/URL, tempo_economizado, publicar_snapshot).
+- [x] (30/09) Passo 6 (Rodrigo): produção na `main` (mesma URL) e `checklist-conformidade-homologacao` na `homologacao`.
+- [x] (01/10) Passo 7: os 5 recursos conferidos no ar e a produção igual a antes (`log.md`). Falta só o julgamento do Rodrigo sobre a clareza do dropdown do tempo economizado.
+- [ ] 📝 Limpeza do app: `use_container_width` está obsoleto no Streamlit 1.64 (avisos no log da nuvem); trocar por `width="stretch"`.
 - [ ] Passo 8 (só com o OK do Rodrigo): `main` como padrão no GitHub; listar e, com nova confirmação, apagar `master`/`feat/llm-cadeia` (GitHub e interno) e o app `-v2`. No Gitea, a branch padrão se troca na tela (Rodrigo).
 - [ ] Passo 9: atualizar as linhas do checklist no registro de cópias (README §4 do framework, branch `homologacao` de lá).
 - [ ] Pedido ao framework: `publicar_snapshot` 1.0.0 falha ao publicar uma branch diferente da aberta (ver `LICOES.md` de 30/09).

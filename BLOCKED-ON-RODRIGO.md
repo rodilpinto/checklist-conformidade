@@ -4,7 +4,9 @@
 
 ## Abertas
 
-- 🔴 **Passo 6 do passe por app (30/09): Streamlit Cloud** (share.streamlit.io; o Streamlit não troca a branch de um app, é apagar e recriar):
+- 🟡 **Passo 7/8 do passe por app:** julgar se a explicação do tempo economizado (dropdown "Como chegamos a esse número?" no app de homologação) está clara; e dar o OK para o passo 8 (`main` padrão no GitHub; depois, com nova confirmação, apagar `master`/`feat/llm-cadeia` e o app `-v2`).
+
+- ✅ (30/09, feito) ~~**Passo 6 do passe por app (30/09): Streamlit Cloud**~~ (share.streamlit.io; o Streamlit não troca a branch de um app, é apagar e recriar):
   1. No app de produção (`checklist-conformidade.streamlit.app`, hoje na branch `master`): **copiar o texto dos Secrets** e guardar fora do navegador.
   2. **Apagar** esse app e **recriá-lo com a mesma URL** (`checklist-conformidade`), repo `rodilpinto/checklist-conformidade`, branch **`main`** (se não aparecer na lista, digitar), arquivo `app.py`; colar **os mesmos Secrets** (sem mudança, com a exceção da `GEMINI_API_KEY` e o `GEMINI_MODEL`).
   3. Criar o app **`checklist-conformidade-homologacao`**, mesmo repo, branch **`homologacao`**, arquivo `app.py`; Secrets = bloco padrão abaixo.

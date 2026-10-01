@@ -2,6 +2,19 @@
 
 <!-- linha do tempo, mais recente no topo; só acrescentar -->
 
+## 2026-09-30 | passe por app: passos 6 e 7 (apps no ar e conferência)
+
+- Passo 6 (Rodrigo): produção recriada na mesma URL na branch `main`, com os mesmos Secrets; `checklist-conformidade-homologacao` criado na `homologacao`.
+- Homologação abriu com `StreamlitAPIException` ("←" não é emoji) no aviso de "nenhum modelo configurado": bug do app, corrigido em `1598bf1` (snapshot `8133664`). A causa de fundo era o app sem chave visível; com **Reboot**, funcionou (o `llm_cadeia` lê os Secrets no início do processo).
+- Log da nuvem: `local` falhou com `ConnectTimeoutError` (IP interno inalcançável fora da rede) e ficou 300 s em espera; a cadeia seguiu para o Gemini. Comportamento esperado (LESSONS do framework).
+- Passo 7, conferido pelo Claude no navegador (Playwright), 01/10 ~01:12-01:19 UTC:
+  - homologação, `branding`: título da aba "… | Câmara dos Deputados", cabeçalho com o logo, rodapé com a assinatura das unidades e o logo;
+  - `llm_cadeia`: barra lateral com a cadeia em ordem (local, gemini, gemini-2, groq-2, cerebras-2, openrouter-2) e o campo de chave própria; cada geração mostrou "Gerado por gemini (gemini-3.5-flash-lite)";
+  - `extracao_texto`: PDF e DOCX de teste (Arts. 10 e 11) viraram 2 itens com esses artigos (conferido no Excel baixado); a URL oficial da Portaria 227 gerou 83 itens em cerca de 1 min 15 s;
+  - `tempo_economizado`: linha e dropdown aparecem; 2 itens = 18 min, 83 itens = 12h27min (9,0 × itens). A clareza da explicação para quem não conhece a conta fica para o julgamento do Rodrigo;
+  - `publicar_snapshot`: snapshots publicados sem exceção na trava;
+  - produção: tela antiga do `master` (seletor Gemini/local, chave configurada), geração curta deu "2 itens gerados, tempo manual estimado: 18 min".
+
 ## 2026-09-30 | passe por app: framework na homologação (passos 0 a 5)
 
 - Passo 0 (confirmado pelo Rodrigo): `master` (app principal) → `main`; `feat/llm-cadeia` (app `-v2`) → `homologacao`; produção sem framework nesta rodada. Entre o snapshot no ar (`69f8c53`) e o `master` interno (`eab1039`), só documentação e `.gitattributes` mudam.
