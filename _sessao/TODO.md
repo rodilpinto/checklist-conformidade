@@ -1,8 +1,8 @@
 # TODO — checklist-conformidade
 
-<!-- last_audit: 2026-09-30 · itens concretos, mais urgentes no topo · ações que só o Rodrigo pode fazer: BLOCKED-ON-RODRIGO.md (raiz) -->
+<!-- last_audit: 2026-10-01 · itens concretos, mais urgentes no topo · ações que só o Rodrigo pode fazer: BLOCKED-ON-RODRIGO.md (raiz) -->
 
-## ▶ Passe por app em andamento (30/09): 1º app a receber o framework
+## ✅ Passe por app concluído (30/09-01/10): 1º app a receber o framework
 
 Objetivo da rodada: o framework (`nuati-framework` @ `29880aa`, branch `homologacao` de lá) entra só na **homologação** deste app, e o que for visto no ar vira evidência para a v0.1.0 do framework. A **produção não recebe o framework** nesta rodada: a `main` nasceu do `master`, sem mudança de código.
 
@@ -10,9 +10,10 @@ Objetivo da rodada: o framework (`nuati-framework` @ `29880aa`, branch `homologa
 - [x] (30/09) Passo 6 (Rodrigo): produção na `main` (mesma URL) e `checklist-conformidade-homologacao` na `homologacao`.
 - [x] (01/10) Passo 7: os 5 recursos conferidos no ar e a produção igual a antes (`log.md`). Falta só o julgamento do Rodrigo sobre a clareza do dropdown do tempo economizado.
 - [ ] 📝 Limpeza do app: `use_container_width` está obsoleto no Streamlit 1.64 (avisos no log da nuvem); trocar por `width="stretch"`.
-- [ ] Passo 8 (só com o OK do Rodrigo): `main` como padrão no GitHub; listar e, com nova confirmação, apagar `master`/`feat/llm-cadeia` (GitHub e interno) e o app `-v2`. No Gitea, a branch padrão se troca na tela (Rodrigo).
-- [ ] Passo 9: atualizar as linhas do checklist no registro de cópias (README §4 do framework, branch `homologacao` de lá).
-- [ ] Pedido ao framework: `publicar_snapshot` 1.0.0 falha ao publicar uma branch diferente da aberta (ver `LICOES.md` de 30/09).
+- [x] (01/10) Passo 8, com o OK do Rodrigo: `main` padrão no GitHub; apagados o app `-v2` (Rodrigo), `master` e `feat/llm-cadeia` no GitHub, `feat/llm-cadeia` e `master` no interno (depois que o Rodrigo trocou a padrão do Gitea para `main`) e as duas branches locais.
+- [x] (01/10) Passo 9: registro de cópias no README §4 do framework (commit `975970b` na `homologacao` de lá).
+- [ ] Depois da v0.1.0 do framework: levar o framework para a produção (`homologacao` → `main` com tag), padronizando antes os *Secrets* da produção (fim da exceção de 28/09).
+- [ ] **Pedido ao framework** (entregue no relatório do passe, 01/10): `publicar_snapshot` 1.0.0 falha ao publicar uma branch diferente da aberta, quando um arquivo de `EXCLUIR` difere entre as duas (`git rm -r --cached` sem `-f` no índice temporário); saída real em `LICOES.md` de 30/09.
 
 ## P0: módulo comum de provedores e chaves de LLM (a partir de 25/09/2026)
 

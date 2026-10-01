@@ -6,9 +6,9 @@
 
 | Item | Valor |
 |---|---|
-| App publicado (**principal, estável**) | https://checklist-conformidade.streamlit.app/ (Streamlit Community Cloud; **público** desde 25/09). Segue `github/master` |
-| App de teste (**v2, homologação**) | https://checklist-conformidade-v2.streamlit.app/ (criado em 28/09). Segue `github/feat/llm-cadeia`. Pela D-C22, vai ser recriado como `<app>-homologacao` no passe por app |
-| Remoto `origin` | servidor git interno da Câmara (Gitea, não GitLab; URL em `INTERNO.md`); o `master` rastreia este |
+| App de produção (`main`) | https://checklist-conformidade.streamlit.app/ (Streamlit Community Cloud; **público** desde 25/09). Recriado em 30/09 na branch `main` do GitHub (D-C22); ainda **sem o framework** (código do antigo `master`) |
+| App de homologação (`homologacao`) | https://checklist-conformidade-homologacao.streamlit.app/ (criado em 30/09). Segue `github/homologacao`, com o framework. O antigo `-v2` foi apagado em 01/10 |
+| Remoto `origin` | servidor git interno da Câmara (Gitea, não GitLab; URL em `INTERNO.md`); origem do histórico completo; branch padrão `main` (trocada pelo Rodrigo em 01/10) |
 | Remoto `github` | https://github.com/rodilpinto/checklist-conformidade.git (**o Streamlit Cloud publica a partir daqui**) |
 | LLM local | endereço em `INTERNO.md`, modelo `google/gemma-4` (llama.cpp; `n_ctx` 20480; velocidade medida em `LICOES.md`). Só é acessível da rede da Câmara |
 | Tokenizer do LLM local | `POST <servidor>/tokenize` (raiz, fora do `/v1`; endereço em `INTERNO.md`) com `{"content": "..."}` |
@@ -18,7 +18,7 @@
 
 ## Variáveis de ambiente (`.env` local; *secrets* no Streamlit Cloud)
 
-A tabela abaixo é a do código do `master` (app principal). Na `feat/llm-cadeia`, os nomes são os da tabela "Segredos" de `llm_cadeia/README.md`; o bloco padrão comum e a exceção do app principal estão em `DECISOES.md` (28/09).
+A tabela abaixo é a do código da `main` (produção, sem framework). Na `homologacao`, os nomes são os da tabela "Segredos" de `llm_cadeia/README.md`; o bloco padrão comum e a exceção do app principal estão em `DECISOES.md` (28/09).
 
 | Variável | Uso |
 |---|---|
@@ -37,6 +37,15 @@ A tabela abaixo é a do código do `master` (app principal). Na `feat/llm-cadeia
 - **Push para o servidor git interno (Gitea):** `git push origin <branch>` costuma funcionar direto (credencial em cache); se der "Authentication failed", `GCM_INTERACTIVE=always git push origin <branch>` da sessão principal, com o Rodrigo autorizando no navegador. Repositório novo precisa ser criado antes pela tela (o servidor não cria por push).
 - **Publicar uma branch no GitHub** (desde 30/09, recurso `publicar_snapshot` do framework): `bash publicar_snapshot/publicar_snapshot.sh --ramo <branch>` (`main` alimenta a produção, `homologacao` o app de homologação; sem `--ramo`, publica a `main`). Use `--simular` antes, para ver o que muda. Configuração do app (exclusões e padrões da trava) em `publicar_snapshot.conf`, que nunca vai para o snapshot.
 - **Publicar no Streamlit Cloud:** atualizar os *secrets* e depois `bash publicar_snapshot/publicar_snapshot.sh --ramo <branch>`. **Nunca** `git push github` direto (em nenhuma branch): o GitHub é público, e o script publica um snapshot sem `_sessao/INTERNO.md` e sem o histórico interno, abortando se achar dado de infraestrutura.
+
+## Ambientes (D-C22, desde 30/09/2026)
+
+| Branch | Papel | App |
+|---|---|---|
+| `main` | estável (produção); padrão no GitHub | checklist-conformidade.streamlit.app |
+| `homologacao` | trabalho do dia a dia | checklist-conformidade-homologacao.streamlit.app |
+
+Receita do dia a dia (trabalhar, testar na homologação, promover com tag, voltar atrás) e regra de sincronia das pastas do framework: README do `nuati-framework`, §2 e §3. Neste app, todo push no interno é seguido do snapshot da branch que mudou (`bash publicar_snapshot/publicar_snapshot.sh --simular --ramo <branch>` e depois sem `--simular`); para publicar uma branch que não é a aberta, use um worktree (`LICOES.md`, 30/09). Tags de retorno: `pre-framework-2026-09-30-master`, `pre-framework-2026-09-30-feat-llm-cadeia`, `pre-llm-cadeia`.
 
 ## Fluxo de versões: estável no ar, trabalho em branches (decidido em 28/09/2026)
 

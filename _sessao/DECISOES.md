@@ -1,6 +1,6 @@
 # DECISOES — checklist-conformidade
 
-<!-- last_updated: 2026-09-30 -->
+<!-- last_updated: 2026-10-01 -->
 
 ## Tomadas
 
@@ -34,6 +34,8 @@
 
 - **2026-09-30** ✅ **Passe por app, 1ª rodada** (Rodrigo, confirmado no passo 0): mapeamento `master` → `main` e `feat/llm-cadeia` → `homologacao`; o framework (`29880aa`, ainda não promovido a `main` lá) entra **só na homologação**; a produção mantém o código e os *Secrets* de hoje (inclusive a exceção da `GEMINI_API_KEY`); o app `-v2` sai quando o `checklist-conformidade-homologacao` estiver no ar, com o OK dele; os 3 arquivos não rastreados ficam como estão (decisão continua no BLOCKED).
 - **2026-09-30** 📝 Tempo economizado sem descontar o tempo da ferramenta (`automatico_min=0`), para o número exibido não mudar na adoção. Descontar a duração da geração é melhoria possível, que muda o número.
+
+- **2026-10-01** ✅ O Rodrigo validou no ar a explicação do tempo economizado (dropdown do recurso `tempo_economizado`) e autorizou o passo 8: `main` padrão no GitHub e remoção das branches velhas e do app `-v2`. Ele trocou a branch padrão do Gitea interno para `main` no mesmo dia, e o `master` interno foi apagado.
 
 ## Evidência dos testes (não é decisão)
 
