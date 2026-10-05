@@ -2,6 +2,47 @@
 
 <!-- linha do tempo, mais recente no topo; só acrescentar -->
 
+## 2026-10-01 | planilha v1.09 na homologacao (código, testes, teste ao vivo)
+
+- Decisões do Rodrigo: "1a 2a 3a 4a" (`DECISOES.md`).
+- Código: `lib/prompt_templates.py` (campos `principio`, `precedencia`, `atores` com `papel`; sem `nivel`), `lib/llm.py` (criticidade e nível pelo código; atores normalizados; `responsavel` = ator principal; aceita o `responsavel` antigo em texto), `lib/excel_builder.py` (17 colunas, ordem por criticidade, sem linhas de capítulo, abas Ações por Ator, Resumo por Capítulo, Legenda), `app.py` (I×P na prévia), `tests/eval_modelos.py` (compara todos os atores responsáveis).
+- Testes: `tests/test_planilha_v109.py` (18); suíte inteira 132 passed, 1 xfailed.
+- Com os 104 itens curados da v1.08 (sem LLM): contagens por capítulo e nível iguais às da aba "Resumo" da v1.08; "Ações por Ator" com 170 linhas. Os dados curados têm plural e singular do mesmo ator, que o código não junta (TODO).
+- Ao vivo, LLM local (`google/gemma-4`, sem raciocínio), capítulo III da Portaria 227 (1.231 caracteres): 6 itens em 70 s, todos com os campos novos. Os nomes vieram **sem acento** ("Gestor de Negocio"): causa, os exemplos novos do prompt escritos sem acento (o prompt antigo produzia acentos, conferido em `tests/resultados/`). Exemplos acentuados, regra explícita e teste; repetido: 71 s, acentos corretos. 📝 Os itens não foram validados contra o gabarito.
+
+## 2026-10-01 | homologacao: publicar_snapshot 1.0.1, MCGR versionado, tag pre-v109
+
+- O Rodrigo confirmou: as próximas features (v1.09) são construídas na `homologacao`, sem mexer na `main`.
+- `publicar_snapshot` 1.0.1: a cópia 1.0.0 conferida por hash contra `nuati-framework` `29880aa` (5/5 iguais); a 1.0.1 copiada de `56d7eb0` por `git archive` (5/5 iguais); `py -m pytest publicar_snapshot -q`: 9 passed. Suíte inteira: 114 passed, 1 xfailed.
+- MCGR é documento público (Rodrigo): `.md` e `.pdf` vão para `referencias/`; a trava do snapshot não acha nada neles.
+- Tag `pre-v109` no commit desta entrada: último ponto da `homologacao` antes do código da v1.09, para a promoção do framework à produção não levar a v1.09 pela metade.
+- Visto ao reler o framework: o `servidor_nuati` 1.0.0 já tem commit na `homologacao` de lá (`f1b8c09`); a troca da `servidor/` daqui continua no TODO.
+
+## 2026-10-01 | checkpoint: servidor do Nuati; v0.1.0 do framework aprovada
+
+- Checkpoint da sessão do servidor. Ao reler os repositórios externos: o framework aprovou a v0.1.0 (F-A3, `ab3fa66`, tag `v0.1.0`) e o buscador promoveu o framework para a produção dele; o `master` do buscador foi apagado (o ledger compartilhado agora se lê em `origin/main`; onboard corrigido).
+- Consequência registrada no TODO: a ida do framework à produção deste app está destravada e exige reescrever o `.env` do servidor com os nomes do `llm_cadeia`.
+
+## 2026-10-01 | app no servidor do Nuati: geração e relatório para o framework
+
+- O Rodrigo mostrou o `.env` do servidor (chave Gemini cortada de propósito): LM Studio `google/gemma-4` com raciocínio desligado, mais Gemini `gemini-3.5-flash-lite`. O Gemini gerou checklist; o local deu "não respondeu a tempo (300s)".
+- Medido daqui: chamada mínima ao LM Studio em 0,75 s, 21,6 tokens/s. Diagnóstico: chamada única grande demais (não é a implantação). Fica para depois.
+- Fluxo de promoção combinado: `main` no Gitea, snapshot no GitHub, e o Rodrigo roda `servidor/atualizar.ps1` no servidor (manual).
+- Relatório e guia para o framework: `_sessao/relatorio-servidor-nuati-para-framework.md`.
+
+## 2026-10-01 | app no servidor do Nuati: instalado na porta 8401
+
+- 1ª tentativa do Rodrigo: `.venv` e dependências ok; o script recusou a porta 8400, ocupada por outro app Streamlit (`C:/amostragem`) fora da lista de portas. Nada foi registrado.
+- O Rodrigo conferiu as portas (livres: 8401, 8404 a 8408) e que o servidor alcança o LM Studio (`/v1/models` listou `google/gemma-4`). 2ª tentativa com `-Porta 8401`: tarefa registrada, regra de firewall criada, app no ar.
+- Conferido daqui (outra máquina da rede): `/_stcore/health` = `ok`, página = 200. Geração ainda não testada.
+- Padrão dos scripts trocado de 8400 para 8401, para o `atualizar.ps1` funcionar sem `-Porta`.
+
+## 2026-10-01 | app no servidor do Nuati: scripts de tarefa agendada
+
+- Pedido do Rodrigo: rodar o app no servidor do Nuati em vez do Streamlit Cloud, por tarefa agendada, puxando do Gitea. Respostas dele: `1a` (scripts na `homologacao`; só `servidor/` vai para a `main`) e a lista de portas liberadas do servidor (`INTERNO.md`). Python no servidor: não sabe (o script confere).
+- Criada a pasta `servidor/` no modelo do AppDOU (`pesquisa_diario/instalar_servico.ps1`): tarefa `ChecklistConformidade` como SYSTEM, ao iniciar o Windows, até 3 reinícios; porta 8400 (📝 escolha minha); firewall do Windows; `atualizar.ps1` com `git pull --ff-only`. `.gitignore` ganhou `logs/`; `.gitattributes`, CRLF para `.ps1`/`.cmd`. Só ASCII nos `.ps1` (PowerShell 5.1).
+- Teste nesta máquina, worktree da `main` em pasta curta, porta 8405: `py -3` achado, `.venv` criado, dependências instaladas, `iniciar.cmd` subiu, `/_stcore/health` = `ok`, parada pela porta liberou. **Não testado aqui:** registrar a tarefa e o firewall (exigem administrador). A 1ª tentativa, no scratchpad, falhou no `pip` com WinError 206 (caminho longo; `LICOES.md`).
+
 ## 2026-10-01 | passe por app: passos 8 a 10 (limpeza, registro, journal)
 
 - O Rodrigo validou o dropdown do tempo economizado e deu o OK para o passo 8.

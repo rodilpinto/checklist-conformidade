@@ -5,7 +5,7 @@
 ## Tomadas
 
 - **2026-09-22** ✅ O app suporta dois providers de LLM, escolhidos na sidebar: Google Gemini (nuvem) e LLM local OpenAI-compatible (`LOCAL_LLM_URL`, `LOCAL_LLM_MODEL`). Decidido pelo Rodrigo. Motivo: a chave do Gemini caiu, e há um servidor interno com `google/gemma-4` (endereço e origem em `INTERNO.md`).
-- **2026-09-22** ✅ O deploy definitivo vai migrar do Streamlit Cloud público para dentro da rede da Câmara, porque o Streamlit Cloud não alcança o IP interno do LLM. O Rodrigo vai levantar como as outras soluções foram implantadas, para padronizar.
+- **2026-09-22** ✅ O deploy definitivo vai migrar do Streamlit Cloud público para dentro da rede da Câmara, porque o Streamlit Cloud não alcança o IP interno do LLM. O Rodrigo vai levantar como as outras soluções foram implantadas, para padronizar. (01/10: padrão do AppDOU, tarefa agendada do Windows; o Streamlit Cloud continua no ar em paralelo.)
 - **2026-09-22** ✅ Proteção anti-SSRF do extrator de URL: allowlist de domínios institucionais (`camara.leg.br` por padrão, configurável em `EXTRACTOR_TRUSTED_DOMAINS`), que podem resolver para IP privado. Os demais IPs privados e reservados continuam bloqueados.
 - **2026-09-22** ✅ Terminologia de referência: **"Encarregado de Proteção de Dados Pessoais"**, a forma do texto oficial da Portaria 227/2025 (decidido pelo Rodrigo). "Encarregado de Dados Pessoais", usado no v1.08 e no `TODO-sync-gerador-nuati.md`, fica como forma não oficial. O prompt do app exige os nomes de cargos exatamente como no normativo e proíbe "DPO".
 - **2026-09-22** ✅ A identidade visual de todos os apps NUATI fica em `branding/` neste repo (decidido pelo Rodrigo), com `branding/README.md` como ponto de referência. A base é o Manual de Identidade Visual oficial da Câmara (v4.00, dez/2025), escolhido pelo Rodrigo a partir do site camara.leg.br. É uma aplicação da marca da Câmara, não uma marca nova: o MIV p.22 proíbe criar marcas próprias para unidades e serviços internos.
@@ -39,6 +39,16 @@
 
 - **2026-10-01** ✅ **Próximo trabalho no app: planilha de saída no padrão v1.08, já como v1.09** (Rodrigo): colunas novas, abas novas, sem as linhas de separação de capítulo, e a v1.09 melhora a separação de atores, porque hoje são campos multivalorados que dificultam o rastreamento. O desenho da separação está em aberto (📝 a propor; `TODO.md`).
 
+- **2026-10-01** ✅ **App no servidor do Nuati** (Rodrigo): roda como tarefa agendada do Windows, no modelo do AppDOU (`pesquisa_diario/instalar_servico.ps1`), puxando do Gitea. Escolhas dele: os scripts nascem na `homologacao` e só a pasta `servidor/` (mais `.gitignore`/`.gitattributes`) vai para a `main`, sem mexer no código (opção `1a`); a porta sai da lista de portas liberadas do servidor (`INTERNO.md`). Porta **8401**: a 8400, minha primeira sugestão, estava ocupada por outro app fora da lista (o script recusou); o Rodrigo conferiu as livres e instalou na 8401, que virou o padrão dos scripts. 📝 Escolhas minhas: tarefa `ChecklistConformidade` como SYSTEM, regra de firewall do Windows criada pelo script, `logs/app.log` fora do git.
+- **2026-10-01** ✅ **O app do servidor usa o LM Studio (`google/gemma-4`) e o Gemini, os dois no `.env`** (Rodrigo configurou; o kobold `gemma4:e4b` da 8081 não foi usado). A barra lateral abre no Gemini, que gerou checklist no servidor; o local estourou o tempo (ver `TODO.md`). Os problemas do LLM local ficam para depois (Rodrigo, 01/10).
+- **2026-10-01** ✅ **Atualizar o servidor é manual:** a cada promoção, o Rodrigo roda `servidor/atualizar.ps1` no servidor. 📝 Pull automático (segunda tarefa agendada) fica de fora: a conta SYSTEM não tem login no Gitea e todo push na `main` iria ao ar sem revisão. O guia da promoção foi para o framework (`_sessao/relatorio-servidor-nuati-para-framework.md`).
+
+- **2026-10-01** ✅ **Planilha v1.09** (Rodrigo, resposta "1a 2a 3a 4a" às opções propostas pelo Claude; medições da v1.08 no `log.md` e no `TODO.md`):
+  1. **Colunas da aba principal (a):** as da v1.08, menos "Nível (v1.06)". O LLM gera "Princípio / Tema" e "Precedência"; o código calcula Criticidade (I×P) e Nível MCGR; Status no padrão da v1.08 (Não Iniciado, Em Andamento, Conforme, Não Conforme, Não Aplicável).
+  2. **Ordem (a):** por criticidade decrescente, como na v1.08; o ID guarda a ordem do normativo. Sem linhas de capítulo.
+  3. **Abas (a):** Checklist, Ações por Ator, Resumo por Capítulo (calculado pelo código) e Legenda. Fora: a aba "Curso" (projeto da SECIN) e a coluna "Fase" (ciclo de vida de IA).
+  4. **Atores (a):** o LLM devolve uma lista de atores por item, cada um com o papel (responsável ou interage), no singular e com o nome do normativo; o código padroniza e monta "Ações por Ator" (uma linha por item × ator). A aba principal mantém "Responsável" com o ator principal.
+
 ## Evidência dos testes (não é decisão)
 
 Todos os números ficam em **`tests/AVALIACAO_MODELOS.md`** (fonte única). Leituras qualitativas relevantes para decidir:
@@ -56,11 +66,12 @@ Todos os números ficam em **`tests/AVALIACAO_MODELOS.md`** (fonte única). Leit
 
 ## Em aberto (só o Rodrigo decide)
 
+- ~~Planilha v1.09~~: decidida em 01/10 (seção "Tomadas").
 - **App público com chave gratuita:** colocar o aviso "não envie documentos internos" ou voltar a deixá-lo privado? No plano gratuito, o Google pode usar os textos enviados. (29/09: a **D-C26** do ledger compartilhado decidiu manter os apps públicos, com o faturamento conferido **desligado** nos dois projetos Google; ela cobre cota e custo. O aviso sobre o uso dos textos no nível gratuito continua em aberto aqui.)
 - **Usar a chave paga da Anthropic (o Rodrigo tem créditos) ou habilitar o faturamento do Gemini?** Resolveria cota e uso dos dados, mas o app não tem provider Claude (é código novo). **Bloqueia:** nada no MVP; entra no desenho do módulo comum.
 - (decidido em 25/09: Streamlit Cloud até o servidor interno ficar pronto) **Onde hospedar a versão funcional agora.**
   - (a) Streamlit Cloud (URL atual), paliativo: só com o Gemini, sujeito à cota e ao uso dos dados do nível gratuito (ou pago, se habilitado).
-  - (b) Servidor na rede da Câmara: funciona com o Gemma, sem custo e sem os dados saírem da rede, mas depende do levantamento de padrão de deploy.
+  - (b) Servidor na rede da Câmara: funciona com o Gemma, sem custo e sem os dados saírem da rede, mas depende do levantamento de padrão de deploy. (01/10: feito, no modelo do AppDOU; a `main` roda no servidor do Nuati além do Streamlit Cloud.)
   - (Não bloqueia mais nada: o MVP está no ar no Streamlit Cloud.)
 - **Habilitar faturamento no projeto Google da unidade?** É condição para usar o Gemini em produção, tanto pela cota (20 requisições/dia/modelo) quanto pelo uso dos dados. Talvez envolva as áreas de contratação e TI. **Bloqueia:** a opção (a) acima para uso real e a comparação com o Gemini nos testes. ⚠ Ligar o faturamento reabre a D-C26.
 - 📝 Confirmar com a Comid (publicidade@camara.leg.br) se ferramentas internas precisam de autorização prévia para usar a marca (MIV p.20-21). **Bloqueia:** nada técnico; é conformidade do `branding/`.

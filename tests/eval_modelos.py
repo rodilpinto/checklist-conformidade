@@ -260,8 +260,14 @@ def atores(texto) -> set[str]:
     return {nome for nome, rx in ATORES.items() if re.search(rx, t)}
 
 
+def responsaveis_do_modelo(m: dict) -> str:
+    """Planilha v1.09: todos os atores com papel "Responsável" (o "responsavel" é só o principal)."""
+    nomes = [a["nome"] for a in m.get("atores") or [] if a.get("papel") == "Responsável"]
+    return " / ".join(nomes) or str(m.get("responsavel") or "")
+
+
 def responsabilidade(pares) -> dict:
-    casos = [(atores(g.get("responsavel")), atores(m.get("responsavel"))) for g, m, _ in pares if m]
+    casos = [(atores(g.get("responsavel")), atores(responsaveis_do_modelo(m))) for g, m, _ in pares if m]
     casos = [(a, b) for a, b in casos if a]
     if not casos:
         return {"n": 0}

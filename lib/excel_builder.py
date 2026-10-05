@@ -50,13 +50,11 @@ from openpyxl.worksheet.worksheet import Worksheet
 HEADER_FONT = Font(name="Arial", size=11, bold=True, color="FFFFFF")
 DATA_FONT = Font(name="Arial", size=10)
 DATA_FONT_BOLD = Font(name="Arial", size=10, bold=True)
-SECTION_FONT = Font(name="Arial", size=11, bold=True, color="1F4E79")
 RISK_FONT_WHITE = Font(name="Arial", size=10, bold=True, color="FFFFFF")
 RISK_FONT_DARK = Font(name="Arial", size=10, bold=True, color="000000")
 
 # -- Preenchimentos ----------------------------------------------------------
 HEADER_FILL = PatternFill("solid", fgColor="1F4E79")
-SECTION_FILL = PatternFill("solid", fgColor="D6E4F0")
 ALT_ROW_FILL = PatternFill("solid", fgColor="F2F7FB")
 WHITE_FILL = PatternFill("solid", fgColor="FFFFFF")
 
@@ -92,26 +90,49 @@ ALIGN_CENTER = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
 # -- Layout de colunas -------------------------------------------------------
 # (chave do dict, título do header, largura em caracteres)
+# Planilha v1.09: colunas da v1.08 da Portaria 227 (gerador-checklists/), menos
+# "Nível (v1.06)"; decisão de 01/10/2026 em _sessao/DECISOES.md.
 COLUMNS: list[tuple[str, str, int]] = [
-    ("id",              "Nº",              5),
-    ("capitulo",        "Capítulo",       14),
-    ("artigo",          "Artigo",         12),
-    ("texto_literal",   "Texto Literal",  55),
-    ("requisito",       "Requisito",      40),
-    ("risco",           "Risco",          40),
-    ("probabilidade",   "Prob.",           7),
-    ("impacto",         "Impacto",         8),
-    ("nivel",           "Nível",          12),
-    ("mitigacao",       "Mitigação",      40),
-    ("responsavel",     "Responsável",    22),
-    ("evidencia",       "Evidência",      30),
-    ("status",          "Status",         16),
-    ("observacoes",     "Observações",    30),
+    ("id",              "ID",                              5),
+    ("capitulo",        "Capítulo",                       16),
+    ("artigo",          "Artigo(s)",                      12),
+    ("texto_literal",   "Texto Literal do Artigo",        55),
+    ("principio",       "Princípio / Tema",               20),
+    ("requisito",       "Requisito / Obrigação",          40),
+    ("risco",           "Risco de Não Conformidade",      40),
+    ("impacto",         "Impacto\n(1-5 MCGR)",            10),
+    ("probabilidade",   "Probabilidade\n(1-5 MCGR)",      14),
+    ("criticidade",     "Criticidade\n(I×P)",             12),
+    ("nivel",           "Nível de\nRisco MCGR",           13),
+    ("precedencia",     "Precedência\n(decorrências)",    35),
+    ("mitigacao",       "Medida de Mitigação",            40),
+    ("responsavel",     "Responsável pela Mitigação",     22),
+    ("evidencia",       "Evidência Esperada",             30),
+    ("status",          "Status",                         16),
+    ("observacoes",     "Observações / Plano de Ação",    30),
 ]
 
-# Valores permitidos para validação de dados
-STATUS_OPTIONS = "Não Iniciado,Em Andamento,Concluído,Não Aplicável"
+# Aba "Ações por Ator": uma linha por item × ator
+ACOES_COLUMNS: list[tuple[str, str, int]] = [
+    ("ator",            "Ator",                           24),
+    ("papel",           "Papel",                          13),
+    ("id",              "ID do Item",                      8),
+    ("capitulo",        "Capítulo",                       16),
+    ("artigo",          "Artigo(s)",                      12),
+    ("requisito",       "Requisito / Obrigação",          45),
+    ("criticidade",     "Criticidade\n(I×P)",             12),
+    ("nivel",           "Nível de\nRisco MCGR",           13),
+    ("evidencia",       "Evidência Esperada",             35),
+    ("status",          "Status",                         16),
+    ("observacoes",     "Observações",                    30),
+]
+
+# Valores permitidos para validação de dados (Status no padrão da v1.08)
+STATUS_OPTIONS = "Não Iniciado,Em Andamento,Conforme,Não Conforme,Não Aplicável"
 NIVEL_OPTIONS = "Muito Alto,Alto,Moderado,Baixo"
+
+# Colunas centralizadas (valores curtos)
+_CENTER_KEYS = ("id", "probabilidade", "impacto", "criticidade", "nivel", "status", "papel")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # HELPERS INTERNOS
@@ -126,17 +147,6 @@ def _style_header_row(ws: Worksheet, row: int, num_cols: int) -> None:
         cell.fill = HEADER_FILL
         cell.alignment = ALIGN_HEADER
         cell.border = THIN_BORDER
-
-
-def _style_section_row(ws: Worksheet, row: int, num_cols: int, label: str) -> None:
-    """Insere linha de separação visual para mudança de capítulo (sem merge)."""
-    cell = ws.cell(row=row, column=1, value=label)
-    cell.font = SECTION_FONT
-    cell.fill = SECTION_FILL
-    cell.alignment = Alignment(horizontal="left", vertical="center")
-    for col_idx in range(1, num_cols + 1):
-        ws.cell(row=row, column=col_idx).border = THIN_BORDER
-        ws.cell(row=row, column=col_idx).fill = SECTION_FILL
 
 
 def _apply_risk_style(cell: Any, nivel: str) -> None:
@@ -316,9 +326,10 @@ def _build_legend_sheet(wb: Workbook) -> None:
 
     aviso = (
         "Esta planilha foi gerada automaticamente por inteligência artificial "
-        "(Google Gemini) a partir do texto do normativo informado.\n\n"
-        "A classificação de risco (Muito Alto, Alto, Moderado, Baixo), bem "
-        "como os valores de probabilidade e impacto, são uma SUGESTÃO INICIAL "
+        "a partir do texto do normativo informado.\n\n"
+        "A classificação de risco (Muito Alto, Alto, Moderado, Baixo), os "
+        "valores de probabilidade e impacto, a precedência e os atores são "
+        "uma SUGESTÃO INICIAL "
         "produzida pela IA com base no teor do dispositivo legal e na "
         "metodologia MCGR da Câmara dos Deputados. Ela NÃO substitui o "
         "julgamento profissional do auditor, gestor ou responsável pela "
@@ -345,33 +356,38 @@ def _build_legend_sheet(wb: Workbook) -> None:
     row += 1
 
     campos = [
-        ("Nº", "Número sequencial do item."),
+        ("ID", "Número do item na ordem do normativo (a aba vem ordenada por criticidade)."),
         ("Capítulo", "Capítulo ou seção do normativo."),
-        ("Artigo", "Artigo, inciso, parágrafo ou alínea específica."),
+        ("Artigo(s)", "Artigo, inciso, parágrafo ou alínea específica."),
         ("Texto Literal", "Transcrição literal do dispositivo legal (sem paráfrase)."),
+        ("Princípio / Tema", "Princípio ou tema do dispositivo."),
         ("Requisito", "O que deve ser verificado ou atendido."),
         ("Risco", "Consequência do não atendimento ao requisito."),
-        ("Prob.", "Probabilidade de ocorrência (1-5, conforme escala MCGR)."),
         ("Impacto", "Impacto sobre os objetivos (1-5, conforme escala MCGR)."),
-        ("Nível", "Criticidade (P×I): Muito Alto (20-25), Alto (10-16), Moderado (4-9), Baixo (1-3)."),
+        ("Probabilidade", "Probabilidade de ocorrência (1-5, conforme escala MCGR)."),
+        ("Criticidade", "Impacto × Probabilidade (1 a 25), calculada pela ferramenta."),
+        ("Nível MCGR", "Faixa da criticidade: Muito Alto (20-25), Alto (10-16), Moderado (4-9), Baixo (1-3)."),
+        ("Precedência", "Dispositivos que decorrem deste ou que ele afeta (informativa; conferir no normativo)."),
         ("Mitigação", "Ação sugerida para atender ao requisito (evitar, transferir, mitigar ou aceitar)."),
-        ("Responsável", "Ator ou área responsável pelo atendimento."),
+        ("Responsável", "Ator principal. Todos os atores do item estão na aba \"Ações por Ator\"."),
         ("Evidência", "Documento ou artefato que comprova o atendimento."),
-        ("Status", "Andamento: Não Iniciado, Em Andamento, Concluído, Não Aplicável."),
-        ("Observações", "Notas livres do avaliador."),
+        ("Status", "Não Iniciado, Em Andamento, Conforme, Não Conforme ou Não Aplicável."),
+        ("Observações", "Notas livres do avaliador ou plano de ação."),
+        ("Ações por Ator", "Uma linha por item e ator, com o papel (Responsável ou Interage); filtre pelo ator."),
+        ("Resumo por Capítulo", "Quantidade de itens por capítulo e nível de risco."),
     ]
 
     for campo, descricao in campos:
         cell_campo = ws.cell(row=row, column=1, value=campo)
         cell_campo.font = Font(name="Arial", size=10, bold=True)
         cell_campo.border = THIN_BORDER
-        cell_campo.alignment = Alignment(vertical="center")
+        cell_campo.alignment = Alignment(vertical="center", wrap_text=True)
 
         cell_desc = ws.cell(row=row, column=2, value=descricao)
         cell_desc.font = Font(name="Arial", size=10)
         cell_desc.border = THIN_BORDER
-        cell_desc.alignment = Alignment(vertical="center")
-        ws.row_dimensions[row].height = 22
+        cell_desc.alignment = Alignment(vertical="center", wrap_text=True)
+        ws.row_dimensions[row].height = 22 if len(descricao) <= 75 else 30
         row += 1
 
 
@@ -389,6 +405,144 @@ def _safe_value(value: Any) -> Any:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# ABAS DE TABELA
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+def _sort_key(item: dict) -> tuple:
+    """Criticidade e impacto decrescentes, depois a ordem do normativo (ID).
+
+    Itens sem notas vão para o fim.
+    """
+    crit = item.get("criticidade")
+    imp = item.get("impacto")
+    return (
+        -(crit if isinstance(crit, (int, float)) else -1),
+        -(imp if isinstance(imp, (int, float)) else -1),
+        item.get("id") or 0,
+    )
+
+
+def _write_table(
+    ws: Worksheet,
+    columns: list[tuple[str, str, int]],
+    rows: list[dict],
+) -> None:
+    """Escreve cabeçalho, linhas, filtro, painel fixo, validações e impressão."""
+    num_cols = len(columns)
+    keys = [key for (key, _, _) in columns]
+
+    for col_idx, (_, header_text, width) in enumerate(columns, start=1):
+        ws.column_dimensions[get_column_letter(col_idx)].width = width
+        ws.cell(row=1, column=col_idx, value=header_text)
+    _style_header_row(ws, 1, num_cols)
+    ws.freeze_panes = "A2"
+
+    for row_idx, row in enumerate(rows, start=2):
+        row_fill = ALT_ROW_FILL if row_idx % 2 == 1 else WHITE_FILL
+        for col_idx, key in enumerate(keys, start=1):
+            cell = ws.cell(row=row_idx, column=col_idx)
+            cell.value = _safe_value(row.get(key, ""))
+            cell.font = DATA_FONT
+            cell.border = THIN_BORDER
+            cell.fill = row_fill
+            cell.alignment = ALIGN_CENTER if key in _CENTER_KEYS else ALIGN_WRAP
+            if key == "nivel":
+                _apply_risk_style(cell, str(row.get("nivel", "") or ""))
+
+    last_row = max(len(rows) + 1, 2)
+    ws.auto_filter.ref = f"A1:{get_column_letter(num_cols)}{last_row}"
+
+    for key, options, title, error in (
+        ("status", STATUS_OPTIONS, "Status", "Selecione um dos status da lista."),
+        ("nivel", NIVEL_OPTIONS, "Nível de Risco",
+         "Selecione: Muito Alto, Alto, Moderado ou Baixo."),
+    ):
+        if key not in keys:
+            continue
+        letter = get_column_letter(keys.index(key) + 1)
+        dv = DataValidation(
+            type="list",
+            formula1=f'"{options}"',
+            allow_blank=True,
+            showErrorMessage=True,
+            errorTitle="Valor inválido",
+            error=error,
+            showInputMessage=True,
+            promptTitle=title,
+            prompt=f"Selecione: {options.replace(',', ', ')}.",
+        )
+        dv.add(f"{letter}2:{letter}{last_row}")
+        ws.add_data_validation(dv)
+
+    _auto_fit_row_heights(ws, 1, len(rows) + 2, columns)
+
+    ws.sheet_properties.pageSetUpPr = PageSetupProperties(fitToPage=True)
+    ws.page_setup.orientation = "landscape"
+    ws.page_setup.fitToWidth = 1
+    ws.page_setup.fitToHeight = 0
+    ws.page_setup.paperSize = ws.PAPERSIZE_A4
+
+
+def _acoes_rows(items: list[dict]) -> list[dict]:
+    """Uma linha por item × ator: ordem alfabética do ator, depois a do checklist."""
+    rows = []
+    for item in sorted(items, key=_sort_key):
+        for ator in item.get("atores") or []:
+            rows.append({**item, "ator": ator.get("nome"), "papel": ator.get("papel"),
+                         "status": "", "observacoes": ""})
+    # sort estável: dentro de cada ator, mantém a ordem do checklist
+    rows.sort(key=lambda r: str(r["ator"] or "").casefold())
+    return rows
+
+
+def _build_resumo_sheet(wb: Workbook, items: list[dict]) -> None:
+    """Itens por capítulo e nível MCGR, com valores fixos (sem fórmulas)."""
+    ws = wb.create_sheet("Resumo por Capítulo")
+    niveis = NIVEL_OPTIONS.split(",")
+    faixas = {"Muito Alto": "20-25", "Alto": "10-16", "Moderado": "4-9", "Baixo": "1-3"}
+    columns = ([("capitulo", "Capítulo", 34), ("dispositivos", "Dispositivos", 26),
+                ("total", "Total", 8)]
+               + [(n, f"{n}\n({faixas[n]})", 12) for n in niveis])
+    if any(item.get("nivel") not in niveis for item in items):
+        columns.append(("sem_nivel", "Sem\nclassificação", 14))
+
+    por_capitulo: dict[str, dict] = {}
+    for item in sorted(items, key=lambda i: i.get("id") or 0):  # ordem do normativo
+        cap = str(item.get("capitulo") or "(sem capítulo)")
+        linha = por_capitulo.setdefault(cap, {"capitulo": cap, "artigos": [], "total": 0,
+                                              **{n: 0 for n in niveis}, "sem_nivel": 0})
+        linha["artigos"].append(str(item.get("artigo") or ""))
+        linha["total"] += 1
+        nivel = item.get("nivel")
+        linha[nivel if nivel in niveis else "sem_nivel"] += 1
+
+    rows = []
+    for linha in por_capitulo.values():
+        arts = [a for a in linha.pop("artigos") if a]
+        if len(arts) > 1 and arts[0] != arts[-1]:
+            linha["dispositivos"] = f"{arts[0]} a {arts[-1]}"
+        else:
+            linha["dispositivos"] = arts[0] if arts else ""
+        rows.append(linha)
+    total = {"capitulo": "Total", "dispositivos": "",
+             **{k: sum(r[k] for r in rows) for k in ["total", *niveis, "sem_nivel"]}}
+
+    for col_idx, (_, header_text, width) in enumerate(columns, start=1):
+        ws.column_dimensions[get_column_letter(col_idx)].width = width
+        ws.cell(row=1, column=col_idx, value=header_text)
+    _style_header_row(ws, 1, len(columns))
+    ws.row_dimensions[1].height = 36
+
+    for row_idx, row in enumerate([*rows, total], start=2):
+        for col_idx, (key, _, _) in enumerate(columns, start=1):
+            cell = ws.cell(row=row_idx, column=col_idx, value=_safe_value(row.get(key, "")))
+            cell.font = DATA_FONT_BOLD if row is total else DATA_FONT
+            cell.border = THIN_BORDER
+            cell.alignment = ALIGN_WRAP if key in ("capitulo", "dispositivos") else ALIGN_CENTER
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # FUNÇÃO PRINCIPAL
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -398,38 +552,31 @@ def build_excel(
     title: str = "Checklist de Conformidade",
 ) -> bytes:
     """
-    Gera planilha Excel formatada a partir de uma lista de itens de checklist.
+    Gera a planilha v1.09 a partir dos itens validados (``lib.llm.validate_items``).
+
+    Abas: checklist (ordenado por criticidade, sem linhas de capítulo), "Ações por
+    Ator" (uma linha por item × ator), "Resumo por Capítulo" e "Legenda".
 
     Parameters
     ----------
     items : list[dict]
-        Lista de dicionários, cada um com as chaves:
-        id, capitulo, artigo, texto_literal, requisito, risco, nivel,
-        mitigacao, responsavel, evidencia.
-        As chaves ``status`` e ``observacoes`` são opcionais (default: vazio).
+        Itens com as chaves de ``COLUMNS`` (id, capitulo, artigo, texto_literal,
+        principio, requisito, risco, impacto, probabilidade, criticidade, nivel,
+        precedencia, mitigacao, responsavel, evidencia) e ``atores`` (lista de
+        {"nome", "papel"}). ``status`` e ``observacoes`` são opcionais.
 
     title : str
-        Título exibido na aba da planilha (máx. 31 caracteres, limitação Excel).
+        Título da aba principal (máx. 31 caracteres, limitação Excel).
 
     Returns
     -------
     bytes
-        Conteúdo do arquivo .xlsx pronto para download (BytesIO.getvalue()).
+        Conteúdo do arquivo .xlsx pronto para download.
 
     Raises
     ------
     ValueError
         Se ``items`` estiver vazio.
-
-    Example
-    -------
-    >>> data = [{"id": 1, "capitulo": "Cap. I", "artigo": "Art. 1º",
-    ...          "texto_literal": "...", "requisito": "...", "risco": "...",
-    ...          "nivel": "Alto", "mitigacao": "...", "responsavel": "...",
-    ...          "evidencia": "..."}]
-    >>> xlsx = build_excel(data, title="Meu Checklist")
-    >>> isinstance(xlsx, bytes)
-    True
     """
     if not items:
         raise ValueError("A lista de itens não pode estar vazia.")
@@ -443,126 +590,11 @@ def build_excel(
         safe_title = safe_title.replace(ch, "_")
     ws.title = safe_title[:31]
 
-    num_cols = len(COLUMNS)
-
-    # ── 1. Definir larguras das colunas ──────────────────────────────────────
-    for col_idx, (_, _, width) in enumerate(COLUMNS, start=1):
-        ws.column_dimensions[get_column_letter(col_idx)].width = width
-
-    # ── 2. Escrever cabeçalhos ───────────────────────────────────────────────
-    header_row = 1
-    for col_idx, (_, header_text, _) in enumerate(COLUMNS, start=1):
-        ws.cell(row=header_row, column=col_idx, value=header_text)
-
-    _style_header_row(ws, header_row, num_cols)
-
-    # ── 3. Auto-filtro na linha de cabeçalho ─────────────────────────────────
-    last_col_letter = get_column_letter(num_cols)
-    ws.auto_filter.ref = f"A{header_row}:{last_col_letter}{header_row}"
-
-    # ── 4. Freeze panes (fixar cabeçalho ao rolar) ──────────────────────────
-    ws.freeze_panes = "A2"
-
-    # ── 5. Índice da coluna "Nível" (para estilo de risco) ──────────────────
-    nivel_col_idx = next(
-        i for i, (key, _, _) in enumerate(COLUMNS, start=1) if key == "nivel"
-    )
-    status_col_idx = next(
-        i for i, (key, _, _) in enumerate(COLUMNS, start=1) if key == "status"
-    )
-
-    # ── 6. Escrever dados com separadores de capítulo ────────────────────────
-    current_row = header_row + 1
-    previous_capitulo: str | None = None
-    data_row_count = 0  # conta apenas linhas de dados (não separadores)
-
-    for item in items:
-        capitulo = str(item.get("capitulo", "") or "")
-
-        # Inserir separador visual quando o capítulo muda
-        if capitulo and capitulo != previous_capitulo:
-            _style_section_row(ws, current_row, num_cols, capitulo)
-            current_row += 1
-            previous_capitulo = capitulo
-
-        # Determinar preenchimento de fundo alternado
-        is_odd = data_row_count % 2 == 1
-        row_fill = ALT_ROW_FILL if is_odd else WHITE_FILL
-
-        # Escrever cada célula da linha
-        for col_idx, (key, _, _) in enumerate(COLUMNS, start=1):
-            cell = ws.cell(row=current_row, column=col_idx)
-            cell.value = _safe_value(item.get(key, ""))
-            cell.font = DATA_FONT
-            cell.border = THIN_BORDER
-            cell.fill = row_fill
-
-            # Colunas curtas (Nº, Nível, Status) ficam centralizadas;
-            # demais com wrap_text alinhado ao topo.
-            if key in ("id", "probabilidade", "impacto", "nivel", "status"):
-                cell.alignment = ALIGN_CENTER
-            else:
-                cell.alignment = ALIGN_WRAP
-
-        # Aplicar estilo de cor ao campo Nível
-        nivel_cell = ws.cell(row=current_row, column=nivel_col_idx)
-        _apply_risk_style(nivel_cell, str(item.get("nivel", "") or ""))
-
-        current_row += 1
-        data_row_count += 1
-
-    last_data_row = current_row - 1
-
-    # ── 7. Atualizar referência do auto-filtro para incluir todas as linhas ──
-    ws.auto_filter.ref = f"A{header_row}:{last_col_letter}{last_data_row}"
-
-    # ── 8. Data validation: Status ───────────────────────────────────────────
-    #    Aplica a todas as células de dados na coluna Status.
-    status_col_letter = get_column_letter(status_col_idx)
-    dv_status = DataValidation(
-        type="list",
-        formula1=f'"{STATUS_OPTIONS}"',
-        allow_blank=True,
-        showErrorMessage=True,
-        errorTitle="Valor inválido",
-        error="Selecione: Não Iniciado, Em Andamento, Concluído ou Não Aplicável.",
-        showInputMessage=True,
-        promptTitle="Status",
-        prompt="Selecione o status do item.",
-    )
-    dv_status.add(f"{status_col_letter}2:{status_col_letter}{last_data_row}")
-    ws.add_data_validation(dv_status)
-
-    # ── 9. Data validation: Nível ────────────────────────────────────────────
-    nivel_col_letter = get_column_letter(nivel_col_idx)
-    dv_nivel = DataValidation(
-        type="list",
-        formula1=f'"{NIVEL_OPTIONS}"',
-        allow_blank=True,
-        showErrorMessage=True,
-        errorTitle="Valor inválido",
-        error="Selecione: Muito Alto, Alto, Moderado ou Baixo.",
-        showInputMessage=True,
-        promptTitle="Nível de Risco",
-        prompt="Selecione a classificação de risco.",
-    )
-    dv_nivel.add(f"{nivel_col_letter}2:{nivel_col_letter}{last_data_row}")
-    ws.add_data_validation(dv_nivel)
-
-    # ── 10. Auto-ajuste de altura das linhas conforme conteúdo ───────────────
-    _auto_fit_row_heights(ws, header_row, current_row, COLUMNS)
-
-    # ── 11. Configuração de impressão (paisagem, ajustar à largura) ─────────
-    ws.sheet_properties.pageSetUpPr = PageSetupProperties(fitToPage=True)
-    ws.page_setup.orientation = "landscape"
-    ws.page_setup.fitToWidth = 1
-    ws.page_setup.fitToHeight = 0
-    ws.page_setup.paperSize = ws.PAPERSIZE_A4
-
-    # ── 12. Criar aba de legenda ──────────────────────────────────────────────
+    _write_table(ws, COLUMNS, sorted(items, key=_sort_key))
+    _write_table(wb.create_sheet("Ações por Ator"), ACOES_COLUMNS, _acoes_rows(items))
+    _build_resumo_sheet(wb, items)
     _build_legend_sheet(wb)
 
-    # ── 13. Salvar em memória e retornar bytes ────────────────────────────────
     buffer = BytesIO()
     wb.save(buffer)
     buffer.seek(0)

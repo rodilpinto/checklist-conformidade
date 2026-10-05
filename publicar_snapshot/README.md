@@ -1,6 +1,6 @@
 # publicar_snapshot: repo interno → snapshot público no GitHub (pasta copiável)
 
-**Versão 1.0.0** (`VERSAO` no script; `--versao` imprime) · **Origem:** `github.com/rodilpinto/nuati-framework`
+**Versão 1.0.1** (`VERSAO` no script; `--versao` imprime) · **Origem:** `github.com/rodilpinto/nuati-framework`
 (privado), pasta `publicar_snapshot/`. Histórico: [`CHANGELOG.md`](CHANGELOG.md).
 
 Para app cuja **origem é o servidor git interno** (histórico completo, notas internas) e que precisa de uma cópia

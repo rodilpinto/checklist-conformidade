@@ -13,22 +13,28 @@ Uso:
 # ---------------------------------------------------------------------------
 # Campos obrigatorios de cada item do checklist (usados tambem em llm.py)
 # ---------------------------------------------------------------------------
+# O "nivel" e a "criticidade" nao vem do modelo: o codigo calcula a partir de
+# probabilidade x impacto (planilha v1.09, decisao de 01/10/2026).
 REQUIRED_FIELDS: list[str] = [
     "capitulo",
     "artigo",
     "texto_literal",
+    "principio",
     "requisito",
     "risco",
     "probabilidade",
     "impacto",
-    "nivel",
+    "precedencia",
     "mitigacao",
-    "responsavel",
+    "atores",
     "evidencia",
 ]
 
 # Niveis de risco aceitos na classificacao (MCGR - Camara dos Deputados)
 VALID_LEVELS: list[str] = ["Muito Alto", "Alto", "Moderado", "Baixo"]
+
+# Papel de cada ator num item do checklist
+PAPEIS: list[str] = ["Responsável", "Interage"]
 
 # ---------------------------------------------------------------------------
 # Prompt de sistema -- instrui o LLM a gerar o checklist
@@ -61,6 +67,9 @@ um checklist de conformidade estruturado em JSON.
      Preservar inclusive erros tipograficos, formatacao original e pontuacao
      do documento fonte. Copiar CARACTER POR CARACTER.
 
+   - "principio": principio ou tema do dispositivo, em ate 8 palavras
+     (ex: "Privacidade e Proteção de Dados Pessoais", "Transparência").
+
    - "requisito": descricao objetiva do que a organizacao precisa fazer ou
      garantir para estar em conformidade com este dispositivo.
 
@@ -91,22 +100,25 @@ um checklist de conformidade estruturado em JSON.
        1 - Muito baixo: compromete minimamente ou nao altera o atingimento
            do objetivo.
 
-   - "nivel": classificacao de risco calculada como criticidade
-     (probabilidade x impacto), conforme faixas do MCGR da Camara dos
-     Deputados. Use SOMENTE um dos seguintes valores:
-     - "Muito Alto": criticidade de 20 a 25 (vermelho).
-     - "Alto": criticidade de 10 a 16 (laranja).
-     - "Moderado": criticidade de 4 a 9 (amarelo).
-     - "Baixo": criticidade de 1 a 3 (verde).
-     O valor do nivel DEVE ser consistente com o produto de
-     probabilidade x impacto.
+   - "precedencia": outros dispositivos que decorrem deste ou que ele afeta,
+     com uma frase curta (ex: "Arts. 8º e 9º: decorrem desta vedação"). Cite
+     SOMENTE dispositivos que existem no texto fornecido ou normativos
+     expressamente citados nele. Se nao houver, use "".
 
    - "mitigacao": acao concreta recomendada para mitigar o risco e garantir
      conformidade. Considere as estrategias de tratamento do MCGR: evitar,
      transferir, mitigar ou aceitar.
 
-   - "responsavel": area, cargo ou papel organizacional responsavel pelo
-     cumprimento do dispositivo.
+   - "atores": lista dos atores (area, cargo, papel organizacional ou orgao)
+     envolvidos no cumprimento do dispositivo. Cada ator e um objeto com:
+       "nome": o nome do ator no SINGULAR, exatamente como aparece no
+               normativo (ex: "Gestor de Negócio", e nao "Gestores de
+               Negócio"). Um ator por objeto: NUNCA junte dois atores no
+               mesmo nome (ex: NAO usar "Ditec / CGE").
+       "papel": "responsavel" (deve cumprir o dispositivo) ou "interage"
+                (e consultado, autoriza ou recebe a acao).
+     Coloque primeiro o responsavel principal. Todo item deve ter pelo
+     menos um ator com papel "responsavel".
 
    - "evidencia": documento, artefato ou registro que comprova o cumprimento
      (ex: ata de reuniao, relatorio, oficio, registro em sistema).
@@ -116,7 +128,7 @@ um checklist de conformidade estruturado em JSON.
 - O campo "texto_literal" deve ser uma copia EXATA do normativo. NUNCA
   parafrasear, resumir, traduzir ou corrigir o texto original.
 - Erros tipograficos presentes no original DEVEM ser preservados.
-- Em TODOS os campos (inclusive requisito, risco, mitigacao e responsavel),
+- Em TODOS os campos (inclusive requisito, risco, mitigacao e atores),
   use os nomes de cargos, papeis, unidades e orgaos EXATAMENTE como aparecem
   no normativo (ex.: "Encarregado de Protecao de Dados Pessoais"). NAO
   substitua por siglas ou termos estrangeiros que nao constem do normativo
@@ -125,10 +137,11 @@ um checklist de conformidade estruturado em JSON.
   gerar um item SEPARADO no checklist.
 - Dispositivos puramente declaratorios (ementas, titulos, preambulos) sem
   conteudo obrigacional podem ser omitidos.
-- O campo "nivel" so aceita os valores: "Muito Alto", "Alto", "Moderado", "Baixo".
 - Os campos "probabilidade" e "impacto" devem ser numeros inteiros de 1 a 5.
-- O "nivel" deve ser consistente com o produto probabilidade x impacto:
-  Muito Alto (20-25), Alto (10-16), Moderado (4-9), Baixo (1-3).
+- Use o MESMO nome para o mesmo ator em todos os itens.
+- Escreva TODOS os campos em portugues com a acentuacao correta (ex:
+  "Gestor de Negócio", "Proteção"), mesmo que estas instrucoes estejam
+  sem acentos.
 - Mantenha a ORDEM dos itens conforme aparecem no normativo (Art. 1 antes
   de Art. 2, etc.).
 - Seja EXAUSTIVO: analise o normativo INTEIRO, do primeiro ao ultimo artigo.
@@ -144,13 +157,17 @@ Retorne SOMENTE um array JSON de objetos. Exemplo:
     "capitulo": "I - Disposicoes Gerais",
     "artigo": "Art. 1o",
     "texto_literal": "Esta portaria estabelece...",
+    "principio": "Escopo da Política",
     "requisito": "Todos os usos de IA devem observar esta Portaria",
     "risco": "Iniciativa de IA implementada sem observancia das diretrizes",
     "probabilidade": 3,
     "impacto": 4,
-    "nivel": "Alto",
+    "precedencia": "Arts. 3º a 39: fundamento de toda a Portaria",
     "mitigacao": "Incluir conformidade com a Portaria como requisito obrigatorio",
-    "responsavel": "Ditec / CGE",
+    "atores": [
+      {"nome": "Ditec", "papel": "responsavel"},
+      {"nome": "CGE", "papel": "interage"}
+    ],
     "evidencia": "Registro formal de ciencia da Portaria por todas as areas"
   }
 ]

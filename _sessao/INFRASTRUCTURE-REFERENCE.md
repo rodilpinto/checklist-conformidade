@@ -8,6 +8,7 @@
 |---|---|
 | App de produção (`main`) | https://checklist-conformidade.streamlit.app/ (Streamlit Community Cloud; **público** desde 25/09). Recriado em 30/09 na branch `main` do GitHub (D-C22); ainda **sem o framework** (código do antigo `master`) |
 | App de homologação (`homologacao`) | https://checklist-conformidade-homologacao.streamlit.app/ (criado em 30/09). Segue `github/homologacao`, com o framework. O antigo `-v2` foi apagado em 01/10 |
+| App no servidor do Nuati (`main`) | tarefa agendada do Windows, porta 8401, servidor e detalhes em `INTERNO.md`; instalação e atualização em `servidor/README.md` (instalado em 01/10/2026) |
 | Remoto `origin` | servidor git interno da Câmara (Gitea, não GitLab; URL em `INTERNO.md`); origem do histórico completo; branch padrão `main` (trocada pelo Rodrigo em 01/10) |
 | Remoto `github` | https://github.com/rodilpinto/checklist-conformidade.git (**o Streamlit Cloud publica a partir daqui**) |
 | LLM local | endereço em `INTERNO.md`, modelo `google/gemma-4` (llama.cpp; `n_ctx` 20480; velocidade medida em `LICOES.md`). Só é acessível da rede da Câmara |
@@ -30,12 +31,13 @@ A tabela abaixo é a do código da `main` (produção, sem framework). Na `homol
 
 ## Receitas
 
+- **Servidor do Nuati (Windows, Agendador de Tarefas):** no servidor, como Administrador, da raiz do clone: `powershell -ExecutionPolicy Bypass -File servidor\instalar_tarefa.ps1 -Porta 8401` (uma vez; exige o `.env` com os nomes que o código da branch lê: o `.env.example` não lista os opcionais, ver `servidor/README.md`) e, a cada push no Gitea, `servidor\atualizar.ps1 -Porta 8401` (`git pull --ff-only`, dependências, reinício). Log em `logs\app.log`; saúde em `http://localhost:8401/_stcore/health`. Detalhes: `servidor/README.md`.
 - **Rodar o app local:** `py -m pip install -r requirements.txt`, depois `cp .env.example .env` e preencher, depois `py -m streamlit run app.py --server.headless true --server.port 8501`. Para reiniciar, ver `LICOES.md`.
 - **Testar o LLM local:** `curl -s $LOCAL_LLM_URL/models` (URL no `.env`)
 - **Testar a chave Gemini sem exibi-la:** `py -c "from dotenv import load_dotenv; load_dotenv('.env'); import os; from google import genai; print(genai.Client(api_key=os.environ['GEMINI_API_KEY']).models.generate_content(model='gemini-3.6-flash', contents='responda: ok').text)"`
 - **Rodar os testes:** `py -m pytest -q` da raiz (inclui os testes das pastas do framework).
 - **Avaliação de modelos:** ver `tests/AVALIACAO_MODELOS.md`, seção 9.
-- **Push para o servidor git interno (Gitea):** `git push origin <branch>` costuma funcionar direto (credencial em cache); se der "Authentication failed", `GCM_INTERACTIVE=always git push origin <branch>` da sessão principal, com o Rodrigo autorizando no navegador. Repositório novo precisa ser criado antes pela tela (o servidor não cria por push).
+- **Push para o servidor git interno (Gitea):** o commit pode ser do agente `gito`, mas o push sai da sessão principal (de um subagente falha com "Authentication failed"; da principal passou sempre em 01/10). `git push origin <branch>` costuma funcionar direto (credencial em cache); se der "Authentication failed", `GCM_INTERACTIVE=always git push origin <branch>` da sessão principal, com o Rodrigo autorizando no navegador. Repositório novo precisa ser criado antes pela tela (o servidor não cria por push).
 - **Publicar uma branch no GitHub** (desde 30/09, recurso `publicar_snapshot` do framework): `bash publicar_snapshot/publicar_snapshot.sh --ramo <branch>` (`main` alimenta a produção, `homologacao` o app de homologação; sem `--ramo`, publica a `main`). Use `--simular` antes, para ver o que muda. Configuração do app (exclusões e padrões da trava) em `publicar_snapshot.conf`, que nunca vai para o snapshot.
 - **Publicar no Streamlit Cloud:** atualizar os *secrets* e depois `bash publicar_snapshot/publicar_snapshot.sh --ramo <branch>`. **Nunca** `git push github` direto (em nenhuma branch): o GitHub é público, e o script publica um snapshot sem `_sessao/INTERNO.md` e sem o histórico interno, abortando se achar dado de infraestrutura.
 
@@ -46,7 +48,9 @@ A tabela abaixo é a do código da `main` (produção, sem framework). Na `homol
 | `main` | estável (produção); padrão no GitHub | checklist-conformidade.streamlit.app |
 | `homologacao` | trabalho do dia a dia | checklist-conformidade-homologacao.streamlit.app |
 
-Receita do dia a dia (trabalhar, testar na homologação, promover com tag, voltar atrás) e regra de sincronia das pastas do framework: README do `nuati-framework`, §2 e §3. Neste app, todo push no interno é seguido do snapshot da branch que mudou (`bash publicar_snapshot/publicar_snapshot.sh --simular --ramo <branch>` e depois sem `--simular`); para publicar uma branch que não é a aberta, use um worktree (`LICOES.md`, 30/09) enquanto a cópia daqui for a 1.0.0 (a 1.0.1 do framework corrige; recópia no `TODO.md`). Tags de retorno: `pre-framework-2026-09-30-master`, `pre-framework-2026-09-30-feat-llm-cadeia`, `pre-llm-cadeia`.
+**Servidor do Nuati:** segue a `main` do Gitea, mas **não** atualiza sozinho. Depois de cada promoção (push da `main` no Gitea), o Rodrigo roda no servidor, como Administrador, `servidor/atualizar.ps1` e confere uma geração curta. Guia completo: `_sessao/relatorio-servidor-nuati-para-framework.md`.
+
+Receita do dia a dia (trabalhar, testar na homologação, promover com tag, voltar atrás) e regra de sincronia das pastas do framework: README do `nuati-framework`, §2 e §3. Neste app, todo push no interno é seguido do snapshot da branch que mudou (⚠ em 01/10 isso não foi feito para os commits do servidor e da documentação: o GitHub `homologacao` está no snapshot de `718eb12`, e a `main` do GitHub não tem a `servidor/`; pendência no `TODO.md`) (`bash publicar_snapshot/publicar_snapshot.sh --simular --ramo <branch>` e depois sem `--simular`); para publicar uma branch que não é a aberta, use um worktree (`LICOES.md`, 30/09) enquanto a cópia daqui for a 1.0.0 (a 1.0.1 do framework corrige; recópia no `TODO.md`). Tags de retorno: `pre-framework-2026-09-30-master`, `pre-framework-2026-09-30-feat-llm-cadeia`, `pre-llm-cadeia`.
 
 ## Fluxo de versões: estável no ar, trabalho em branches (decidido em 28/09/2026)
 

@@ -2,6 +2,15 @@
 
 Versão atual: `VERSAO` em `publicar_snapshot.sh`.
 
+## 1.0.1 (01/10/2026): publicar outra branch com arquivo excluído diferente
+
+Pedido 6.1 do passe por app do checklist (relatório de 01/10): com `homologacao` aberta,
+`--ramo master` abortava com "the following file has staged content different from both the file and the HEAD:
+_sessao/INTERNO.md". Causa: o `git rm --cached` no índice temporário comparava com a branch aberta e a pasta de
+trabalho. Conserto: `-f` nesse `git rm` (só mexe no índice temporário; a branch aberta e a pasta de trabalho não são
+tocadas). Teste novo reproduz o caso (falhava antes, passa agora). Quem usou o contorno do `git worktree` pode voltar
+a rodar o script direto.
+
 ## 1.0.0 (30/09/2026): entra no nuati-framework, generalizado
 
 Nasceu de `checklist-conformidade/scripts/publicar_github.sh`, branch `feat/llm-cadeia` @ `92ac158` (servidor

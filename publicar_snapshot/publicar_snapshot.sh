@@ -13,7 +13,7 @@
 # Nasceu de checklist-conformidade/scripts/publicar_github.sh (@ 92ac158); mudancas no CHANGELOG.md.
 set -euo pipefail
 
-VERSAO="1.0.0"
+VERSAO="1.0.1"
 CONF="publicar_snapshot.conf"
 
 simular=""
@@ -54,7 +54,9 @@ indice=$(mktemp)
 trap 'rm -f "$indice"' EXIT
 GIT_INDEX_FILE="$indice" git read-tree "$ramo"
 for caminho in "${EXCLUIR[@]}"; do
-  GIT_INDEX_FILE="$indice" git rm -r --cached --quiet --ignore-unmatch -- "$caminho"
+  # -f: o indice temporario e o da branch publicada; sem ele, o git compara com a branch ABERTA e a pasta de
+  # trabalho e aborta quando o arquivo difere (pedido 6.1 do checklist, 01/10/2026). So mexe no indice temporario.
+  GIT_INDEX_FILE="$indice" git rm -r --cached -f --quiet --ignore-unmatch -- "$caminho"
 done
 arvore=$(GIT_INDEX_FILE="$indice" git write-tree)
 

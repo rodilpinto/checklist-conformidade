@@ -32,6 +32,7 @@ from typing import Any
 from llm_cadeia import gerar
 
 from lib.prompt_templates import (
+    PAPEIS,
     REQUIRED_FIELDS,
     VALID_LEVELS,
     build_prompt,
@@ -115,13 +116,22 @@ def generate_checklist(text: str, extra_prompt: str = "") -> tuple[list[dict[str
 # Validacao dos itens retornados
 # ---------------------------------------------------------------------------
 def validate_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Valida, sanitiza e numera os itens do checklist."""
+    """Valida, sanitiza e numera os itens do checklist.
+
+    Alem dos campos do modelo, cada item sai com:
+      - "criticidade": probabilidade x impacto (None sem as duas notas);
+      - "nivel": calculado da criticidade (sem notas, o "nivel" do modelo, normalizado);
+      - "atores": lista de {"nome", "papel"} sem repeticao, com a mesma grafia
+        para o mesmo ator em todos os itens (vale a primeira que aparecer);
+      - "responsavel": o ator principal (o 1o "Responsável"; sem nenhum, o 1o ator).
+    """
     if not isinstance(items, list):
         logger.warning("validate_items recebeu tipo %s; convertendo.", type(items))
         items = [items] if isinstance(items, dict) else []
 
     validated: list[dict[str, Any]] = []
     seq = 0
+    grafias: dict[str, str] = {}  # nome em minusculas -> 1a grafia vista
 
     for idx, item in enumerate(items, start=1):
         if not isinstance(item, dict):
@@ -135,16 +145,14 @@ def validate_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
         clean["probabilidade"] = _normalize_score(clean.get("probabilidade"), "probabilidade")
         clean["impacto"] = _normalize_score(clean.get("impacto"), "impacto")
 
-        # Normalizar nivel; se inconsistente com scores, recalcular
-        clean["nivel"] = _normalize_level(clean.get("nivel"))
-        computed = _compute_nivel_from_scores(clean["probabilidade"], clean["impacto"])
-        if computed and clean["nivel"] != computed:
-            logger.info(
-                "Item %d: nivel '%s' inconsistente com P(%s)xI(%s)=%s. Corrigido para '%s'.",
-                idx, clean["nivel"], clean["probabilidade"], clean["impacto"],
-                (clean["probabilidade"] or 0) * (clean["impacto"] or 0), computed,
-            )
-            clean["nivel"] = computed
+        # Criticidade e nivel calculados pelo codigo; o "nivel" do modelo so vale sem notas
+        p, i = clean["probabilidade"], clean["impacto"]
+        clean["criticidade"] = p * i if p is not None and i is not None else None
+        clean["nivel"] = (_compute_nivel_from_scores(p, i)
+                          or _normalize_level(clean.get("nivel")))
+
+        clean["atores"] = _normalize_atores(clean.get("atores"), clean.get("responsavel"), grafias)
+        clean["responsavel"] = _ator_principal(clean["atores"])
 
         seq += 1
         clean["id"] = seq
@@ -167,6 +175,51 @@ def _sanitize_string_fields(item: dict[str, Any]) -> dict[str, Any]:
                 stripped = "'" + stripped
             item[key] = stripped
     return item
+
+
+def _normalize_atores(
+    atores: Any, responsavel_texto: Any, grafias: dict[str, str],
+) -> list[dict[str, str]]:
+    """Lista de atores {"nome", "papel"} limpa, sem repeticao e com grafia unica.
+
+    Sem a lista, aceita o campo antigo "responsavel" em texto ("Ditec / CGE; CDTI"),
+    todos com papel "Responsável".
+    """
+    if not isinstance(atores, list) or not atores:
+        texto = str(responsavel_texto or "")
+        atores = [{"nome": n, "papel": "Responsável"} for n in re.split(r"[/;]", texto)]
+
+    resultado: list[dict[str, str]] = []
+    vistos: set[str] = set()
+    for ator in atores:
+        if isinstance(ator, str):
+            ator = {"nome": ator}
+        if not isinstance(ator, dict):
+            continue
+        nome = re.sub(r"\s+", " ", str(ator.get("nome") or "")).strip()
+        if not nome:
+            continue
+        chave = nome.lower()
+        if chave in vistos:
+            continue
+        vistos.add(chave)
+        nome = grafias.setdefault(chave, nome)
+        papel = _normalize_papel(ator.get("papel"))
+        resultado.append(_sanitize_string_fields({"nome": nome, "papel": papel}))
+    return resultado
+
+
+def _normalize_papel(raw: Any) -> str:
+    """'responsavel'/'RESPONSÁVEL' -> 'Responsável'; o resto -> 'Interage'."""
+    texto = str(raw or "").strip().lower().replace("á", "a")
+    return PAPEIS[0] if texto.startswith("respons") else PAPEIS[1]
+
+
+def _ator_principal(atores: list[dict[str, str]]) -> str | None:
+    for ator in atores:
+        if ator["papel"] == PAPEIS[0]:
+            return ator["nome"]
+    return atores[0]["nome"] if atores else None
 
 
 def _ensure_required_fields(item: dict[str, Any]) -> dict[str, Any]:

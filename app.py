@@ -293,7 +293,7 @@ def _render_result_column() -> None:
         st.caption(f"Gerado por {st.session_state['llm_origem']}")
 
     # Preview em tabela -- selecionar colunas mais relevantes para leitura rápida
-    preview_keys = ["artigo", "requisito", "probabilidade", "impacto", "nivel", "responsavel"]
+    preview_keys = ["artigo", "requisito", "probabilidade", "impacto", "criticidade", "nivel", "responsavel"]
     preview_data = [
         {k: item.get(k, "") for k in preview_keys}
         for item in items
@@ -308,6 +308,7 @@ def _render_result_column() -> None:
             "requisito": st.column_config.TextColumn("O que deve ser verificado", width="large"),
             "probabilidade": st.column_config.NumberColumn("P", width="small"),
             "impacto": st.column_config.NumberColumn("I", width="small"),
+            "criticidade": st.column_config.NumberColumn("I×P", width="small"),
             "nivel": st.column_config.TextColumn("Nível", width="small"),
             "responsavel": st.column_config.TextColumn("Responsável", width="medium"),
         },

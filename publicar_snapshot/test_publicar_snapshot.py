@@ -147,6 +147,20 @@ def test_ramo_novo_descende_da_main_publica(app):
     assert "novo.py" not in _arquivos_publicos(publico, "main")   # a main publica nao mudou
 
 
+def test_publicar_outra_branch_com_arquivo_excluido_diferente(app):
+    """1.0.1 (pedido 6.1 do checklist, 01/10): com homologacao aberta e o _sessao/INTERNO.md diferente entre ela e a
+    main, `--ramo main` abortava em "staged content different from both the file and the HEAD"."""
+    app, publico = app
+    _git(app, "checkout", "-q", "-b", "homologacao")
+    _commit(app, {"_sessao/INTERNO.md": "outra versao interna\n", "novo.py": "x = 1\n"})
+    _escrever(app, {"_sessao/INTERNO.md": "edicao local ainda nao commitada\n"})   # pasta de trabalho diferente
+    r = _rodar(app, "--ramo", "main")
+    assert r.returncode == 0, r.stderr
+    assert _arquivos_publicos(publico) == {"app.py", "publicar_snapshot/publicar_snapshot.sh"}
+    assert _git(app, "rev-parse", "--abbrev-ref", "HEAD") == "homologacao"      # a branch aberta nao mudou
+    assert (app / "_sessao" / "INTERNO.md").read_text(encoding="utf-8") == "edicao local ainda nao commitada\n"
+
+
 def test_sem_conf_ou_ramo_inexistente_e_erro_de_uso(app):
     app, publico = app
     assert _rodar(app, "--ramo", "nao-existe").returncode == 2
