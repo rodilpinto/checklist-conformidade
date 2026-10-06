@@ -45,9 +45,11 @@
 
 - **2026-10-01** ✅ **Planilha v1.09** (Rodrigo, resposta "1a 2a 3a 4a" às opções propostas pelo Claude; medições da v1.08 no `log.md` e no `TODO.md`):
   1. **Colunas da aba principal (a):** as da v1.08, menos "Nível (v1.06)". O LLM gera "Princípio / Tema" e "Precedência"; o código calcula Criticidade (I×P) e Nível MCGR; Status no padrão da v1.08 (Não Iniciado, Em Andamento, Conforme, Não Conforme, Não Aplicável).
-  2. **Ordem (a):** por criticidade decrescente, como na v1.08; o ID guarda a ordem do normativo. Sem linhas de capítulo.
+  2. ~~**Ordem (a):** por criticidade decrescente, como na v1.08~~ → **revista em 06/10 (Rodrigo, depois de testar no ar): a aba principal vem na ordem dos artigos** (o ID, ordem do normativo). Sem linhas de capítulo. A aba "Ações por Ator" continua por ator e, dentro dele, por criticidade.
   3. **Abas (a):** Checklist, Ações por Ator, Resumo por Capítulo (calculado pelo código) e Legenda. Fora: a aba "Curso" (projeto da SECIN) e a coluna "Fase" (ciclo de vida de IA).
   4. **Atores (a):** o LLM devolve uma lista de atores por item, cada um com o papel (responsável ou interage), no singular e com o nome do normativo; o código padroniza e monta "Ações por Ator" (uma linha por item × ator). A aba principal mantém "Responsável" com o ator principal.
+
+- **2026-10-06** ✅ **Texto literal é obrigatório** (Rodrigo: "texto tem de ser literal. se der divergencia, precisamos de mais rodadas até chegar em convergência total"). O app confere cada item contra o normativo enviado (`lib/conferencia.py`) e, havendo divergência, pede ao modelo só os itens divergentes, em rodadas, até conferirem. O que não convergir sai "Não confere" na planilha e com aviso na tela; o texto do modelo só é trocado por uma resposta que confira. 📝 Escolhas do Claude, a confirmar: limite de **3 rodadas** (`MAX_RODADAS`), contra laço infinito; e a tolerância da comparação (só espaços e quebras de linha, aspas curvas/retas, travessão/hífen e o espaço antes de pontuação do HTML de portais).
 
 ## Evidência dos testes (não é decisão)
 

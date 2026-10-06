@@ -97,6 +97,7 @@ COLUMNS: list[tuple[str, str, int]] = [
     ("capitulo",        "Capítulo",                       16),
     ("artigo",          "Artigo(s)",                      12),
     ("texto_literal",   "Texto Literal do Artigo",        55),
+    ("conferencia_literal", "Conferência do\nTexto Literal", 14),
     ("principio",       "Princípio / Tema",               20),
     ("requisito",       "Requisito / Obrigação",          40),
     ("risco",           "Risco de Não Conformidade",      40),
@@ -132,7 +133,16 @@ STATUS_OPTIONS = "Não Iniciado,Em Andamento,Conforme,Não Conforme,Não Aplicá
 NIVEL_OPTIONS = "Muito Alto,Alto,Moderado,Baixo"
 
 # Colunas centralizadas (valores curtos)
-_CENTER_KEYS = ("id", "probabilidade", "impacto", "criticidade", "nivel", "status", "papel")
+_CENTER_KEYS = ("id", "conferencia_literal", "probabilidade", "impacto", "criticidade", "nivel",
+                "status", "papel")
+
+# Conferência do texto literal (lib/conferencia.py): verde confere, vermelho não confere
+CONFERENCIA_STYLES: dict[str, tuple[PatternFill, Font]] = {
+    "Confere": (PatternFill("solid", fgColor="C6EFCE"),
+                Font(name="Arial", size=10, bold=True, color="006100")),
+    "Não confere": (PatternFill("solid", fgColor="FFC7CE"),
+                    Font(name="Arial", size=10, bold=True, color="9C0006")),
+}
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # HELPERS INTERNOS
@@ -356,10 +366,11 @@ def _build_legend_sheet(wb: Workbook) -> None:
     row += 1
 
     campos = [
-        ("ID", "Número do item na ordem do normativo (a aba vem ordenada por criticidade)."),
+        ("ID", "Número do item, na ordem do normativo (a aba principal segue essa ordem)."),
         ("Capítulo", "Capítulo ou seção do normativo."),
         ("Artigo(s)", "Artigo, inciso, parágrafo ou alínea específica."),
         ("Texto Literal", "Transcrição literal do dispositivo legal (sem paráfrase)."),
+        ("Conferência", "Confere: o texto aparece idêntico no normativo (só espaços, aspas e travessões podem variar). Não confere: a ferramenta não o achou no normativo, mesmo depois das rodadas de correção; confira à mão."),
         ("Princípio / Tema", "Princípio ou tema do dispositivo."),
         ("Requisito", "O que deve ser verificado ou atendido."),
         ("Risco", "Consequência do não atendimento ao requisito."),
@@ -387,7 +398,7 @@ def _build_legend_sheet(wb: Workbook) -> None:
         cell_desc.font = Font(name="Arial", size=10)
         cell_desc.border = THIN_BORDER
         cell_desc.alignment = Alignment(vertical="center", wrap_text=True)
-        ws.row_dimensions[row].height = 22 if len(descricao) <= 75 else 30
+        ws.row_dimensions[row].height = max(22, 15 * -(-len(descricao) // 75))
         row += 1
 
 
@@ -449,6 +460,8 @@ def _write_table(
             cell.alignment = ALIGN_CENTER if key in _CENTER_KEYS else ALIGN_WRAP
             if key == "nivel":
                 _apply_risk_style(cell, str(row.get("nivel", "") or ""))
+            elif key == "conferencia_literal" and row.get(key) in CONFERENCIA_STYLES:
+                cell.fill, cell.font = CONFERENCIA_STYLES[row[key]]
 
     last_row = max(len(rows) + 1, 2)
     ws.auto_filter.ref = f"A1:{get_column_letter(num_cols)}{last_row}"
@@ -554,7 +567,7 @@ def build_excel(
     """
     Gera a planilha v1.09 a partir dos itens validados (``lib.llm.validate_items``).
 
-    Abas: checklist (ordenado por criticidade, sem linhas de capítulo), "Ações por
+    Abas: checklist (na ordem do normativo, sem linhas de capítulo), "Ações por
     Ator" (uma linha por item × ator), "Resumo por Capítulo" e "Legenda".
 
     Parameters
@@ -590,7 +603,8 @@ def build_excel(
         safe_title = safe_title.replace(ch, "_")
     ws.title = safe_title[:31]
 
-    _write_table(ws, COLUMNS, sorted(items, key=_sort_key))
+    # Aba principal na ordem do normativo (Rodrigo, 06/10/2026); "Ações por Ator" segue por criticidade
+    _write_table(ws, COLUMNS, sorted(items, key=lambda i: i.get("id") or 0))
     _write_table(wb.create_sheet("Ações por Ator"), ACOES_COLUMNS, _acoes_rows(items))
     _build_resumo_sheet(wb, items)
     _build_legend_sheet(wb)

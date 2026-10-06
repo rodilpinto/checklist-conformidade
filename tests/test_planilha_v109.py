@@ -101,7 +101,8 @@ def test_atores_sanitizados_contra_injecao_em_excel():
 # ── build_excel ───────────────────────────────────────────────────────────────
 
 CABECALHO_V109 = [
-    "ID", "Capítulo", "Artigo(s)", "Texto Literal do Artigo", "Princípio / Tema",
+    "ID", "Capítulo", "Artigo(s)", "Texto Literal do Artigo", "Conferência do\nTexto Literal",
+    "Princípio / Tema",
     "Requisito / Obrigação", "Risco de Não Conformidade", "Impacto\n(1-5 MCGR)",
     "Probabilidade\n(1-5 MCGR)", "Criticidade\n(I×P)", "Nível de\nRisco MCGR",
     "Precedência\n(decorrências)", "Medida de Mitigação", "Responsável pela Mitigação",
@@ -132,30 +133,31 @@ def test_cabecalho_da_aba_principal():
     assert [c.value for c in ws[1]] == CABECALHO_V109
 
 
-def test_ordenada_por_criticidade_sem_linhas_de_capitulo():
+def test_ordenada_pelos_artigos_sem_linhas_de_capitulo():
+    """Rodrigo, 06/10: a aba principal na ordem do normativo (antes, por criticidade)."""
     ws = _abrir(_itens_exemplo()).worksheets[0]
     ids = [ws.cell(r, 1).value for r in range(2, ws.max_row + 1)]
-    crit = [ws.cell(r, 10).value for r in range(2, ws.max_row + 1)]
-    assert ids == [2, 3, 1]  # o ID guarda a ordem do normativo
-    assert crit == [25, 12, 2]
+    artigos = [ws.cell(r, 3).value for r in range(2, ws.max_row + 1)]
+    assert ids == [1, 2, 3]
+    assert artigos == ["Art. 1º", "Art. 4º", "Art. 5º"]
     assert ws.max_row == 4  # cabeçalho + 3 itens, nenhuma linha de capítulo
 
 
-def test_empate_de_criticidade_desempata_por_impacto_e_depois_por_id():
+def test_acoes_por_ator_desempata_criticidade_por_impacto_e_depois_por_id():
     itens = validate_items([
         _bruto(artigo="Art. 1º", probabilidade=4, impacto=3),
         _bruto(artigo="Art. 2º", probabilidade=3, impacto=4),
         _bruto(artigo="Art. 3º", probabilidade=4, impacto=3),
         _bruto(artigo="Art. 4º", probabilidade=None, impacto=None),
     ])
-    ws = _abrir(itens).worksheets[0]
-    assert [ws.cell(r, 1).value for r in range(2, 6)] == [2, 1, 3, 4]
+    ws = _abrir(itens)["Ações por Ator"]
+    assert [ws.cell(r, 3).value for r in range(2, 6)] == [2, 1, 3, 4]
 
 
 def test_responsavel_da_aba_principal_e_o_ator_principal():
     ws = _abrir(_itens_exemplo()).worksheets[0]
     linha_id2 = next(r for r in range(2, ws.max_row + 1) if ws.cell(r, 1).value == 2)
-    assert ws.cell(linha_id2, 14).value == "Gestor de Dados"
+    assert ws.cell(linha_id2, 15).value == "Gestor de Dados"
 
 
 def test_acoes_por_ator_uma_linha_por_item_e_ator():

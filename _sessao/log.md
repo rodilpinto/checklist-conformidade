@@ -2,6 +2,23 @@
 
 <!-- linha do tempo, mais recente no topo; só acrescentar -->
 
+## 2026-10-06 | conferência do texto literal com rodadas de correção
+
+- Pedido do Rodrigo (resposta "b"): texto literal obrigatório; havendo divergência, novas rodadas até convergir; publicar junto com a ordem pelos artigos.
+- `lib/conferencia.py` (`normalizar`, `confere`, `convergir`), `corrigir_literais` em `lib/llm.py` (pede só os itens divergentes, com o normativo inteiro), coluna "Conferência do Texto Literal" (verde/vermelho) ao lado do texto, Legenda, etapa 3 de 4 no app e aviso com o resultado. Testes novos: 8; suíte 140 passed, 1 xfailed.
+- Ao vivo (LLM local, capítulo III, 1.231 caracteres): 6 itens em 76 s, os 6 conferem de primeira. Com 2 textos estragados de propósito (sem acento e resumidos), uma rodada de correção (7 s) devolveu os 2 ao texto original.
+- Rigor: dos 104 itens curados da v1.08, 100 conferem; os 4 restantes são divergências reais do texto curado (item no TODO).
+
+## 2026-10-06 | teste no ar da v1.09: ordem por artigos
+
+- O Rodrigo testou no app de homologação: a planilha nova veio. Pediu a aba principal na ordem dos artigos (Art. 1º, Art. 2º...), não por criticidade (revê a decisão 2a de 01/10). Feito na `homologacao`; "Ações por Ator" continua por criticidade dentro de cada ator. Suíte: 132 passed, 1 xfailed.
+- Pergunta do Rodrigo: há verificação do texto literal? Não no app: só a métrica `fidelidade_literal` em `tests/eval_modelos.py`, rodada à parte contra a Portaria 227 (cerca de 100% nas rodadas de 22-23/09, `tests/AVALIACAO_MODELOS.md`). Proposta no TODO.
+
+## 2026-10-05 | v1.09 publicada no app de homologação
+
+- Com o ok do Rodrigo: `bash publicar_snapshot/publicar_snapshot.sh --ramo homologacao` publicou `1f617ff` em `github/homologacao` (snapshot de `ce9e708`; simulação de 01/10: trava sem achados, 29 arquivos). A `main` e o servidor do Nuati não mudaram.
+- O teste no ar fica com o Rodrigo (o `curl` na URL do app dá 303, o redirecionamento do Streamlit Cloud; não dá para conferir a versão por ele).
+
 ## 2026-10-01 | planilha v1.09 na homologacao (código, testes, teste ao vivo)
 
 - Decisões do Rodrigo: "1a 2a 3a 4a" (`DECISOES.md`).

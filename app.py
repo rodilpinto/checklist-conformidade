@@ -21,11 +21,13 @@ from dotenv import load_dotenv
 from extracao_texto import extract_text
 from lib.llm import (
     LLMError,
+    corrigir_literais,
     generate_checklist,
     validate_items,
 )
 import llm_cadeia
 from llm_cadeia.painel_streamlit import painel_llm
+from lib.conferencia import convergir
 from lib.excel_builder import build_excel
 from branding.streamlit_cd import cd_brand
 from tempo_economizado import Etapa, estimar
@@ -291,6 +293,7 @@ def _render_result_column() -> None:
     )
     if st.session_state.get("llm_origem"):
         st.caption(f"Gerado por {st.session_state['llm_origem']}")
+    _render_conferencia(st.session_state.get("conferencia"))
 
     # Preview em tabela -- selecionar colunas mais relevantes para leitura rápida
     preview_keys = ["artigo", "requisito", "probabilidade", "impacto", "criticidade", "nivel", "responsavel"]
@@ -343,6 +346,24 @@ def _render_result_column() -> None:
         )
 
 
+def _render_conferencia(resumo: dict | None) -> None:
+    """Resultado da conferência do texto literal (lib/conferencia.py)."""
+    if not resumo:
+        return
+    total, restantes = resumo["total"], resumo["restantes"]
+    rodadas = resumo["rodadas"]
+    detalhe = (f" ({resumo['corrigidos']} corrigido(s) em {rodadas} rodada(s) de correção)"
+               if rodadas else "")
+    if not restantes:
+        st.success(f"Texto literal conferido: os {total} itens aparecem idênticos no normativo{detalhe}.")
+        return
+    falha = f" A correção parou por erro: {resumo['erro']}" if resumo.get("erro") else ""
+    st.warning(
+        f"Texto literal: {restantes} de {total} itens **não conferem** com o normativo{detalhe}."
+        f"{falha} Eles estão marcados como \"Não confere\" na planilha; confira-os à mão."
+    )
+
+
 # ---------------------------------------------------------------------------
 # Lógica principal de geração
 # ---------------------------------------------------------------------------
@@ -356,10 +377,11 @@ def _generate(source: str | bytes, source_type: str, extra_prompt: str) -> None:
     st.session_state.excel_bytes = None
     st.session_state.error = None
     st.session_state["llm_origem"] = None
+    st.session_state["conferencia"] = None
 
     try:
         # 1. Extrair texto da fonte
-        with st.spinner("Etapa 1 de 3: Extraindo o texto do normativo..."):
+        with st.spinner("Etapa 1 de 4: Extraindo o texto do normativo..."):
             text = extract_text(source, source_type)
 
         if not text or not text.strip():
@@ -373,28 +395,36 @@ def _generate(source: str | bytes, source_type: str, extra_prompt: str) -> None:
 
         # 2. Gerar checklist via LLM
         with st.spinner(
-            "Etapa 2 de 3: Analisando o normativo com inteligência artificial... "
+            "Etapa 2 de 4: Analisando o normativo com inteligência artificial... "
             "Isso pode levar de 1 a 3 minutos. Por favor, aguarde."
         ):
             raw_items, origem = generate_checklist(text, extra_prompt=extra_prompt)
         st.session_state["llm_origem"] = origem
 
         # 3. Validar e numerar itens
-        with st.spinner("Etapa 3 de 3: Organizando os itens e gerando a planilha..."):
-            items = validate_items(raw_items)
+        items = validate_items(raw_items)
+        if not items:
+            st.session_state.error = (
+                "A análise não encontrou itens de checklist no texto fornecido. "
+                "Verifique se o documento é realmente um normativo com obrigações, "
+                "proibições ou requisitos (ex.: lei, portaria, decreto, resolução)."
+            )
+            return
 
-            if not items:
-                st.session_state.error = (
-                    "A análise não encontrou itens de checklist no texto fornecido. "
-                    "Verifique se o documento é realmente um normativo com obrigações, "
-                    "proibições ou requisitos (ex.: lei, portaria, decreto, resolução)."
-                )
-                return
+        # 4. Conferir o texto literal contra o normativo; divergência = nova rodada
+        with st.spinner(
+            "Etapa 3 de 4: Conferindo o texto literal de cada item com o normativo "
+            "(havendo divergência, a IA é consultada de novo)..."
+        ):
+            st.session_state["conferencia"] = convergir(
+                items, text, lambda divergentes: corrigir_literais(divergentes, text)
+            )
 
-            # 4. Gerar planilha Excel
+        # 5. Gerar planilha Excel
+        with st.spinner("Etapa 4 de 4: Gerando a planilha..."):
             excel_bytes = build_excel(items, title="Checklist de Conformidade")
 
-        # 5. Persistir no session_state
+        # 6. Persistir no session_state
         st.session_state["checklist_items"] = items
         st.session_state.excel_bytes = excel_bytes
 

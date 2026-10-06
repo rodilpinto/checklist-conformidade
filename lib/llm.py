@@ -112,6 +112,48 @@ def generate_checklist(text: str, extra_prompt: str = "") -> tuple[list[dict[str
     return _parse_json_response(r.texto), r.origem
 
 
+_SISTEMA_CORRECAO = """Você recebe o texto integral de um normativo e uma lista de dispositivos
+cujo texto foi transcrito com erro. Para cada dispositivo, copie do normativo o
+trecho correspondente EXATAMENTE como está escrito, caractere por caractere:
+sem resumir, sem completar, sem corrigir e sem trocar acentos, maiúsculas ou
+pontuação.
+
+Responda SOMENTE um array JSON, um objeto por dispositivo:
+[{"id": <id recebido>, "texto_literal": "<trecho copiado do normativo>"}]"""
+
+
+def corrigir_literais(divergentes: list[dict[str, Any]], texto: str) -> dict[int, str]:
+    """Uma rodada de correção: pede ao modelo o trecho exato de cada item divergente.
+
+    Returns:
+        {id do item: texto_literal novo}. Quem confere o resultado é lib.conferencia.
+
+    Raises:
+        LLMError / JSONParseError: como em generate_checklist.
+    """
+    pedidos = [{"id": it.get("id"), "artigo": it.get("artigo"),
+                "texto_devolvido": it.get("texto_literal")} for it in divergentes]
+    conteudo = ("=== NORMATIVO ===\n" + str(texto or "")
+                + "\n\n=== DISPOSITIVOS ===\n" + json.dumps(pedidos, ensure_ascii=False, indent=1))
+    r = gerar(conteudo, sistema=_SISTEMA_CORRECAO, json=True,
+              temperatura=_TEMPERATURE, max_tokens=_MAX_TOKENS)
+    if r.texto is None:
+        tentativas = "\n".join(f"- {t}" for t in r.tentativas) or "- nenhum provedor de IA configurado"
+        raise LLMError("Nenhum modelo de IA respondeu na correção do texto literal:\n\n" + tentativas)
+
+    novos: dict[int, str] = {}
+    for obj in _parse_json_response(r.texto):
+        if not isinstance(obj, dict):
+            continue
+        try:
+            item_id = int(obj.get("id"))
+        except (TypeError, ValueError):
+            continue
+        if isinstance(obj.get("texto_literal"), str):
+            novos[item_id] = obj["texto_literal"].strip()
+    return novos
+
+
 # ---------------------------------------------------------------------------
 # Validacao dos itens retornados
 # ---------------------------------------------------------------------------
